@@ -2,44 +2,39 @@ package FileManagement;
 
 import java.io.*;
 
-public class FileWriter {
-
+public class NotFound {
     PrintWriter pr;
     private OutputStream os;
-    String url;
 
-    public FileWriter(PrintWriter pr, OutputStream os, String  url) {
+    public NotFound(PrintWriter pr, OutputStream os) {
         this.pr = pr;
         this.os = os;
-        this.url = url;
     }
 
     public void write(){
         try {
-            String start_tag = "HTTP/1.1 200 OK";
+            String start_tag = "HTTP/1.1 404";
 
             pr.println(start_tag);
             pr.flush();
             System.out.println(start_tag);
 
-            File file = new File(url);
+            File file = new File("404.html");
             FileInputStream fis = null;
 
             fis = new FileInputStream(file);
 
             BufferedInputStream bis = new BufferedInputStream(fis);
-//        OutputStream os = socket.getOutputStream();
 
             byte[] contents;
             long fileLength = file.length();
 
-            String head = "HTTP/1.1 200 OK\n" +
-                    "Date: Sun, 04 Nov 2018 11:50:15 GMT\n" +
+            String head = "Date: Sun, 04 Nov 2018 11:50:15 GMT\n" +
                     "Accept-Ranges: bytes\n" +
                     "Content-Length: "+String.valueOf(fileLength)+"\n" +
                     "Keep-Alive: timeout=15, max=100\n" +
                     "Connection: Keep-Alive\n" +
-                    "Content-Type: "+getMIMEType(url)+"\n" +
+                    "Content-Type: text/html\n" +
                     "CRLF";
 
             System.out.println(head);
@@ -74,23 +69,4 @@ public class FileWriter {
         }
     }
 
-    String getMIMEType(String targetfile) {
-        if (targetfile.endsWith("html"))
-            return "text/html";
-
-        else if (targetfile.endsWith("bmp"))
-            return "image/bmp";
-
-        else if (targetfile.endsWith("jpg"))
-            return "image/jpeg";
-
-        else if (targetfile.endsWith("pdf"))
-            return "application/pdf";
-
-        else if (targetfile.endsWith("png"))
-            return "image/png";
-
-        else
-            return "text/plain";
-    }
 }

@@ -52,8 +52,18 @@ class WorkerThread implements Runnable
 
                             r.sendData();
                         }
-                        else  if(arr[0] == "POST"){
+                        else  if(arr[0].equals("POST")){
+                            System.out.println("POST request received by server --------------->");
+                            Router r = new Router(arr[1] , os);
 
+                            r.processData();
+
+                        }
+                        else if(arr[0].endsWith("GET")){
+                            System.out.println("post values -->"+str);
+
+                            Router r = new Router(arr[0] , os);
+                            r.sendResponse();
                         }
 
                 }
