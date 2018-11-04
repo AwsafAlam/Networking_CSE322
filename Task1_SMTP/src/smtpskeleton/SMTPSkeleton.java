@@ -1,4 +1,3 @@
-
 package smtpskeleton;
 
 import java.io.BufferedReader;
@@ -13,7 +12,8 @@ import java.util.Scanner;
 
 public class SMTPSkeleton {
 
-    public static void main(String[] args) throws UnknownHostException, IOException {
+    public static void main(String[] args) throws IOException {
+
         String temp;
         String mailServer = "smtp.sendgrid.net";
         InetAddress mailHost = InetAddress.getByName(mailServer);
