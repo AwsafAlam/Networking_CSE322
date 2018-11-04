@@ -2,9 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="524242f9-e980-4fda-99e0-e9fb1c10597d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../../Offline2/src/HTTPServer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../Offline2/src/WorkerThread.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../Offline2/src/http_post.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Offline2/src/Router.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Offline2/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Offline2/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Offline2/http_post.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../Offline2/http_post.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Offline2/src/HTTPServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Offline2/src/HTTPServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Offline2/src/WorkerThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Offline2/src/WorkerThread.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -89,7 +92,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1541354473836" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1541360662663" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
