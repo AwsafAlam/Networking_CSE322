@@ -1,11 +1,15 @@
+package FileManagement;
+
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Router {
 
     String url;
-    String route;
-    String MIMEType;
     PrintWriter pr;
+    List<String> dirs;
     private OutputStream os;
 
 
@@ -14,20 +18,37 @@ public class Router {
         this.url = url;
         this.os = os;
         pr = new PrintWriter(os);
+        dirs = new ArrayList<>();
+
     }
 
     public void sendData() {
 
-        String fileName = getFileName();
+        if(url.equals("/")){
+            url += "index.html";
+        }
+        url = url.substring(1);
+
+        String MIMEType = getMIMEType(url);
+
+        String status = "200 OK";
+
+        String dirs[] = url.split("/");
+
+        if(! FileExists(dirs[dirs.length - 1])){
+            status = "404";
+            System.out.println(" Not found ->" +url);
+        }
+        else{
 
         try {
-        String start_tag = "HTTP/1.1 200 OK";
+        String start_tag = "HTTP/1.1 "+status;
 
         pr.println(start_tag);
         pr.flush();
         System.out.println(start_tag);
 
-        File file = new File("http_post.html");
+        File file = new File(url);
         FileInputStream fis = null;
 
             fis = new FileInputStream(file);
@@ -44,7 +65,7 @@ public class Router {
                 "Content-Length: "+String.valueOf(fileLength)+"\n" +
                 "Keep-Alive: timeout=15, max=100\n" +
                 "Connection: Keep-Alive\n" +
-                "Content-Type: text/html\n" +
+                "Content-Type: "+MIMEType+"\n" +
                 "CRLF";
 
         System.out.println(head);
@@ -77,29 +98,47 @@ public class Router {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        }
     }
+
 
     String getFileName(){
-        return null;
+        String links[] = url.split("/");
+        System.out.println("File dir...---------------->   "+ Arrays.toString(links));
+        if(links.length == 0){
+            return "index.html";
+        }
+
+        for (int i =0 ; i < links.length ; i++) {
+            dirs.add(links[i]);
+        }
+
+
+        return links[links.length - 1];
     }
 
-    String getMIMEType() {
-        if (route.endsWith("html"))
+    String getMIMEType(String targetfile) {
+        if (targetfile.endsWith("html"))
             return "text/html";
 
-        else if (route.endsWith("bmp"))
+        else if (targetfile.endsWith("bmp"))
             return "image/bmp";
 
-        else if (route.endsWith("jpg"))
+        else if (targetfile.endsWith("jpg"))
             return "image/jpeg";
 
-        else if (route.endsWith("pdf"))
+        else if (targetfile.endsWith("pdf"))
             return "application/pdf";
 
-        else if (route.endsWith("png"))
+        else if (targetfile.endsWith("png"))
             return "image/png";
 
         else
             return "text/plain";
+    }
+
+    public boolean FileExists(String url){
+        File f = new File(url);
+        return f.exists();
     }
 }

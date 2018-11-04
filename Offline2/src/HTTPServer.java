@@ -4,8 +4,8 @@ import java.net.Socket;
 
 public class HTTPServer {
 
-    private static final int PORT = 4000;
-    static int workerThreadCount = 0;
+    private static final int PORT = 8080;
+    public static int workerThreadCount = 0;
 
     public static void main(String[] args) {
 
