@@ -44,7 +44,7 @@ public class SMTPSkeleton {
         }
 
         //giving password
-        pr.println("U0cuWXFCSmZXNTZRc1dPQ19YbWxmTzdjUS5JNFBNTkdvbV9ISllTSWUxU0xnMlFhY1hKZ1VzV3FQVFpoaGZPTTFEYTk0");
+        pr.println("U0cuQjhyb2R1Mm1Rd1dOcWpabnFWcGFsdy5xLVRyUEFKdko0V096TndQVVBkUUR4cV9HOUhOcUZ6WWJqRmpocTY3WjRN");
         temp=in.readLine();
         System.out.println("Server: "+temp);
         //quitting if error in connecting the server

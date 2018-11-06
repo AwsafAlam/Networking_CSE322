@@ -57,6 +57,14 @@ class WorkerThread implements Runnable
                             Router r = new Router(arr[1] , os);
 
                             r.processData();
+//                            while (true){
+//                                if(br.readLine() != null){
+//                                    System.out.println("Inside post...");
+//                                    if(str.substring(0,3).equals("user")){
+//                                        System.out.printf("Found User");
+//                                    }
+//                                }
+//                            }
 
                         }
                         else if(arr[0].endsWith("GET")){

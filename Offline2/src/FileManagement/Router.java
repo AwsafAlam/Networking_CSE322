@@ -29,9 +29,7 @@ public class Router {
         }
         url = url.substring(1);
 
-        String dirs[] = url.split("/");
-
-        if(! FileExists(dirs[dirs.length - 1])){
+        if(! FileExists(url)){
             System.out.println(" Not found ->" +url);
             NotFound nf = new NotFound(pr, os);
             nf.write();
@@ -88,8 +86,9 @@ public class Router {
     public void processData() {
         System.out.println("Process ding POST req..");
 
-        NotFound nf = new NotFound(pr, os);
-        nf.write();
+//        NotFound nf = new NotFound(pr, os);
+//        nf.write();
+
     }
 
     public void sendResponse() {
