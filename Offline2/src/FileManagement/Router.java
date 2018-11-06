@@ -1,5 +1,7 @@
 package FileManagement;
 
+import javafx.geometry.Pos;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,25 +60,6 @@ public class Router {
         return links[links.length - 1];
     }
 
-    String getMIMEType(String targetfile) {
-        if (targetfile.endsWith("html"))
-            return "text/html";
-
-        else if (targetfile.endsWith("bmp"))
-            return "image/bmp";
-
-        else if (targetfile.endsWith("jpg"))
-            return "image/jpeg";
-
-        else if (targetfile.endsWith("pdf"))
-            return "application/pdf";
-
-        else if (targetfile.endsWith("png"))
-            return "image/png";
-
-        else
-            return "text/plain";
-    }
 
     public boolean FileExists(String url){
         File f = new File(url);
@@ -86,6 +69,8 @@ public class Router {
     public void processData() {
         System.out.println("Process ding POST req..");
 
+        PostReq pst = new PostReq(pr , os);
+        pst.write();
 //        NotFound nf = new NotFound(pr, os);
 //        nf.write();
 

@@ -9,6 +9,9 @@ class WorkerThread implements Runnable
     private InputStream is;
     private OutputStream os;
 
+    private BufferedReader br;
+    private PrintWriter pr;
+
     private int id;
 
     WorkerThread(Socket s, int id)
@@ -19,6 +22,10 @@ class WorkerThread implements Runnable
         {
             this.is = this.socket.getInputStream();
             this.os = this.socket.getOutputStream();
+
+            br = new BufferedReader(new InputStreamReader(this.is));
+            pr = new PrintWriter(this.os);
+
         }
         catch(Exception e)
         {
@@ -30,8 +37,6 @@ class WorkerThread implements Runnable
 
     public void run()
     {
-        BufferedReader br = new BufferedReader(new InputStreamReader(this.is));
-        PrintWriter pr = new PrintWriter(this.os);
 
 
         String str;
@@ -42,14 +47,14 @@ class WorkerThread implements Runnable
 
                 if( (str = br.readLine()) != null )
                 {
-                        System.out.println("[" + id + "] says: " + str);
                         // receiving server response
+                        System.out.println("[" + id + "] says: " + str);
+
                         String arr[] = str.split(" ");
 
                         if(arr[0].equals("GET")){
                             System.out.println("GET request received by server --------------->");
                             Router r = new Router(arr[1] , os);
-
                             r.sendData();
                         }
                         else  if(arr[0].equals("POST")){
@@ -57,15 +62,13 @@ class WorkerThread implements Runnable
                             Router r = new Router(arr[1] , os);
 
                             r.processData();
-//                            while (true){
-//                                if(br.readLine() != null){
-//                                    System.out.println("Inside post...");
-//                                    if(str.substring(0,3).equals("user")){
-//                                        System.out.printf("Found User");
-//                                    }
-//                                }
-//                            }
 
+                        }
+                        else if(arr[0].substring(0,3).equals("user")){
+                            System.out.println("------------------- FOUND POST DATA ------------------");
+                            Router r = new Router("/http_post.html", os);
+
+                            r.sendData();
                         }
                         else if(arr[0].endsWith("GET")){
                             System.out.println("post values -->"+str);
@@ -77,16 +80,15 @@ class WorkerThread implements Runnable
                 }
                 else
                 {
-                    System.out.println("[" + id + "] terminated connection. Worker thread will terminate now.");
+                    System.out.println("[" + id + "] terminated connection. Worker thread will terminate now. Null received");
                     break;
                 }
 
-            } catch (IOException e1) {
-                e1.printStackTrace();
             }
             catch(Exception e)
             {
                 System.err.println("Problem in communicating with the client [" + id + "]. Terminating worker thread.");
+                e.printStackTrace();
                 break;
             }
         }

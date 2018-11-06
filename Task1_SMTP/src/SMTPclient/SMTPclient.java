@@ -1,64 +1,50 @@
 package SMTPclient;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.Socket;
+import java.util.Scanner;
 
 public class SMTPclient {
 
+
+//    static final String mailServer = "webmail.buet.ac.bd";
+//    static final int PORT = 25;
+
+
     public static void main(String[] args) throws IOException {
+
         System.out.println("Starting client ... ");
 
-        String mailServer = "webmail.buet.ac.bd";
-        InetAddress mailHost = InetAddress.getByName(mailServer);
-        InetAddress localHost = InetAddress.getLocalHost();
-        Socket smtpSocket = new Socket(mailHost,25);
-        BufferedReader in =  new BufferedReader(new InputStreamReader(smtpSocket.getInputStream()));
-        PrintWriter pr = new PrintWriter(smtpSocket.getOutputStream(),true);
-        String initialID = in.readLine();
-        System.out.println("Server: " +initialID);
+        EmailSender sender = new EmailSender();
 
-        pr.println("HELO "+localHost.getHostName());
-        pr.flush();
-        System.out.println("EHLO "+localHost.getHostName());
-        String welcome = in.readLine();
-        System.out.println("Server: " +welcome);
+        sender.setMailServer("webmail.buet.ac.bd");
+        sender.setPORT(25);
 
-        pr.println("MAIL FROM:<1505114.maaa@ugrad.cse.buet.ac.bd>");
-        System.out.println("MAIL FROM:<1505114.maaa@ugrad.cse.buet.ac.bd>");
-        System.out.println("Server: " + in.readLine());
+//        Scanner sc = new Scanner(System.in);
+//
+//        System.out.print("Enter your Email details :\nSubject: ");
+//
+//        String subject = sc.next();
+//        System.out.print("From: ");
+//        String from = sc.next();
+//
+//        System.out.print("To: ");
+//        String to = sc.next();
+//
+//        System.out.print("Mail Body: ");
+//        String body = sc.next();
 
-        //setting the receiver
-        pr.println("RCPT TO:<awsafalam@gmail.com>");
-        System.out.println("RCPT TO:<awsafalam@gmail.com>");
-        System.out.println("Server: " + in.readLine());
+        String subject = "Hello";
+        String from = "1505114.maaa@ugrad.cse.buet.ac.bd";
+        String to = "awsafalam@gmail.com";
+        String body = "Mail Body";
 
-        pr.println("RCPT TO:<1505113.anf@ugrad.cse.buet.ac.bd>");
-        System.out.println("RCPT TO:<1505113.anf@ugrad.cse.buet.ac.bd>");
-        System.out.println("Server: " + in.readLine());
+        sender.setMailContent(subject , from,to ,body);
+        sender.initMail();
 
-        //data
-        pr.println("DATA");
-        System.out.println("Server: " + in.readLine());
+        sender.setMailHeaders();
+        sender.sendMail();
 
-        //email body
-        pr.println("Subject: sample message");
-        pr.println("From: 1505114.maaa@ugrad.cse.buet.ac.bd");
-        pr.println("To: awsafalam@gmail.com");
-        pr.println("");
-        pr.println("Greetings,");
-        pr.println("Hello This is Awsaf.");
-        pr.println("Goodbye");
-        pr.println(".");
-        System.out.println("data sent");
-        System.out.println("Server: " + in.readLine());
 
-        //closing
-        pr.println("QUIT");
-        System.out.println("Server: "+in.readLine());
 
     }
 }
