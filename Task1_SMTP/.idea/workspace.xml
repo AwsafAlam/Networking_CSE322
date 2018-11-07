@@ -2,16 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e331a2e-66e1-448f-b82d-ef22b1401a93" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../Offline2/src/FileManagement/PostReq.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SMTPclient/EmailSender.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Offline2/Server_Files/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Offline2/src/HTTP/HTTPResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Offline2/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/FileWriter.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/FileWriter.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/PostReq.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/PostReq.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/Router.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/Router.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/WorkerThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/out/production/Offline2/WorkerThread.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/HTTPServer.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/WorkerThread.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/src/FileManagement/FileWriter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/FileManagement/FileWriter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/src/FileManagement/PostReq.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/FileManagement/PostReq.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Offline2/src/FileManagement/Router.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/FileManagement/Router.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/src/WorkerThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/WorkerThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/src/HTTPServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/HTTP/HTTPServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/src/WorkerThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/HTTP/WorkerThread.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Task1_SMTP/SMTPclient/SMTPclient.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task1_SMTP/SMTPclient/SMTPclient.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SMTPclient/SMTPclient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SMTPclient/SMTPclient.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -55,7 +59,7 @@
     <session id="108543351">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="2" />
+          <entry key="project.closed" value="3" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.46" value="1" />
           <entry key="project.open.time.58" value="1" />
@@ -204,7 +208,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1541505873202" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1541538406650" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../Offline2" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />

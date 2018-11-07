@@ -1,36 +1,55 @@
 package FileManagement;
 
-import javafx.geometry.Pos;
-
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class Router {
 
-    String url;
-    PrintWriter pr;
-    List<String> dirs;
+    private String url;
+
     private OutputStream os;
 
+    private PrintWriter pr;
+    private BufferedReader br;
 
 
-    public Router(String url ,OutputStream os) {
+    public Router(String url, OutputStream os, BufferedReader br) {
         this.url = url;
         this.os = os;
-        pr = new PrintWriter(os);
-        dirs = new ArrayList<>();
+        this.br = br;
 
+        pr = new PrintWriter(os);
     }
 
-    public void sendData() {
 
-        if(url.equals("/")){
+
+    public boolean FileExists(String url){
+        File f = new File(url);
+        return f.exists();
+    }
+
+//    public void processData() {
+//        System.out.println("Process ding POST req..");
+//
+//        PostReq pst = new PostReq(pr , os, url, map);
+//        pst.write();
+////        NotFound nf = new NotFound(pr, os);
+////        nf.write();
+//
+//    }
+
+
+    public void route(String request) {
+        if(url.endsWith("/")){
             url += "index.html";
         }
         url = url.substring(1);
 
+        if(request.equals("POST")){
+//            PostReq p = new PostReq(pr , os, url, map);
+//            p.write();
+
+            return;
+        }
         if(! FileExists(url)){
             System.out.println(" Not found ->" +url);
             NotFound nf = new NotFound(pr, os);
@@ -42,52 +61,5 @@ public class Router {
             FileWriter f = new FileWriter(pr,os ,url);
             f.write();
         }
-    }
-
-
-    String getFileName(){
-        String links[] = url.split("/");
-        System.out.println("File dir...---------------->   "+ Arrays.toString(links));
-        if(links.length == 0){
-            return "index.html";
-        }
-
-        for (int i =0 ; i < links.length ; i++) {
-            dirs.add(links[i]);
-        }
-
-
-        return links[links.length - 1];
-    }
-
-
-    public boolean FileExists(String url){
-        File f = new File(url);
-        return f.exists();
-    }
-
-    public void processData() {
-        System.out.println("Process ding POST req..");
-
-        PostReq pst = new PostReq(pr , os);
-        pst.write();
-//        NotFound nf = new NotFound(pr, os);
-//        nf.write();
-
-    }
-
-    public void sendResponse() {
-        url = url.substring(0 , url.length()-3);
-
-        String val[] = url.split("&");
-
-        for (int i=0 ; i< val.length ; i++){
-//            System.out.println("val "+ Arrays.);
-            String arr[] = val[i].split("=");
-            FileWriter f = new FileWriter(pr,os ,"http_post.html");
-            f.write();
-        }
-
-
     }
 }

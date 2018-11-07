@@ -20,7 +20,7 @@ public class FileWriter {
 
             pr.println(start_tag);
             pr.flush();
-            System.out.println(start_tag);
+//            System.out.println(start_tag);
 
             File file = new File(url);
             FileInputStream fis = null;
@@ -42,7 +42,7 @@ public class FileWriter {
                     "Content-Type: "+getMIMEType(url)+"\n" +
                     "CRLF";
 
-            System.out.println(head);
+//            System.out.println(head);
             pr.println(head);
             pr.flush();
 
