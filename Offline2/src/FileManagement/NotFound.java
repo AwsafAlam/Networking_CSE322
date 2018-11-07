@@ -13,7 +13,7 @@ public class NotFound {
 
     public void write(){
         try {
-            String start_tag = "HTTP/1.1 404 NOT FOUND";
+            String start_tag = "HTTP/1.1 404 Not Found";
 
             pr.println(start_tag);
             pr.flush();

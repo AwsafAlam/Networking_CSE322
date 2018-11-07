@@ -1,5 +1,6 @@
 package HTTP;
 
+import java.io.File;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -8,10 +9,16 @@ public class HTTPServer {
 
     private static final int PORT = 8080;
     public static int workerThreadCount = 0;
-
+    public static final String logdir = "log";
     public static void main(String[] args) {
 
         int id = 1;
+        File f = new File(logdir);
+        if(!f.exists())
+        {
+            f.mkdir();
+            System.out.println("Log Directory Created");
+        }
 
         try
         {

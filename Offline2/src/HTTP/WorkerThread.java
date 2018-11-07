@@ -16,12 +16,19 @@ class WorkerThread implements Runnable
 
     private BufferedReader br;
     private PrintWriter pr;
-
+    private File log;
+    private FileWriter fileWriter;
     private int id;
 
-    WorkerThread(Socket s, int id)
-    {
+    WorkerThread(Socket s, int id) throws IOException {
         this.socket = s;
+        this.id = id;
+
+        log = new File(HTTPServer.logdir+"/log."+id+".txt");
+        if(!log.exists()){
+            log.createNewFile();
+            System.out.println("log file created");
+        }
 
         try
         {
@@ -37,12 +44,19 @@ class WorkerThread implements Runnable
             System.err.println("Sorry. Cannot manage client [" + id + "] properly.");
         }
 
-        this.id = id;
     }
 
     public void run()
     {
-        String str ="", prev = "";
+
+//        try {
+//            fileWriter = new FileWriter(log);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+
+        String str ="", httpRequest = "";
         char charIn;
 
 
@@ -54,11 +68,16 @@ class WorkerThread implements Runnable
 
                 while (br.ready()){
                     charIn = (char) br.read();
-                    buff.append(charIn);
 
+                    buff.append(charIn);
                 }
 
                 str = buff.toString();
+
+                fileWriter = new FileWriter(log);
+                fileWriter.write(str);
+                fileWriter.flush();
+                fileWriter.close();
 
                 Scanner sc = new Scanner(str);
                 String url = null;
@@ -70,115 +89,39 @@ class WorkerThread implements Runnable
                     String arr[] = line.split(" ");
 
                     if(arr[0].equals("GET")){
-                        prev = "GET";
-                        System.out.println("GET request received by server --------------->");
+                        httpRequest = "GET";
                         Router r = new Router(arr[1] , os , br);
                         r.route("GET");
 
                     }
                     else  if(arr[0].equals("POST")){
-                        prev = "POST";
-                        System.out.println("POST request received by server --------------->\n"+str);
+                        httpRequest = "POST";
                         url = arr[1];
-//                        Router r = new Router(arr[1] , os, br);
-//                        r.route("POST");
-
 
                     }
-                    else if(arr[0].startsWith("user") && url != null){
+                    else if(httpRequest.equals("POST") && arr[0].startsWith("user") && url != null){
                         String items[] = arr[0].split("&");
                         HashMap<String , String> map = new HashMap<>();
-                        for(int k = 0 ; k< items.length ; k++){
-                            String keyval[] = items[k].split("=");
-                            if(keyval.length > 1){
-                                map.put(keyval[0] , keyval[1]);
+                        for (String item : items) {
+                            String keyval[] = item.split("=");
+                            if (keyval.length > 1) {
+                                map.put(keyval[0], keyval[1]);
+                            } else {
+                                System.out.println("No value specified in input form.");
+                                map.put(keyval[0], "");
                             }
                         }
+                        Router r = new Router(url , os , br , map);
+                        r.route("POST");
 
-                        url = url.substring(1);
-                        url = "http_post.html";
-                        PostReq pst = new PostReq(pr , os , url , map);
-                        pst.write();
+//                        PostReq pst = new PostReq(pr , os , url , map);
+//                        pst.write();
+                    }
+                    else if(httpRequest.equals("POST") && arr[0].startsWith("Referer")){
+                        String referer[] = arr[1].split("/");
+                        url += "/"+referer[referer.length -1];
                     }
                 }
-
-                str = "";
-                /*if( (str = br.readLine()) != null )
-                {
-                        // receiving server response
-                        System.out.println("[" + id + "] says: " + str);
-
-                        String arr[] = str.split(" ");
-
-                        if(arr[0].equals("GET")){
-                            prev = "GET";
-                            System.out.println("GET request received by server --------------->");
-                            Router r = new Router(arr[1] , os , br);
-                            r.route("GET");
-
-                        }
-                        else  if(arr[0].equals("POST")){
-                            prev = "POST";
-                            System.out.println("POST request received by server --------------->");
-                            Router r = new Router(arr[1] , os, br);
-                            r.route("POST");
-
-                        }
-                        else if(arr[0].equals("")){
-
-                            System.out.println("REQUEST COMPLETE -- >");
-                            if(prev.equals("POST")){
-
-                                DataInputStream dis;
-
-                                try {
-
-                                    // create new data input stream
-                                    dis = new DataInputStream(is);
-                                    while (true){
-                                        if(dis.available()>0) {
-
-                                            // read character
-                                            char c = dis.readChar();
-
-                                            // print
-                                            System.out.print(c);
-                                        }
-                                    }
-                                    // read till end of the stream
-
-
-                                } catch(Exception e) {
-
-                                    e.printStackTrace();
-                                }
-//                                finally {
-//                                    // releases all system resources from the streams
-//                                    if(is!=null)
-//                                        is.close();
-//                                    if(dos!=null)
-//                                        is.close();
-//                                    if(dis!=null)
-//                                        dis.close();
-//                                    if(fos!=null)
-//                                        fos.close();
-//                                }
-                            }
-
-                        }
-                        else if(arr[0].substring(0,3).equals("user")){
-
-                            System.out.println("------------------- FOUND POST DATA ------------------");
-
-                        }
-
-
-                }
-                else
-                {
-                    System.out.println("[" + id + "] terminated connection. Worker thread will terminate now. Null received");
-                    break;
-                }*/
 
             }
             catch(Exception e)
@@ -194,6 +137,7 @@ class WorkerThread implements Runnable
             this.is.close();
             this.os.close();
             this.socket.close();
+
         }
         catch(Exception e)
         {

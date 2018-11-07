@@ -45,14 +45,14 @@ public class PostReq {
             System.out.println(content);
 
             File file = new File(url);
-            FileWriter fileWriter = new FileWriter("form_submitted"+url);
+            FileWriter fileWriter = new FileWriter(url);
             fileWriter.write(content);
             fileWriter.flush();
             fileWriter.close();
 
 
             FileInputStream fis = null;
-            fis = new FileInputStream("form_submitted"+url);
+            fis = new FileInputStream(url);
             BufferedInputStream bis = new BufferedInputStream(fis);
 
             byte[] contents;

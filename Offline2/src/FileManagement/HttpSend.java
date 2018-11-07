@@ -2,13 +2,13 @@ package FileManagement;
 
 import java.io.*;
 
-public class FileWriter {
+public class HttpSend {
 
-    PrintWriter pr;
+    private PrintWriter pr;
     private OutputStream os;
-    String url;
+    private String url;
 
-    public FileWriter(PrintWriter pr, OutputStream os, String  url) {
+    HttpSend(PrintWriter pr, OutputStream os, String url) {
         this.pr = pr;
         this.os = os;
         this.url = url;
@@ -16,11 +16,6 @@ public class FileWriter {
 
     public void write(){
         try {
-            String start_tag = "HTTP/1.1 200 OK";
-
-            pr.println(start_tag);
-            pr.flush();
-//            System.out.println(start_tag);
 
             File file = new File(url);
             FileInputStream fis = null;
@@ -28,7 +23,6 @@ public class FileWriter {
             fis = new FileInputStream(file);
 
             BufferedInputStream bis = new BufferedInputStream(fis);
-//        OutputStream os = socket.getOutputStream();
 
             byte[] contents;
             long fileLength = file.length();
