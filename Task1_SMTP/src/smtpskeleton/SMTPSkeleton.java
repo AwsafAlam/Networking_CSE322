@@ -5,10 +5,12 @@ import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
 import java.io.*;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.Buffer;
@@ -17,19 +19,69 @@ import java.util.Scanner;
 
 public class SMTPSkeleton {
 
+
+    public static byte[] extractBytes (String ImageName) throws IOException {
+        // open image
+        File imgPath = new File(ImageName);
+        BufferedImage bufferedImage = ImageIO.read(imgPath);
+
+        // get DataBufferBytes from Raster
+        WritableRaster raster = bufferedImage .getRaster();
+        DataBufferByte data   = (DataBufferByte) raster.getDataBuffer();
+
+        return ( data.getData() );
+    }
+
+
+
     public static void main(String[] args) throws UnknownHostException, IOException {
         String temp;
-
+        //String mailServer = "smtp.sendgrid.net";
         String mailServer="webmail.buet.ac.bd";
         InetAddress mailHost = InetAddress.getByName(mailServer);
         InetAddress localHost = InetAddress.getLocalHost();
-        Socket smtpSocket = new Socket(mailHost,25);
+        Socket smtpSocket = new Socket();
+        smtpSocket.connect(new InetSocketAddress(mailHost,25),2000);
         BufferedReader in =  new BufferedReader(new InputStreamReader(smtpSocket.getInputStream()));
-        OutputStream os = smtpSocket.getOutputStream();
-
         PrintWriter pr = new PrintWriter(smtpSocket.getOutputStream(),true);
         String initialID = in.readLine();
         System.out.println("Server: "+initialID);
+
+
+/*
+        //authentication for sendgrid smtp server
+        pr.println("auth login");
+        System.out.println("Server: "+in.readLine());
+
+        //giving id =apikey
+        pr.println("YXBpa2V5");
+        temp=in.readLine();
+        System.out.println("Server: "+temp);
+        //quitting if error in connecting the server
+        if(temp.equalsIgnoreCase("501 Syntax error in parameters"))
+        {
+            System.out.println("Incorrect key");
+            //closing
+            pr.println("QUIT");
+            System.out.println("Server: "+in.readLine());
+            return ;
+        }
+
+        //giving password
+        pr.println("U0cuYVhERnVJTlNSMi1qdTA5T2JCamlQdy4yMnpJeXQzMkxsWjZzNlBTYnRPUE55dGNiYzV5MEpjbVg3Tmdjbjlpd0ow");
+        temp=in.readLine();
+        System.out.println("Server: "+temp);
+        //quitting if error in connecting the server
+        if(temp.equalsIgnoreCase("501 Syntax error in parameters"))
+        {
+            System.out.println("Incorrect Password");
+            //closing
+            pr.println("QUIT");
+            System.out.println("Server: "+in.readLine());
+            return ;
+        }
+*/
+
 
 
         try {
@@ -58,7 +110,7 @@ public class SMTPSkeleton {
                     pr.println(cmd);
                     System.out.println("Server: "+in.readLine());
                     String msg=br2.readLine();
-                    Nestedloop:
+
                     while(msg!=null)
                     {
                         System.out.println("Client: "+msg);
@@ -67,73 +119,16 @@ public class SMTPSkeleton {
                             pr.println(msg);
                             System.out.println("Server: "+in.readLine());
                             br2.close();
-                            break Nestedloop;
+                            break ;
                         }
                         else if(msg.equalsIgnoreCase("send attachment"))
                         {
-                            System.out.println("Sending File");
-                            File file=new File("buet.png");
-                            FileInputStream fstream =new FileInputStream(file);
-
-                            long length=file.length();
-
-                            byte[] bytearray = Files.readAllBytes(file.toPath());
-
-//                            byte[] bytearray=new byte[(int)length];
-                            fstream.read(bytearray,0,(int)length);
 
 
-                            String encoded= Base64.encode(bytearray);
+                            File fi = new File("buet.png");
+                            byte[] fileContent = Files.readAllBytes(fi.toPath());
+                            String encoded= Base64.encode(fileContent);
                             pr.println(encoded);
-                            pr.flush();
-
-                            pr.println("Subject:Small Koala\n" +
-                                    "MIME-Version: 1.0\n" +
-                                    "Content-Type:multipart/mixed;  boundary=\"sam\"\n" +
-                                    "--sam\n" +
-                                    "Content-Type:application/octet-stream;name=\"koala.jpg\"\n" +
-                                    "Content-Transfer-Encoding:base64\n" +
-                                    "Content-Disposition:attachment;filename=\"koala.jpg\"\n" +
-                                    "\n" +
-                                    "--sam--\n");
-
-                            pr.flush();
-
-//                            File file = new File("buet.png");
-//                            FileInputStream fis = null;
-//
-//                            fis = new FileInputStream(file);
-//
-//                            BufferedInputStream bis = new BufferedInputStream(fis);
-//
-//                            byte[] contents;
-//                            long fileLength = file.length();
-//
-//
-//                            long current = 0;
-//
-//                            long start = System.nanoTime();
-//                            while(current!=fileLength){
-//                                int size = 10000;
-//                                if(fileLength - current >= size)
-//                                    current += size;
-//                                else{
-//                                    size = (int)(fileLength - current);
-//                                    current = fileLength;
-//                                }
-//                                contents = new byte[size];
-//                                bis.read(contents, 0, size);
-//
-//                                String encoded= Base64.encode(contents);
-//                                pr.println(encoded);
-////                                pr.flush();
-////                                os.write(Integer.parseInt(encoded));
-////
-////                                os.write(contents);
-//                                System.out.println("Sending file ... "+(current*100)/fileLength+"% complete!");
-//                            }
-//                            pr.flush();
-//                            System.out.println("File sent successfully!");
 
                         }
                         else
@@ -165,18 +160,6 @@ public class SMTPSkeleton {
             System.out.println(e.toString());
         }
 
-    }
-
-    public static byte[] extractBytes (String ImageName) throws IOException {
-        // open image
-        File imgPath = new File(ImageName);
-        BufferedImage bufferedImage = ImageIO.read(imgPath);
-
-        // get DataBufferBytes from Raster
-        WritableRaster raster = bufferedImage .getRaster();
-        DataBufferByte data   = (DataBufferByte) raster.getDataBuffer();
-
-        return ( data.getData() );
     }
 }
 

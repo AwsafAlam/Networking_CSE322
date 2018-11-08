@@ -1,9 +1,20 @@
-Subject: sample message
 From: anfuad23@gmail.com
 To: anfuad23@gmail.com
+MIME-Version: 1.0
+Subject: ajaira mail testing
+Content-Type: multipart/mixed; boundary=sep
+--sep
+hii i am awsaf
+i am fuad
+tata
+--sep
+Content--Type: application/octet-stream; name=\"image.png\"
+Content-Disposition: attachment; filename=\"image.png\"
+Content-Transfer-Encoding: base64
 
-Greetings,
-Hello This is fuad.
-helloooooooooooooo
+
 send attachment
+...
+--sep--
 .
+QUIT

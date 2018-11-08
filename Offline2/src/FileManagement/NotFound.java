@@ -1,6 +1,9 @@
 package FileManagement;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class NotFound {
     PrintWriter pr;
@@ -29,7 +32,11 @@ public class NotFound {
             byte[] contents;
             long fileLength = file.length();
 
-            String head = "Date: Sun, 04 Nov 2018 11:50:15 GMT\n" +
+            String timeStamp = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz").format(Calendar.getInstance().getTime());
+
+            System.out.println(timeStamp);
+
+            String head = "Date: "+timeStamp+"\n" +
                     "Accept-Ranges: bytes\n" +
                     "Content-Length: "+String.valueOf(fileLength)+"\n" +
                     "Keep-Alive: timeout=15, max=100\n" +
@@ -47,7 +54,7 @@ public class NotFound {
 
             long current = 0;
 
-            long start = System.nanoTime();
+//            long start = System.nanoTime();
             while(current!=fileLength){
                 int size = 10000;
                 if(fileLength - current >= size)

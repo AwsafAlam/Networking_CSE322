@@ -69,6 +69,7 @@ class WorkerThread implements Runnable
 //                    break;
 
                 while (br.ready()){
+
                     charIn = (char) br.read();
 
                     buff.append(charIn);
