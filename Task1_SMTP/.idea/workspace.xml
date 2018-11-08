@@ -2,20 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e331a2e-66e1-448f-b82d-ef22b1401a93" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../Offline2/Server_Files/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../Offline2/src/HTTP/HTTPResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Offline2/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/FileWriter.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/FileWriter.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/PostReq.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/PostReq.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/Router.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/out/production/Offline2/FileManagement/Router.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/HTTPServer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/WorkerThread.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/src/FileManagement/FileWriter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/FileManagement/FileWriter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/src/FileManagement/PostReq.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/FileManagement/PostReq.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/src/FileManagement/Router.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/FileManagement/Router.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/src/HTTPServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/HTTP/HTTPServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Offline2/src/WorkerThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/HTTP/WorkerThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/http_post.html" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/http_post.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/log/log.3.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/log/log.3.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/out/production/Offline2/HTTP/WorkerThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/out/production/Offline2/HTTP/WorkerThread.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Offline2/src/HTTP/WorkerThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/src/HTTP/WorkerThread.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Task1_SMTP/smtpskeleton/SMTPSkeleton.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task1_SMTP/smtpskeleton/SMTPSkeleton.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/smtpskeleton/SMTPSkeleton.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/smtpskeleton/SMTPSkeleton.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -61,49 +56,75 @@
         <counts>
           <entry key="project.closed" value="3" />
           <entry key="project.open.time.0" value="1" />
+          <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.46" value="1" />
           <entry key="project.open.time.58" value="1" />
-          <entry key="project.opened" value="3" />
+          <entry key="project.opened" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="java" value="637" />
+          <entry key="java" value="826" />
+          <entry key="txt" value="10" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="JAVA" value="637" />
+          <entry key="JAVA" value="826" />
+          <entry key="PLAIN_TEXT" value="10" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="java" value="3" />
+          <entry key="txt" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="JAVA" value="3" />
+          <entry key="PLAIN_TEXT" value="2" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/smtpskeleton/SMTPSkeleton.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="307">
-              <caret line="95" lean-forward="true" selection-start-line="61" selection-start-column="8" selection-end-line="95" />
+            <state relative-caret-position="327">
+              <caret line="91" column="114" lean-forward="true" selection-start-line="91" selection-start-column="114" selection-end-line="91" selection-end-column="114" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/input.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret column="34" selection-start-column="34" selection-end-column="34" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/mail.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="108">
+              <caret line="6" column="18" lean-forward="true" selection-start-line="6" selection-start-column="18" selection-end-line="6" selection-end-column="18" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/SMTPclient/SMTPclient.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="41" column="26" lean-forward="true" selection-start-line="41" selection-start-column="26" selection-end-line="41" selection-end-column="26" />
+            <state relative-caret-position="327">
+              <caret line="31" column="2" lean-forward="true" selection-start-line="31" selection-start-column="2" selection-end-line="31" selection-end-column="2" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -114,14 +135,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/SMTPclient/EmailSender.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="307">
-              <caret line="77" lean-forward="true" selection-start-line="77" selection-end-line="77" />
+            <state relative-caret-position="633">
+              <caret line="77" selection-start-line="77" selection-end-line="77" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#361#362#0" expanded="true" />
-                <element signature="e#411#412#0" expanded="true" />
-                <element signature="e#446#447#0" expanded="true" />
-                <element signature="e#484#485#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -143,9 +160,11 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/src/SMTPSkeleton.java" />
-        <option value="$PROJECT_DIR$/src/smtpskeleton/SMTPSkeleton.java" />
         <option value="$PROJECT_DIR$/src/SMTPclient/EmailSender.java" />
         <option value="$PROJECT_DIR$/src/SMTPclient/SMTPclient.java" />
+        <option value="$PROJECT_DIR$/input.txt" />
+        <option value="$PROJECT_DIR$/mail.txt" />
+        <option value="$PROJECT_DIR$/src/smtpskeleton/SMTPSkeleton.java" />
       </list>
     </option>
   </component>
@@ -161,11 +180,10 @@
       <select />
     </treeState>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="1920" />
-    <option name="y" value="-2" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="y" value="25" />
     <option name="width" value="1366" />
-    <option name="height" value="770" />
+    <option name="height" value="743" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -180,35 +198,18 @@
               <item name="Task1_SMTP" type="b2602c69:ProjectViewProjectNode" />
               <item name="Task1_SMTP" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="Task1_SMTP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Task1_SMTP" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Task1_SMTP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Task1_SMTP" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="SMTPclient" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Task1_SMTP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Task1_SMTP" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="smtpskeleton" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1541538406650" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1541663804478" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../Offline2" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -230,7 +231,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.SMTPclient">
+  <component name="RunManager" selected="Application.SMTPSkeleton">
     <configuration name="SMTPSkeleton" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="smtpskeleton.SMTPSkeleton" />
       <module name="Task1_SMTP" />
@@ -263,8 +264,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.SMTPclient" />
         <item itemvalue="Application.SMTPSkeleton" />
+        <item itemvalue="Application.SMTPclient" />
       </list>
     </recent_temporary>
   </component>
@@ -285,17 +286,18 @@
       <workItem from="1541368768051" duration="875000" />
       <workItem from="1541420591355" duration="6454000" />
       <workItem from="1541470181410" duration="2868000" />
+      <workItem from="1541655928426" duration="6314000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="46862000" />
+    <option name="totallyTimeSpent" value="53176000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1920" y="-2" width="1366" height="770" extended-state="7" />
+    <frame x="0" y="25" width="1366" height="743" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18257576" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18560606" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -304,7 +306,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49959514" weight="0.46982056" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49959514" weight="0.78955954" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -332,31 +334,44 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/smtpskeleton/SMTPSkeleton.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="307">
-          <caret line="95" lean-forward="true" selection-start-line="61" selection-start-column="8" selection-end-line="95" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/SMTPclient/EmailSender.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="307">
-          <caret line="77" lean-forward="true" selection-start-line="77" selection-end-line="77" />
+        <state relative-caret-position="633">
+          <caret line="77" selection-start-line="77" selection-end-line="77" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#361#362#0" expanded="true" />
-            <element signature="e#411#412#0" expanded="true" />
-            <element signature="e#446#447#0" expanded="true" />
-            <element signature="e#484#485#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/SMTPclient/SMTPclient.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="41" column="26" lean-forward="true" selection-start-line="41" selection-start-column="26" selection-end-line="41" selection-end-column="26" />
+        <state relative-caret-position="327">
+          <caret line="31" column="2" lean-forward="true" selection-start-line="31" selection-start-column="2" selection-end-line="31" selection-end-column="2" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/input.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="34" selection-start-column="34" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mail.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" column="18" lean-forward="true" selection-start-line="6" selection-start-column="18" selection-end-line="6" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/smtpskeleton/SMTPSkeleton.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="327">
+          <caret line="91" column="114" lean-forward="true" selection-start-line="91" selection-start-column="114" selection-end-line="91" selection-end-column="114" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

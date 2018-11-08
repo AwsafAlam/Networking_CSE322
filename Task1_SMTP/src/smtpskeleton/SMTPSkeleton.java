@@ -1,151 +1,183 @@
+
 package smtpskeleton;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.WritableRaster;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.Buffer;
+import java.nio.file.Files;
 import java.util.Scanner;
 
 public class SMTPSkeleton {
 
-    public static void main(String[] args) throws IOException {
-
+    public static void main(String[] args) throws UnknownHostException, IOException {
         String temp;
-        String mailServer = "smtp.sendgrid.net";
+
+        String mailServer="webmail.buet.ac.bd";
         InetAddress mailHost = InetAddress.getByName(mailServer);
         InetAddress localHost = InetAddress.getLocalHost();
-        Socket smtpSocket = new Socket(mailHost,587);
+        Socket smtpSocket = new Socket(mailHost,25);
         BufferedReader in =  new BufferedReader(new InputStreamReader(smtpSocket.getInputStream()));
+        OutputStream os = smtpSocket.getOutputStream();
+
         PrintWriter pr = new PrintWriter(smtpSocket.getOutputStream(),true);
         String initialID = in.readLine();
         System.out.println("Server: "+initialID);
 
 
-        //authentication for sendgrid smtp server
-        pr.println("auth login");
-        System.out.println("Server: "+in.readLine());
+        try {
+            BufferedReader br=new BufferedReader(new FileReader("input.txt"));
+            BufferedReader br2=new BufferedReader(new FileReader("mail.txt"));
+            String cmd = br.readLine();
+            while (cmd != null) {
+                System.out.println("Client: "+cmd);
 
-        //giving id =apikey
-        pr.println("YXBpa2V5");
-        temp=in.readLine();
-        System.out.println("Server: "+temp);
-        //quitting if error in connecting the server
-        if(temp.equalsIgnoreCase("501 Syntax error in parameters"))
-        {
-            System.out.println("Incorrect key");
-            //closing
-            pr.println("QUIT");
-            System.out.println("Server: "+in.readLine());
-            return ;
-        }
-
-        //giving password
-        pr.println("U0cuQjhyb2R1Mm1Rd1dOcWpabnFWcGFsdy5xLVRyUEFKdko0V096TndQVVBkUUR4cV9HOUhOcUZ6WWJqRmpocTY3WjRN");
-        temp=in.readLine();
-        System.out.println("Server: "+temp);
-        //quitting if error in connecting the server
-        if(temp.equalsIgnoreCase("501 Syntax error in parameters"))
-        {
-            System.out.println("Incorrect Password");
-            //closing
-            pr.println("QUIT");
-            System.out.println("Server: "+in.readLine());
-            return ;
-        }
-
-
-
-        //hello from client
-        pr.println("HELO " + localHost.getHostName());
-        String welcome = in.readLine();
-        System.out.println("Server: " + welcome);
-
-        //setting the sender
-        pr.println("MAIL FROM:<anfuad23@gmail.com>");
-        System.out.println("Server: " + in.readLine());
-
-        //setting the receiver
-        pr.println("RCPT TO:<anfuad23@gmail.com>");
-        System.out.println("Server: " + in.readLine());
-        pr.println("RCPT TO:<1505113.anf@ugrad.cse.buet.ac.bd>");
-        System.out.println("Server: " + in.readLine());
-
-        //data
-        pr.println("DATA");
-        System.out.println("Server: " + in.readLine());
-
-
-        //email body
-        pr.println("Subject: sample message");
-        pr.println("From: anfuad23@gmail.com");
-        pr.println("To: anfuad23@gmail.com");
-        pr.println();
-        pr.println("Greetings,");
-        pr.println("Hello This is fuad.");
-        pr.println("Goodbye");
-        pr.println(".");
-        System.out.println("Server: " + in.readLine());
-
-        //closing
-        pr.println("QUIT");
-        System.out.println("Server: "+in.readLine());
-
-
-
-/*
-        Scanner sc= new Scanner(System.in);
-        String cmd;
-        while(true)
-        {
-            System.out.print("Client: ");
-            cmd=sc.nextLine();
-
-            if(cmd.equalsIgnoreCase("QUIT")) {
-                pr.println(cmd);
-                System.out.println("Server: "+in.readLine());
-                return;
-            }
-
-            else if(cmd.equalsIgnoreCase("DATA"))
-            {
-                pr.println(cmd);
-                System.out.println("Server: "+in.readLine());
-                String msg;
-                Scanner sc2=new Scanner(System.in);
-                Nestedloop:
-                while(true)
+                if(cmd.equalsIgnoreCase("HELO "+localHost.getHostName()))
                 {
-                    System.out.print("Client: ");
-                    msg=sc2.nextLine();
-                    if(msg.equalsIgnoreCase("."))
-                    {
-                        pr.println(msg);
-                        System.out.println("Server: "+in.readLine());
-                        break Nestedloop;
-                    }
-                    else
-                        pr.println(msg);
+                    pr.println(cmd);
+                    System.out.println("Server: "+in.readLine());
 
                 }
+
+
+                else if(cmd.equalsIgnoreCase("QUIT")) {
+                    pr.println(cmd);
+                    System.out.println("Server: "+in.readLine());
+                    return;
+                }
+
+                else if(cmd.equalsIgnoreCase("DATA"))
+                {
+                    pr.println(cmd);
+                    System.out.println("Server: "+in.readLine());
+                    String msg=br2.readLine();
+                    Nestedloop:
+                    while(msg!=null)
+                    {
+                        System.out.println("Client: "+msg);
+                        if(msg.equalsIgnoreCase("."))
+                        {
+                            pr.println(msg);
+                            System.out.println("Server: "+in.readLine());
+                            br2.close();
+                            break Nestedloop;
+                        }
+                        else if(msg.equalsIgnoreCase("send attachment"))
+                        {
+                            System.out.println("Sending File");
+                            File file=new File("buet.png");
+                            FileInputStream fstream =new FileInputStream(file);
+
+                            long length=file.length();
+
+                            byte[] bytearray = Files.readAllBytes(file.toPath());
+
+//                            byte[] bytearray=new byte[(int)length];
+                            fstream.read(bytearray,0,(int)length);
+
+
+                            String encoded= Base64.encode(bytearray);
+                            pr.println(encoded);
+                            pr.flush();
+
+                            pr.println("Subject:Small Koala\n" +
+                                    "MIME-Version: 1.0\n" +
+                                    "Content-Type:multipart/mixed;  boundary=\"sam\"\n" +
+                                    "--sam\n" +
+                                    "Content-Type:application/octet-stream;name=\"koala.jpg\"\n" +
+                                    "Content-Transfer-Encoding:base64\n" +
+                                    "Content-Disposition:attachment;filename=\"koala.jpg\"\n" +
+                                    "\n" +
+                                    "--sam--\n");
+
+                            pr.flush();
+
+//                            File file = new File("buet.png");
+//                            FileInputStream fis = null;
+//
+//                            fis = new FileInputStream(file);
+//
+//                            BufferedInputStream bis = new BufferedInputStream(fis);
+//
+//                            byte[] contents;
+//                            long fileLength = file.length();
+//
+//
+//                            long current = 0;
+//
+//                            long start = System.nanoTime();
+//                            while(current!=fileLength){
+//                                int size = 10000;
+//                                if(fileLength - current >= size)
+//                                    current += size;
+//                                else{
+//                                    size = (int)(fileLength - current);
+//                                    current = fileLength;
+//                                }
+//                                contents = new byte[size];
+//                                bis.read(contents, 0, size);
+//
+//                                String encoded= Base64.encode(contents);
+//                                pr.println(encoded);
+////                                pr.flush();
+////                                os.write(Integer.parseInt(encoded));
+////
+////                                os.write(contents);
+//                                System.out.println("Sending file ... "+(current*100)/fileLength+"% complete!");
+//                            }
+//                            pr.flush();
+//                            System.out.println("File sent successfully!");
+
+                        }
+                        else
+                        {
+                            pr.println(msg);
+                        }
+
+                        //read next line
+                        msg=br2.readLine();
+
+                    }
+                }
+
+                else
+                {
+                    pr.println(cmd);
+                    System.out.println("Server: "+in.readLine());
+                }
+
+
+                // read next line
+                cmd = br.readLine();
             }
 
-            else
-            {
-                pr.println(cmd);
-                System.out.println("Server: "+in.readLine());
-            }
-
-
+            br.close();
         }
 
-        */
-
-            }
+        catch (IOException e) {
+            System.out.println(e.toString());
         }
 
+    }
+
+    public static byte[] extractBytes (String ImageName) throws IOException {
+        // open image
+        File imgPath = new File(ImageName);
+        BufferedImage bufferedImage = ImageIO.read(imgPath);
+
+        // get DataBufferBytes from Raster
+        WritableRaster raster = bufferedImage .getRaster();
+        DataBufferByte data   = (DataBufferByte) raster.getDataBuffer();
+
+        return ( data.getData() );
+    }
+}
 
 

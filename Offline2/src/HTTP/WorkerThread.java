@@ -65,6 +65,8 @@ class WorkerThread implements Runnable
             try {
 
                 StringBuilder buff = new StringBuilder();
+//                if(br.readLine() == null)
+//                    break;
 
                 while (br.ready()){
                     charIn = (char) br.read();

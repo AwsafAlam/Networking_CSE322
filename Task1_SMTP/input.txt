@@ -1,0 +1,5 @@
+HELO awsaf-Inspiron-5437/127.0.1.1
+MAIL FROM:<anfuad23@gmail.com>
+RCPT TO:<awsafalam@gmail.com>
+DATA
+QUIT
