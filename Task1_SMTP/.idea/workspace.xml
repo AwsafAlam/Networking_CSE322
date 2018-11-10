@@ -1,21 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2e331a2e-66e1-448f-b82d-ef22b1401a93" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../Offline2/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Offline2/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Task1_SMTP.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Task1_SMTP.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buet.png" beforeDir="false" afterPath="$PROJECT_DIR$/buet.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/input.txt" beforeDir="false" afterPath="$PROJECT_DIR$/input.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mail.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mail.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Task1_SMTP/SMTPclient/SMTPclient.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task1_SMTP/SMTPclient/SMTPclient.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Task1_SMTP/smtpskeleton/SMTPSkeleton.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SMTPclient/SMTPclient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SMTPclient/SMTPclient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/smtpskeleton/SMTPSkeleton.java" beforeDir="false" />
-    </list>
+    <list default="true" id="2e331a2e-66e1-448f-b82d-ef22b1401a93" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -130,7 +116,7 @@
     <session id="108543351">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="2" />
+          <entry key="project.closed" value="3" />
           <entry key="project.open.time.15" value="1" />
           <entry key="project.open.time.63" value="1" />
           <entry key="project.open.time.67" value="1" />
@@ -168,8 +154,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/SMTPclient/SMTPclient.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="338">
-              <caret line="70" column="39" lean-forward="true" selection-start-line="70" selection-start-column="39" selection-end-line="70" selection-end-column="39" />
+            <state relative-caret-position="518">
+              <caret line="80" column="36" lean-forward="true" selection-start-line="80" selection-start-column="36" selection-end-line="80" selection-end-column="36" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -346,12 +332,12 @@
       <workItem from="1541660230242" duration="7865000" />
       <workItem from="1541827865912" duration="444000" />
       <workItem from="1541828352670" duration="3595000" />
-      <workItem from="1541846926761" duration="1124000" />
+      <workItem from="1541846926761" duration="1276000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="78480000" />
+    <option name="totallyTimeSpent" value="78632000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="25" width="1920" height="1055" extended-state="6" />
@@ -373,7 +359,7 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="9" />
+      <window_info anchor="bottom" id="Terminal" order="9" weight="0.32972974" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50040483" side_tool="true" weight="0.30373" />
       <window_info anchor="bottom" id="Messages" order="11" weight="0.31810766" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -411,8 +397,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/SMTPclient/SMTPclient.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="338">
-          <caret line="70" column="39" lean-forward="true" selection-start-line="70" selection-start-column="39" selection-end-line="70" selection-end-column="39" />
+        <state relative-caret-position="518">
+          <caret line="80" column="36" lean-forward="true" selection-start-line="80" selection-start-column="36" selection-end-line="80" selection-end-column="36" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
