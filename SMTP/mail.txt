@@ -1,8 +1,7 @@
 From: anfuad23@gmail.com
 To: anfuad23@gmail.com
-cc: awsafalam@gmail.com
 MIME-Version: 1.0
-Subject: ajaira mail testing
+Subject: mail testing
 Content-Type: multipart/mixed; boundary=sep
 --sep
 hii i am awsaf

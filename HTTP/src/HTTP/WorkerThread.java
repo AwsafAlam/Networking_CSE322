@@ -53,7 +53,8 @@ class WorkerThread implements Runnable
 
         String str ="", httpRequest = "";
         char charIn;
-
+        int state = 0;
+        String cookie = "1234";
 
         while(true)
         {
@@ -76,26 +77,141 @@ class WorkerThread implements Runnable
                 Scanner sc = new Scanner(str);
                 String url = null;
 
-                while (sc.hasNextLine()){
+                while (sc.hasNextLine()) {
                     String line = sc.nextLine();
                     System.out.println("[" + id + "] says: " + line);
 
                     String arr[] = line.split(" ");
 
-                    if(arr[0].equals("GET")){
+                    /*if (arr[0].equals("GET") && state==0) {
                         httpRequest = "GET";
+                        state = 1;
+                        url = "index.html";
+                        if(arr[1].equals("/")){
+                            System.out.println("Sending index");
+                        }
+                        File file = new File("index"+state+".html");
+                        FileInputStream fis = null;
+
+                        fis = new FileInputStream(file);
+
+                        BufferedInputStream bis = new BufferedInputStream(fis);
+
+                        byte[] contents;
+                        long fileLength = file.length();
+
+                        String head = "HTTP/1.1 200 OK\n" +
+                                "Date: Sun, 04 Nov 2018 11:50:15 GMT\n" +
+                                "setCookie: "+cookie+"\n" +
+                                "Accept-Ranges: bytes\n" +
+                                "Content-Length: " + String.valueOf(fileLength) + "\n" +
+                                "Keep-Alive: timeout=15, max=100\n" +
+                                "Connection: Keep-Alive\n" +
+                                "Content-Type: " + getMIMEType(url) + "\n" +
+                                "CRLF";
+
+                        System.out.println(head);
+                        pr.println(head);
+                        pr.flush();
+
+                        pr.println("");
+                        pr.flush();
+
+
+                        long current = 0;
+
+                        long start = System.nanoTime();
+                        while (current != fileLength) {
+                            int size = 10000;
+                            if (fileLength - current >= size)
+                                current += size;
+                            else {
+                                size = (int) (fileLength - current);
+                                current = fileLength;
+                            }
+                            contents = new byte[size];
+                            bis.read(contents, 0, size);
+                            os.write(contents);
+                            System.out.println("Sending file ... " + (current * 100) / fileLength + "% complete!");
+                        }
+                        os.flush();
+                        System.out.println("File sent successfully!");
+                        pr.println();
+                        pr.flush();
+
+//                        Router r = new Router(arr[1] , os , br);
+//                        r.route("GET");
+
+                    } else if (httpRequest.equals("GET") && arr[0].startsWith("Cookie")) {
+//                        Router r = new Router(arr[1] , os , br , "");
+//                        r.route("GET");
+                        state++;
+                        url = "index.html";
+
+                        File file = new File("index"+state+".html");
+                        FileInputStream fis = null;
+
+                        fis = new FileInputStream(file);
+
+                        BufferedInputStream bis = new BufferedInputStream(fis);
+
+                        byte[] contents;
+                        long fileLength = file.length();
+
+                        String head = "HTTP/1.1 200 OK\n" +
+                                "Date: Sun, 04 Nov 2018 11:50:15 GMT\n" +
+                                "Accept-Ranges: bytes\n" +
+                                "Content-Length: " + String.valueOf(fileLength) + "\n" +
+                                "Keep-Alive: timeout=15, max=100\n" +
+                                "Connection: Keep-Alive\n" +
+                                "Content-Type: " + getMIMEType(url) + "\n" +
+                                "CRLF";
+
+                        System.out.println(head);
+                        pr.println(head);
+                        pr.flush();
+
+                        pr.println("");
+                        pr.flush();
+
+
+                        long current = 0;
+
+                        long start = System.nanoTime();
+                        while (current != fileLength) {
+                            int size = 10000;
+                            if (fileLength - current >= size)
+                                current += size;
+                            else {
+                                size = (int) (fileLength - current);
+                                current = fileLength;
+                            }
+                            contents = new byte[size];
+                            bis.read(contents, 0, size);
+                            os.write(contents);
+                            System.out.println("Sending file ... " + (current * 100) / fileLength + "% complete!");
+                        }
+                        os.flush();
+                        System.out.println("File sent successfully!");
+                        pr.println();
+
+
+                    }
+                    */
+                    if (arr[0].equals("GET")) {
+//                        httpRequest = "POST";
+//                        url = arr[1];
                         Router r = new Router(arr[1] , os , br);
                         r.route("GET");
 
                     }
-                    else  if(arr[0].equals("POST")){
+                    else if (arr[0].equals("POST")) {
                         httpRequest = "POST";
                         url = arr[1];
 
-                    }
-                    else if(httpRequest.equals("POST") && arr[0].startsWith("user") && url != null){
+                    } else if (httpRequest.equals("POST") && arr[0].startsWith("user") && url != null) {
                         String items[] = arr[0].split("&");
-                        HashMap<String , String> map = new HashMap<>();
+                        HashMap<String, String> map = new HashMap<>();
                         for (String item : items) {
                             String keyval[] = item.split("=");
                             if (keyval.length > 1) {
@@ -105,14 +221,15 @@ class WorkerThread implements Runnable
                                 map.put(keyval[0], "");
                             }
                         }
-                        Router r = new Router(url , os , br , map);
+                        Router r = new Router(url, os, br, map);
                         r.route("POST");
 
-                    }
-                    else if(httpRequest.equals("POST") && arr[0].startsWith("Referer")){
+                    } else if (httpRequest.equals("POST") && arr[0].startsWith("Referer")) {
                         String referer[] = arr[1].split("/");
-                        url += "/"+referer[referer.length -1];
+                        url += "/" + referer[referer.length - 1];
                     }
+
+//                break;
                 }
 
             }
@@ -143,5 +260,26 @@ class WorkerThread implements Runnable
                 + HTTPServer.workerThreadCount);
     }
 
+    String getMIMEType(String targetfile) {
+        if (targetfile.endsWith("html"))
+        return "text/html";
+        else if (targetfile.endsWith("css"))
+        return "text/css";
+
+        else if (targetfile.endsWith("bmp"))
+        return "image/bmp";
+
+        else if (targetfile.endsWith("jpg"))
+        return "image/jpeg";
+
+        else if (targetfile.endsWith("pdf"))
+        return "application/pdf";
+
+        else if (targetfile.endsWith("png"))
+        return "image/png";
+
+        else
+        return "text/plain";
+    }
 
 }

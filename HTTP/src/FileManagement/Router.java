@@ -13,6 +13,7 @@ public class Router {
     private BufferedReader br;
     private HashMap<String , String> map;
 
+    private HashMap<String , String> cookie;
 
     public Router(String url, OutputStream os, BufferedReader br) {
         this.url = url;
@@ -29,6 +30,9 @@ public class Router {
         this.map = map;
 
         pr = new PrintWriter(os);
+    }
+
+    public Router(String url, OutputStream os, BufferedReader br, String cookie) {
     }
 
 
