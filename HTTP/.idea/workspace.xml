@@ -1,25 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8a11aea7-9d65-416f-8993-dd04dec6a4d9" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/index1.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/index2.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/index3.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/HTTP_client.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/src/HTTPClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Offline2/FileManagement/Router.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Offline2/FileManagement/Router.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Offline2/HTTP/WorkerThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Offline2/HTTP/WorkerThread.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FileManagement/Router.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FileManagement/Router.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/HTTP/WorkerThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/HTTP/WorkerThread.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SMTP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../SMTP/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SMTP/mail.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../SMTP/mail.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SMTP/out/production/Task1_SMTP/SMTPclient/SMTPclient.class" beforeDir="false" afterPath="$PROJECT_DIR$/../SMTP/out/production/Task1_SMTP/SMTPclient/SMTPclient.class" afterDir="false" />
-    </list>
+    <list default="true" id="8a11aea7-9d65-416f-8993-dd04dec6a4d9" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -78,6 +60,7 @@
     <session id="-130829774">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+          <entry key="project.closed" value="1" />
           <entry key="project.open.time.22" value="1" />
           <entry key="project.opened" value="1" />
         </counts>
@@ -115,8 +98,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/HTTP/WorkerThread.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="309">
-              <caret line="241" column="9" lean-forward="true" selection-start-line="241" selection-start-column="9" selection-end-line="241" selection-end-column="9" />
+            <state relative-caret-position="237">
+              <caret line="108" column="60" lean-forward="true" selection-start-line="108" selection-start-column="60" selection-end-line="108" selection-end-column="60" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -296,7 +279,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1542018221403" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1542018326421" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../SMTP" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -367,18 +350,18 @@
       <workItem from="1541655856401" duration="7561000" />
       <workItem from="1541827862245" duration="443000" />
       <workItem from="1541857523121" duration="9103000" />
-      <workItem from="1542006751927" duration="8869000" />
+      <workItem from="1542006751927" duration="9199000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="91607000" />
+    <option name="totallyTimeSpent" value="91937000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="25" width="1366" height="743" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17045455" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17045455" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -394,7 +377,7 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="9" weight="0.49105692" />
+      <window_info anchor="bottom" id="Terminal" order="9" weight="0.49102774" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Messages" order="11" weight="0.32972974" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -587,8 +570,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/HTTP/WorkerThread.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="309">
-          <caret line="241" column="9" lean-forward="true" selection-start-line="241" selection-start-column="9" selection-end-line="241" selection-end-column="9" />
+        <state relative-caret-position="237">
+          <caret line="108" column="60" lean-forward="true" selection-start-line="108" selection-start-column="60" selection-end-line="108" selection-end-column="60" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

@@ -2,23 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2e331a2e-66e1-448f-b82d-ef22b1401a93" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../HTTP/index1.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP/index2.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP/index3.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/HTTP_client.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP_client/src/HTTPClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../HTTP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../HTTP/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../HTTP/out/production/Offline2/FileManagement/Router.class" beforeDir="false" afterPath="$PROJECT_DIR$/../HTTP/out/production/Offline2/FileManagement/Router.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../HTTP/out/production/Offline2/HTTP/WorkerThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/../HTTP/out/production/Offline2/HTTP/WorkerThread.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../HTTP/src/FileManagement/Router.java" beforeDir="false" afterPath="$PROJECT_DIR$/../HTTP/src/FileManagement/Router.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../HTTP/src/HTTP/WorkerThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/../HTTP/src/HTTP/WorkerThread.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../HTTP_client/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../HTTP_client/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mail.txt" beforeDir="false" afterPath="$PROJECT_DIR$/mail.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Task1_SMTP/SMTPclient/SMTPclient.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Task1_SMTP/SMTPclient/SMTPclient.class" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -169,8 +155,10 @@
     <session id="74420200">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.1" value="1" />
-          <entry key="project.opened" value="1" />
+          <entry key="project.open.time.54" value="1" />
+          <entry key="project.opened" value="2" />
         </counts>
       </usages-collector>
     </session>
@@ -180,8 +168,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/SMTPclient/SMTPclient.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="212">
-              <caret line="65" column="25" lean-forward="true" selection-start-line="65" selection-start-column="25" selection-end-line="65" selection-end-column="25" />
+            <state relative-caret-position="1098">
+              <caret line="65" column="25" selection-start-line="65" selection-start-column="25" selection-end-line="65" selection-end-column="25" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -193,7 +181,7 @@
         <entry file="file://$PROJECT_DIR$/mail.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="162">
-              <caret line="9" column="24" lean-forward="true" selection-start-line="9" selection-start-column="24" selection-end-line="9" selection-end-column="24" />
+              <caret line="9" column="24" selection-start-line="9" selection-start-column="24" selection-end-line="9" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -246,6 +234,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -257,7 +246,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -350,17 +338,17 @@
       <workItem from="1541828352670" duration="3595000" />
       <workItem from="1541846926761" duration="1276000" />
       <workItem from="1542006793826" duration="2134000" />
+      <workItem from="1542185976388" duration="50000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="80766000" />
+    <option name="totallyTimeSpent" value="80816000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="25" width="1366" height="743" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25378788" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -369,7 +357,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49959514" visible="true" weight="0.34910277" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49959514" weight="0.34910277" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39964476" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -400,8 +388,8 @@
     <entry file="file://$PROJECT_DIR$/src/SMTPSkeleton.java" />
     <entry file="file://$PROJECT_DIR$/src/SMTPclient/SMTPclient.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
-          <caret line="65" column="25" lean-forward="true" selection-start-line="65" selection-start-column="25" selection-end-line="65" selection-end-column="25" />
+        <state relative-caret-position="1098">
+          <caret line="65" column="25" selection-start-line="65" selection-start-column="25" selection-end-line="65" selection-end-column="25" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -418,7 +406,7 @@
     <entry file="file://$PROJECT_DIR$/mail.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
-          <caret line="9" column="24" lean-forward="true" selection-start-line="9" selection-start-column="24" selection-end-line="9" selection-end-column="24" />
+          <caret line="9" column="24" selection-start-line="9" selection-start-column="24" selection-end-line="9" selection-end-column="24" />
         </state>
       </provider>
     </entry>

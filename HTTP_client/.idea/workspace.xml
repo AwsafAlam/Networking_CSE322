@@ -2,23 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e4268967-a25b-4e18-abf1-52b06dcdf48f" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../HTTP/index1.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP/index2.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../HTTP/index3.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/HTTP_client.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/HTTPClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../HTTP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../HTTP/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../HTTP/out/production/Offline2/FileManagement/Router.class" beforeDir="false" afterPath="$PROJECT_DIR$/../HTTP/out/production/Offline2/FileManagement/Router.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../HTTP/out/production/Offline2/HTTP/WorkerThread.class" beforeDir="false" afterPath="$PROJECT_DIR$/../HTTP/out/production/Offline2/HTTP/WorkerThread.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../HTTP/src/FileManagement/Router.java" beforeDir="false" afterPath="$PROJECT_DIR$/../HTTP/src/FileManagement/Router.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../HTTP/src/HTTP/WorkerThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/../HTTP/src/HTTP/WorkerThread.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SMTP/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../SMTP/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SMTP/mail.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../SMTP/mail.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SMTP/out/production/Task1_SMTP/SMTPclient/SMTPclient.class" beforeDir="false" afterPath="$PROJECT_DIR$/../SMTP/out/production/Task1_SMTP/SMTPclient/SMTPclient.class" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -31,7 +15,7 @@
     <session id="755116875">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.1" value="1" />
           <entry key="project.open.time.6" value="1" />
           <entry key="project.opened" value="2" />
@@ -64,8 +48,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/HTTPClient.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="215">
-              <caret line="53" column="5" lean-forward="true" selection-start-line="53" selection-start-column="5" selection-end-line="53" selection-end-column="5" />
+            <state relative-caret-position="233">
+              <caret line="33" column="33" selection-start-line="33" selection-start-column="33" selection-end-line="33" selection-end-column="33" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -99,7 +83,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="4">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="683" />
     <option name="y" value="25" />
     <option name="width" value="683" />
@@ -134,7 +118,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1542018221487" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1542018326534" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
   </component>
@@ -187,15 +171,15 @@
       <option name="presentableId" value="Default" />
       <updated>1542006876413</updated>
       <workItem from="1542006881228" duration="2863000" />
-      <workItem from="1542011678045" duration="4311000" />
+      <workItem from="1542011678045" duration="4508000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="7174000" />
+    <option name="totallyTimeSpent" value="7371000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="683" y="25" width="683" height="743" extended-state="4" />
+    <frame x="0" y="25" width="1366" height="743" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.38932496" />
@@ -207,7 +191,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32952693" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32952693" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -247,8 +231,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/HTTPClient.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="215">
-          <caret line="53" column="5" lean-forward="true" selection-start-line="53" selection-start-column="5" selection-end-line="53" selection-end-column="5" />
+        <state relative-caret-position="233">
+          <caret line="33" column="33" selection-start-line="33" selection-start-column="33" selection-end-line="33" selection-end-column="33" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
