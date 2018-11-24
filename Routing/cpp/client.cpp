@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
 	struct sockaddr_in server_address;
 	struct sockaddr_in client_address;
 
-	if(argc != 2){
+	if(argc != 2){//Takes ip address as command line arguments
 		printf("%s <ip address>\n", argv[0]);
 		exit(1);
 	}
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
 	bind_flag = bind(sockfd, (struct sockaddr*) &client_address, sizeof(sockaddr_in));
 
 	while(true){
-		// gets(buffer);
+		// gets(buffer); ///comppilation error with gets, find alternative
 		cin>>buffer;
 		if(!strcmp(buffer, "shutdown")) break;
 		sendto(sockfd, buffer, 1024, 0, (struct sockaddr*) &server_address, sizeof(sockaddr_in));
