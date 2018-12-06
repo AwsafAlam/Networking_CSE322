@@ -11,7 +11,7 @@
 
 using namespace std;
 
-#define INF -100000
+#define INF 999999
 string myIP;
 
 class Entry
@@ -43,7 +43,7 @@ void showRoutingTable(){
 }
 
 void sendRoutingUpdates(){
-	return;
+	
 	struct sockaddr_in client_address;
 	struct sockaddr_in server_address;
 	int sockfd; 
@@ -54,17 +54,21 @@ void sendRoutingUpdates(){
 	client_address.sin_addr.s_addr = inet_addr(myIP.c_str());
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 	bind_flag = bind(sockfd, (struct sockaddr*) &client_address, sizeof(sockaddr_in));
-
-
+	map<string,int> sent;
+	
 	for (map<string, Entry*>::iterator j = routingtable.begin() ; j != routingtable.end() ; j++){
 
 		string tmp = "Update-"+myIP+"\n";
 
-		
 		server_address.sin_family = AF_INET;
 		server_address.sin_port = htons(4747);
-		server_address.sin_addr.s_addr = inet_addr(j->first.c_str());
-	
+		if(sent.find(j->second->getNextHop()) == sent.end()){
+			server_address.sin_addr.s_addr = inet_addr(j->second->getNextHop().c_str());
+			sent.insert(pair<string, int>(j->second->getNextHop() ,j->second->getCost() ));
+		}
+		else
+			continue;
+		
 		for (map<string, Entry*>::iterator i = routingtable.begin() ; i != routingtable.end() ; i++)
 		{
 			if(i->second->getCost() != INF){
@@ -78,7 +82,7 @@ void sendRoutingUpdates(){
 		strcpy(buffer, tmp.c_str());
 		sendto(sockfd, buffer, n, 0, (struct sockaddr*) &server_address, sizeof(sockaddr_in));
 	}
-
+	close(sockfd);
 }
 
 int main(int argc, char *argv[]){
@@ -204,7 +208,7 @@ int main(int argc, char *argv[]){
 				
 			}
 			else{
-				cout<<"update cost <"<<ip1<<"> <"<<ip2<<"> "<<to_string(value)<<endl;
+				cout<<"update cost <"<<ip1<<"> <"<<ip2<<"> "<<to_string(val)<<endl;
 				it = routingtable.find(ip1);
 				if (it != routingtable.end()){
 					// routingtable.erase (it);
@@ -218,7 +222,38 @@ int main(int argc, char *argv[]){
 			cout<<"Link cost updated"<<endl;
 			showRoutingTable();
 		}
-		// else if(str.find("show") != string::npos)
+		else if(str.find("Update") != string::npos){
+			//Update routing table
+			cout<<"-----------request update----------\n";
+			string from , eachline;
+			istringstream l(str);
+
+			while(getline(l, eachline ))
+			{
+				//Each line
+				istringstream iss(eachline);
+				string s;
+				vector<string> line;
+				while ( getline( iss, s, '-' ) ) {
+					line.push_back(s);
+				}
+				if(line[0] == "Update")
+					from = line[1];
+				else{
+					it = routingtable.find(line[0]);
+					if (it != routingtable.end()){
+						if( (routingtable.find(from)->second->getCost() + stoi(line[2]) ) < it->second->getCost()){
+							cout<<"Shorter path found... \n";
+							it->second->setCost(routingtable.find(from)->second->getCost() + stoi(line[2]));
+							it->second->setNextHop(from);
+						}
+					}
+				}
+
+			}
+			showRoutingTable();
+
+		}
 		// 	showRoutingTable();
 		// else if(str.find("show") != string::npos)
 		// 	showRoutingTable();
