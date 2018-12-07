@@ -161,12 +161,12 @@ int main(int argc, char *argv[]){
 	printf("Router running...\n");
 	while(true){
 		bytes_received = recvfrom(sockfd, buffer, 1024, 0, (struct sockaddr*) &client_address, &addrlen);
-		printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
+		// printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
 		string str(buffer);
 
 		if (str.find("clk") != string::npos)
 			sendRoutingUpdates();
-		else if(str.find("show") != string::npos)
+		else if(str.find("show") != string::npos) //show 192.168.10.2
 			showRoutingTable();
 		else if(str.find("cost") != string::npos){
 			// cost 192.168.10.1 192.168.10.2 2
@@ -224,7 +224,6 @@ int main(int argc, char *argv[]){
 		}
 		else if(str.find("Update") != string::npos){
 			//Update routing table
-			cout<<"-----------request update----------\n";
 			string from , eachline;
 			istringstream l(str);
 
@@ -237,22 +236,29 @@ int main(int argc, char *argv[]){
 				while ( getline( iss, s, '-' ) ) {
 					line.push_back(s);
 				}
-				if(line[0] == "Update")
-					from = line[1];
-				else{
-					it = routingtable.find(line[0]);
-					if (it != routingtable.end()){
-						if( (routingtable.find(from)->second->getCost() + stoi(line[2]) ) < it->second->getCost()){
-							cout<<"Shorter path found... \n";
-							it->second->setCost(routingtable.find(from)->second->getCost() + stoi(line[2]));
-							it->second->setNextHop(from);
+				if(line.size() > 0){
+					if(line[0] == "Update")
+						from = line[1];
+					else{
+						map<string, Entry*>::iterator ite = routingtable.find(line[0]);
+						map<string, Entry*>::iterator ite2 = routingtable.find(from);
+
+						if (ite != routingtable.end() && ite2 != routingtable.end()){
+							int newCost = routingtable.find(from)->second->getCost() + stoi(line[2]);
+							if(newCost < ite->second->getCost()){
+								cout<<"Shorter path found.. "<<newCost<<" < "<<ite->second->getCost()<<" updating routing table"<<endl;
+								//routingtable.erase (it);
+								//routingtable.insert(pair<string, Entry*>(line[0].c_str(), new Entry(line[1].c_str(),stoi(line[2]))));
+								ite->second->setCost(newCost);
+								ite->second->setNextHop(ite2->second->getNextHop()); //Next hop of router to go to next
+								showRoutingTable();
+							}
 						}
 					}
 				}
-
+				
 			}
-			showRoutingTable();
-
+			
 		}
 		// 	showRoutingTable();
 		// else if(str.find("show") != string::npos)
