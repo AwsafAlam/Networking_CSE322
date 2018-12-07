@@ -12,7 +12,7 @@ using namespace std;
 
 #define INF 999999
 string myIP;
-int clk = 0;
+int routingupdate = 0;
 
 class Entry
 {
@@ -33,6 +33,7 @@ Entry::Entry(string n , int c){
 }
 
 map<string, Entry*> routingtable;
+vector<string> neighbours;
 
 void showRoutingTable(){
 	cout<<"Routing Table for :"<<myIP<<"\n-------------------------\n";
@@ -42,8 +43,54 @@ void showRoutingTable(){
 	}
 }
 
+void initRoutingTable(string file){
+	string str;
+	map<string, Entry*>::iterator it;
+	ifstream inFile;
+	inFile.open(file.c_str());
+	
+	while(getline(inFile, str ))
+    {
+        istringstream iss(str);
+		string s;
+		vector<string> line;
+		while ( getline( iss, s, ' ' ) ) {
+			line.push_back(s);
+			
+		}
+		if(line[0] == myIP){
+			it = routingtable.find(line[1]);
+			if (it != routingtable.end()){
+				routingtable.erase (it);
+				routingtable.insert(pair<string, Entry*>(line[1].c_str(), new Entry(line[1].c_str(),stoi(line[2])))); 
+			}
+			else
+				routingtable.insert(pair<string, Entry*>(line[1].c_str(), new Entry(line[1].c_str(),stoi(line[2])))); 
+		}
+		else if(line[1] == myIP){
+			it = routingtable.find(line[0]);
+			if (it != routingtable.end()){
+				routingtable.erase (it);
+				routingtable.insert(pair<string, Entry*>(line[0].c_str(), new Entry(line[0].c_str(),stoi(line[2])))); 
+			}
+			else
+				routingtable.insert(pair<string, Entry*>(line[0].c_str(), new Entry(line[0].c_str(),stoi(line[2])))); 
+		}
+		else{
+			routingtable.insert(pair<string, Entry*>(line[0].c_str(), new Entry(" undefined  ",INF))); 
+			routingtable.insert(pair<string, Entry*>(line[1].c_str(), new Entry(" undefined  ",INF))); 
+		}
+		
+    }
+	showRoutingTable();
+	for (map<string, Entry*>::iterator i = routingtable.begin() ; i != routingtable.end() ; i++){
+		if(i->second->getCost() != INF)
+			neighbours.push_back(i->first.c_str());
+	}
+}
+
 void sendRoutingUpdates(string str){
-	clk++;
+	routingupdate++;
 	
 	struct sockaddr_in client_address;
 	struct sockaddr_in server_address;
@@ -59,7 +106,7 @@ void sendRoutingUpdates(string str){
 	
 	for (map<string, Entry*>::iterator j = routingtable.begin() ; j != routingtable.end() ; j++){
 
-		string tmp = "Update-"+myIP+"-"+to_string(clk)+"\n";
+		string tmp = "Update-"+myIP+"-"+to_string(routingupdate)+"\n";
 
 		server_address.sin_family = AF_INET;
 		server_address.sin_port = htons(4747);
@@ -102,7 +149,7 @@ void updateRoutingTable(string str){
 		if(line.size() > 0){
 			if(line[0] == "Update"){
 				from = line[1];
-				// cout<<"clk: "<<line[2]<<endl; //seg fault
+				// cout<<"routingupdate: "<<line[2]<<endl; //seg fault
 			}
 			else{
 				map<string, Entry*>::iterator ite = routingtable.find(line[0]);
@@ -171,49 +218,6 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
-	myIP = argv[1];
-	ifstream inFile;
-	inFile.open(argv[2]);
-	string str;
-
-
-	while(getline(inFile, str ))
-    {
-        //Each line
-		// cout<<str<<endl;
-		istringstream iss(str);
-		string s;
-		vector<string> line;
-		while ( getline( iss, s, ' ' ) ) {
-			line.push_back(s);
-			
-		}
-		if(line[0] == argv[1]){
-			it = routingtable.find(line[1]);
-			if (it != routingtable.end()){
-				routingtable.erase (it);
-				routingtable.insert(pair<string, Entry*>(line[1].c_str(), new Entry(line[1].c_str(),stoi(line[2])))); 
-			}
-			else
-				routingtable.insert(pair<string, Entry*>(line[1].c_str(), new Entry(line[1].c_str(),stoi(line[2])))); 
-		}
-		else if(line[1] == argv[1]){
-			it = routingtable.find(line[0]);
-			if (it != routingtable.end()){
-				routingtable.erase (it);
-				routingtable.insert(pair<string, Entry*>(line[0].c_str(), new Entry(line[0].c_str(),stoi(line[2])))); 
-			}
-			else
-				routingtable.insert(pair<string, Entry*>(line[0].c_str(), new Entry(line[0].c_str(),stoi(line[2])))); 
-		}
-		else{
-			routingtable.insert(pair<string, Entry*>(line[0].c_str(), new Entry(" undefined  ",INF))); 
-			routingtable.insert(pair<string, Entry*>(line[1].c_str(), new Entry(" undefined  ",INF))); 
-		}
-		
-    }
-	showRoutingTable();
-
 	server_address.sin_family = AF_INET;
 	server_address.sin_port = htons(4747);
 	server_address.sin_addr.s_addr = inet_addr(argv[1]);
@@ -221,7 +225,11 @@ int main(int argc, char *argv[]){
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 	bind_flag = bind(sockfd, (struct sockaddr*) &server_address, sizeof(sockaddr_in));
 
+	myIP = argv[1];
+	string file = argv[2]; 
 	
+	initRoutingTable(file);
+
 	printf("Router running...\n");
 	while(true){
 		bytes_received = recvfrom(sockfd, buffer, 1024, 0, (struct sockaddr*) &client_address, &addrlen);
