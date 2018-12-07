@@ -33,7 +33,9 @@ Entry::Entry(string n , int c){
 }
 
 map<string, Entry*> routingtable;
-vector<string> neighbours;
+map<string,int> neighbours;
+map<string,int> linktrack;
+
 
 void showRoutingTable(){
 	cout<<"Routing Table for :"<<myIP<<"\n-------------------------\n";
@@ -84,8 +86,10 @@ void initRoutingTable(string file){
     }
 	showRoutingTable();
 	for (map<string, Entry*>::iterator i = routingtable.begin() ; i != routingtable.end() ; i++){
-		if(i->second->getCost() != INF)
-			neighbours.push_back(i->first.c_str());
+		if(i->second->getCost() != INF){
+			linktrack.insert(pair<string,int>(i->first.c_str(), 0));
+			neighbours.insert(pair<string,int>(i->first.c_str(), i->second->getCost()));
+		}
 	}
 }
 
@@ -148,15 +152,15 @@ void sendRoutingUpdates(string str){
 	bind_flag = bind(sockfd, (struct sockaddr*) &client_address, sizeof(sockaddr_in));
 	// map<string,int> sent;
 	
-	// for (map<string, Entry*>::iterator j = routingtable.begin() ; j != routingtable.end() ; j++){
-	for(int j =0 ; j< neighbours.size() ; j++){
+	for (map<string, int>::iterator j = neighbours.begin() ; j != neighbours.end() ; j++){
+	// for(int j =0 ; j< neighbours.size() ; j++){
 		string tmp = "Update-"+myIP+"-"+to_string(routingupdate)+"\n";
 
 		server_address.sin_family = AF_INET;
 		server_address.sin_port = htons(4747);
-		map<string, Entry*>::iterator nei = routingtable.find(neighbours[j]);
-		if(nei != routingtable.end()){
-			server_address.sin_addr.s_addr = inet_addr(neighbours[j].c_str());
+		// map<string, Entry*>::iterator nei = routingtable.find(neighbours[j]);
+		if( j->second != INF){
+			server_address.sin_addr.s_addr = inet_addr(j->first.c_str());
 			// server_address.sin_addr.s_addr = inet_addr(nei->second->getNextHop().c_str());
 			// sent.insert(pair<string, int>(j->second->getNextHop() ,j->second->getCost() ));
 		}
@@ -195,7 +199,18 @@ void updateRoutingTable(string str){
 		if(line.size() > 0){
 			if(line[0] == "Update"){
 				from = line[1];
-				// cout<<"routingupdate: "<<line[2]<<endl; //seg fault
+				cout<<"routingupdate: "<<line[2]<<endl; //seg fault
+				//detect link failure.
+				map<string, int>::iterator myIt = linktrack.find(from);
+				if (myIt != linktrack.end() ){
+					myIt->second = stoi(line[2]);
+				}
+				for (map<string, int>::iterator i = linktrack.begin() ; i != linktrack.end() ; i++){
+					if(i->second+3 < stoi(line[2]))
+						cout<<"Link failure found :<"+i->first+"> !- <"+myIP+">\n";
+				
+				}
+			
 			}
 			else{
 				map<string, Entry*>::iterator ite = routingtable.find(line[0]);
