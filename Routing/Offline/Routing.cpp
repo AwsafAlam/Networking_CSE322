@@ -7,12 +7,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <iostream>
-//#include "Entry.h"
 
 using namespace std;
 
 #define INF 999999
 string myIP;
+int clk = 0;
 
 class Entry
 {
@@ -42,7 +42,8 @@ void showRoutingTable(){
 	}
 }
 
-void sendRoutingUpdates(){
+void sendRoutingUpdates(string str){
+	clk++;
 	
 	struct sockaddr_in client_address;
 	struct sockaddr_in server_address;
@@ -58,7 +59,7 @@ void sendRoutingUpdates(){
 	
 	for (map<string, Entry*>::iterator j = routingtable.begin() ; j != routingtable.end() ; j++){
 
-		string tmp = "Update-"+myIP+"\n";
+		string tmp = "Update-"+myIP+"-"+to_string(clk)+"\n";
 
 		server_address.sin_family = AF_INET;
 		server_address.sin_port = htons(4747);
@@ -87,37 +88,39 @@ void sendRoutingUpdates(){
 
 void updateRoutingTable(string str){
 	string from , eachline;
-			istringstream l(str);
+	istringstream l(str);
 
-			while(getline(l, eachline ))
-			{
-				//Each line
-				istringstream iss(eachline);
-				string s;
-				vector<string> line;
-				while ( getline( iss, s, '-' ) ) {
-					line.push_back(s);
-				}
-				if(line.size() > 0){
-					if(line[0] == "Update")
-						from = line[1];
-					else{
-						map<string, Entry*>::iterator ite = routingtable.find(line[0]);
-						map<string, Entry*>::iterator ite2 = routingtable.find(from);
+	while(getline(l, eachline ))
+	{
+		//Each line
+		istringstream iss(eachline);
+		string s;
+		vector<string> line;
+		while ( getline( iss, s, '-' ) ) {
+			line.push_back(s);
+		}
+		if(line.size() > 0){
+			if(line[0] == "Update"){
+				from = line[1];
+				// cout<<"clk: "<<line[2]<<endl; //seg fault
+			}
+			else{
+				map<string, Entry*>::iterator ite = routingtable.find(line[0]);
+				map<string, Entry*>::iterator ite2 = routingtable.find(from);
 
-						if (ite != routingtable.end() && ite2 != routingtable.end()){
-							int newCost = routingtable.find(from)->second->getCost() + stoi(line[2]);
-							if(newCost < ite->second->getCost()){
-								cout<<"Shorter path found.. "<<newCost<<" < "<<ite->second->getCost()<<" updating routing table"<<endl;
-								ite->second->setCost(newCost);
-								ite->second->setNextHop(ite2->second->getNextHop()); //Next hop of router to go to next
-								showRoutingTable();
-							}
-						}
+				if (ite != routingtable.end() && ite2 != routingtable.end()){
+					int newCost = routingtable.find(from)->second->getCost() + stoi(line[2]);
+					if(newCost < ite->second->getCost()){
+						cout<<"Shorter path found.. cls:"+line[2]+" "<<newCost<<" < "<<ite->second->getCost()<<" updating routing table"<<endl;
+						ite->second->setCost(newCost);
+						ite->second->setNextHop(ite2->second->getNextHop()); //Next hop of router to go to next
+						showRoutingTable();
 					}
 				}
-				
 			}
+		}
+		
+	}
 }
 
 void forwardmsg(string dst, string nexthop , string len, string msg){
@@ -183,10 +186,7 @@ int main(int argc, char *argv[]){
 		vector<string> line;
 		while ( getline( iss, s, ' ' ) ) {
 			line.push_back(s);
-			// if(line[0] == argv[1]){
-			// 	cout<<"my ip->"<<line[0]<<endl;
-			// }
-			// printf( "%s\n", s.c_str() );
+			
 		}
 		if(line[0] == argv[1]){
 			it = routingtable.find(line[1]);
@@ -229,7 +229,7 @@ int main(int argc, char *argv[]){
 		string str(buffer);
 
 		if (str.find("clk") != string::npos)
-			sendRoutingUpdates();
+			sendRoutingUpdates(str);
 		else if(str.find("show") != string::npos) //show 192.168.10.2
 			showRoutingTable();
 		else if(str.find("cost") != string::npos){
