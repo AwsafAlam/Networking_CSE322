@@ -85,6 +85,41 @@ void sendRoutingUpdates(){
 	close(sockfd);
 }
 
+void updateRoutingTable(string str){
+	string from , eachline;
+			istringstream l(str);
+
+			while(getline(l, eachline ))
+			{
+				//Each line
+				istringstream iss(eachline);
+				string s;
+				vector<string> line;
+				while ( getline( iss, s, '-' ) ) {
+					line.push_back(s);
+				}
+				if(line.size() > 0){
+					if(line[0] == "Update")
+						from = line[1];
+					else{
+						map<string, Entry*>::iterator ite = routingtable.find(line[0]);
+						map<string, Entry*>::iterator ite2 = routingtable.find(from);
+
+						if (ite != routingtable.end() && ite2 != routingtable.end()){
+							int newCost = routingtable.find(from)->second->getCost() + stoi(line[2]);
+							if(newCost < ite->second->getCost()){
+								cout<<"Shorter path found.. "<<newCost<<" < "<<ite->second->getCost()<<" updating routing table"<<endl;
+								ite->second->setCost(newCost);
+								ite->second->setNextHop(ite2->second->getNextHop()); //Next hop of router to go to next
+								showRoutingTable();
+							}
+						}
+					}
+				}
+				
+			}
+}
+
 int main(int argc, char *argv[]){
 
 	int sockfd; 
@@ -223,42 +258,41 @@ int main(int argc, char *argv[]){
 			showRoutingTable();
 		}
 		else if(str.find("Update") != string::npos){
-			//Update routing table
-			string from , eachline;
-			istringstream l(str);
-
-			while(getline(l, eachline ))
-			{
-				//Each line
-				istringstream iss(eachline);
-				string s;
-				vector<string> line;
-				while ( getline( iss, s, '-' ) ) {
-					line.push_back(s);
+			updateRoutingTable(str);
+		}
+		else if(str.find("send") != string::npos){
+			printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
+			string ip1="";
+			string ip2="";
+			string msg="";
+			for(int i= 4; i < 8 ; i++){
+				int tmp = (int) buffer[i];
+				if(tmp<0)
+					tmp+= 256;
+				ip1+=to_string(tmp);
+				if(i != 7){
+					ip1 += ".";
 				}
-				if(line.size() > 0){
-					if(line[0] == "Update")
-						from = line[1];
-					else{
-						map<string, Entry*>::iterator ite = routingtable.find(line[0]);
-						map<string, Entry*>::iterator ite2 = routingtable.find(from);
-
-						if (ite != routingtable.end() && ite2 != routingtable.end()){
-							int newCost = routingtable.find(from)->second->getCost() + stoi(line[2]);
-							if(newCost < ite->second->getCost()){
-								cout<<"Shorter path found.. "<<newCost<<" < "<<ite->second->getCost()<<" updating routing table"<<endl;
-								//routingtable.erase (it);
-								//routingtable.insert(pair<string, Entry*>(line[0].c_str(), new Entry(line[1].c_str(),stoi(line[2]))));
-								ite->second->setCost(newCost);
-								ite->second->setNextHop(ite2->second->getNextHop()); //Next hop of router to go to next
-								showRoutingTable();
-							}
-						}
-					}
+			}
+			for(int i= 8; i < 12 ; i++){
+				int tmp = (int) buffer[i];
+				if(tmp<0) //returns unsigned char from python
+					tmp+= 256;
+				ip2+=to_string(tmp);
+				if(i != 11){
+					ip2 += ".";
 				}
-				
 			}
 			
+			int len = (int) buffer[12];
+			for(int i = 14 ; i< bytes_received ; i++){
+				msg += buffer[i];
+			}
+
+			cout<<"Sending from <"<<ip1<<"> to <"<<ip2<<" len:"<<len<<" msg:"<<msg<<endl;
+		}
+		else{
+			printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
 		}
 		// 	showRoutingTable();
 		// else if(str.find("show") != string::npos)
@@ -266,30 +300,6 @@ int main(int argc, char *argv[]){
 		
 	}
 
-/*
-	server_address.sin_family = AF_INET;
-	server_address.sin_port = htons(4747);
-	server_address.sin_addr.s_addr = inet_addr("192.168.10.100");
-
-	client_address.sin_family = AF_INET;
-	client_address.sin_port = htons(4747);
-	client_address.sin_addr.s_addr = inet_addr(argv[1]);
-
-	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-	bind_flag = bind(sockfd, (struct sockaddr*) &server_address, sizeof(sockaddr_in));
-	bind_flag2 = bind(sockfd, (struct sockaddr*) &client_address, sizeof(sockaddr_in));
-
-	printf("Server running...\n");
-	while(true){
-		bytes_received = recvfrom(sockfd, buffer, 1024, 0, (struct sockaddr*) &client_address, &addrlen);
-		printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
-		cin>>buffer;
-		if(!strcmp(buffer, "shutdown")) break;
-		sendto(sockfd, buffer, 1024, 0, (struct sockaddr*) &server_address, sizeof(sockaddr_in));
-	
-	}
-	close(sockfd);
-*/
 
 	return 0;
 
