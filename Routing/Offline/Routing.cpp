@@ -134,7 +134,7 @@ void forwardmsg(string dst, string nexthop , string len, string msg){
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 	bind_flag = bind(sockfd, (struct sockaddr*) &client_address, sizeof(sockaddr_in));
 	
-	string tmp = "frwd "+dst+" "+len+" "+msg;
+	string tmp = "frwd-"+dst+"-"+len+"-"+msg;
 
 	server_address.sin_family = AF_INET;
 	server_address.sin_port = htons(4747);
@@ -290,7 +290,7 @@ int main(int argc, char *argv[]){
 			updateRoutingTable(str);
 		}
 		else if(str.find("send") != string::npos){ //send 192.168.10.1 192.168.10.4 5 hello
-			printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
+			// printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
 			string ip1="";
 			string ip2="";
 			string msg="";
@@ -332,7 +332,7 @@ int main(int argc, char *argv[]){
 			istringstream iss(str);
 			string s;
 			vector<string> line;
-			while ( getline( iss, s, ' ') ) {
+			while ( getline( iss, s, '-') ) {
 				line.push_back(s);
 			}
 			string msg = "";
