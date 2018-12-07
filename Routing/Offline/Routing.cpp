@@ -321,7 +321,11 @@ int main(int argc, char *argv[]){
 			cout<<"Sending from <"<<ip1<<"> to <"<<ip2<<"> len:"<<len<<" msg:"<<msg<<endl;
 			it = routingtable.find(ip2);
 			if(it != routingtable.end() && ip1 == myIP){
-				forwardmsg(ip2 , it->second->getNextHop() , to_string(len) , msg);
+				if(it->second->getCost() != INF)
+					forwardmsg(ip2 , it->second->getNextHop() , to_string(len) , msg);
+				else
+					cout<<msg<<" packet cannot be sent\n";
+
 			}
 			else
 				cout<<"IP not found in routing table\n";		
@@ -350,7 +354,10 @@ int main(int argc, char *argv[]){
 			
 				it = routingtable.find(line[1]);
 				if(it != routingtable.end()){
-					forwardmsg(line[1] ,it->second->getNextHop() ,line[2] , msg);
+					if(it->second->getCost() != INF)
+						forwardmsg(line[1] ,it->second->getNextHop() ,line[2] , msg);
+					else
+						cout<<msg<<" packet cannot be sent\n";
 				}
 				else
 					cout<<"IP not found in routing table\n";		
