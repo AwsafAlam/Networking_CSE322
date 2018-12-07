@@ -120,6 +120,35 @@ void updateRoutingTable(string str){
 			}
 }
 
+void forwardmsg(string dst, string nexthop , string len, string msg){
+	
+	struct sockaddr_in client_address;
+	struct sockaddr_in server_address;
+	int sockfd; 
+	int bind_flag;
+
+	client_address.sin_family = AF_INET;
+	client_address.sin_port = htons(4747);
+	client_address.sin_addr.s_addr = inet_addr(myIP.c_str());
+	
+	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	bind_flag = bind(sockfd, (struct sockaddr*) &client_address, sizeof(sockaddr_in));
+	
+	string tmp = "frwd "+dst+" "+len+" "+msg;
+
+	server_address.sin_family = AF_INET;
+	server_address.sin_port = htons(4747);
+	server_address.sin_addr.s_addr = inet_addr(nexthop.c_str());
+	int n = tmp.length();  
+	
+	char buffer[n+1];  
+	strcpy(buffer, tmp.c_str());
+	sendto(sockfd, buffer, n, 0, (struct sockaddr*) &server_address, sizeof(sockaddr_in));
+	close(sockfd);
+	cout<<msg<<" packet forwarded to "<<nexthop<<endl;
+
+}
+
 int main(int argc, char *argv[]){
 
 	int sockfd; 
@@ -260,7 +289,7 @@ int main(int argc, char *argv[]){
 		else if(str.find("Update") != string::npos){
 			updateRoutingTable(str);
 		}
-		else if(str.find("send") != string::npos){
+		else if(str.find("send") != string::npos){ //send 192.168.10.1 192.168.10.4 5 hello
 			printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
 			string ip1="";
 			string ip2="";
@@ -289,7 +318,44 @@ int main(int argc, char *argv[]){
 				msg += buffer[i];
 			}
 
-			cout<<"Sending from <"<<ip1<<"> to <"<<ip2<<" len:"<<len<<" msg:"<<msg<<endl;
+			cout<<"Sending from <"<<ip1<<"> to <"<<ip2<<"> len:"<<len<<" msg:"<<msg<<endl;
+			it = routingtable.find(ip2);
+			if(it != routingtable.end() && ip1 == myIP){
+				forwardmsg(ip2 , it->second->getNextHop() , to_string(len) , msg);
+			}
+			else
+				cout<<"IP not found in routing table\n";		
+
+		}
+		else if(str.find("frwd") != string::npos){
+			printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
+			istringstream iss(str);
+			string s;
+			vector<string> line;
+			while ( getline( iss, s, ' ') ) {
+				line.push_back(s);
+			}
+			string msg = "";
+			for(int i = 0 ; i< stoi(line[2]) ; i++){
+				msg += line[3].front();
+				line[3].erase(line[3].begin() , line[3].begin()+1);
+			}
+			// line[3].substr(stoi(line[2]));
+
+			cout<<"Got forwarding msg: ->"<<msg<<" len->"<<line[2]<<" to:"<<line[1]<<endl;
+			if(line[1] == myIP){
+				cout<<msg<<" packet reached destination\n";
+			}
+			else{
+			
+				it = routingtable.find(line[1]);
+				if(it != routingtable.end()){
+					forwardmsg(line[1] ,it->second->getNextHop() ,line[2] , msg);
+				}
+				else
+					cout<<"IP not found in routing table\n";		
+			
+			}
 		}
 		else{
 			printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
