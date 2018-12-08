@@ -199,7 +199,7 @@ void updateRoutingTable(string str){
 		if(line.size() > 0){
 			if(line[0] == "Update"){
 				from = line[1];
-				cout<<"routingupdate: "<<line[2]<<endl; //seg fault
+				cout<<"update from: "+from+" clk:"<<line[2]<<endl; //seg fault
 				//detect link failure.
 				map<string, int>::iterator myIt = linktrack.find(from);
 				if (myIt != linktrack.end() ){
