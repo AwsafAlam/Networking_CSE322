@@ -98,31 +98,18 @@ void initRoutingTable(string file){
 void sendRoutingUpdates(string str){
 	routingupdate++;
 	
-	// struct sockaddr_in client_address;
 	struct sockaddr_in server_address;
-	// int sockfd; 
-	// int bind_flag;
-
-	// client_address.sin_family = AF_INET;
-	// client_address.sin_port = htons(4747);
-	// client_address.sin_addr.s_addr = inet_addr(myIP.c_str());
-
-	// sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-	// bind_flag = bind(sockfd, (struct sockaddr*) &client_address, sizeof(sockaddr_in));
-
+	
 	server_address.sin_family = AF_INET;
 	server_address.sin_port = htons(4747);
 
 
 	for (map<string, int>::iterator j = neighbours.begin() ; j != neighbours.end() ; j++){
-	// for(int j =0 ; j< neighbours.size() ; j++){
+	
 		string tmp = "Update-"+myIP+"-"+to_string(routingupdate)+"\n";
 
-		// map<string, Entry*>::iterator nei = routingtable.find(neighbours[j]);
 		if( j->second != INF){
 			server_address.sin_addr.s_addr = inet_addr(j->first.c_str());
-			// server_address.sin_addr.s_addr = inet_addr(nei->second->getNextHop().c_str());
-			// sent.insert(pair<string, int>(j->second->getNextHop() ,j->second->getCost() ));
 		}
 		else
 			continue;
@@ -140,7 +127,7 @@ void sendRoutingUpdates(string str){
 		strcpy(buffer, tmp.c_str());
 		sendto(sockfd, buffer, n, 0, (struct sockaddr*) &server_address, sizeof(sockaddr_in));
 	}
-	// close(sockfd);
+
 }
 
 void updateRoutingTable(string str){
@@ -159,27 +146,56 @@ void updateRoutingTable(string str){
 		if(line.size() > 0){
 			if(line[0] == "Update"){
 				from = line[1];
-				cout<<"update from: "+from+" clk:"<<line[2]<<endl; //seg fault
+				// cout<<"update from: "+from+" clk:"<<line[2]<<endl; //seg fault
 				//detect link failure.
 				map<string, int>::iterator myIt = linktrack.find(from);
 				if (myIt != linktrack.end() ){
-					myIt->second = stoi(line[2]);
+					if(myIt->second == -1){ //link down previously || link up
+						cout<<"Link up :<"+myIt->first+"> -- <"+myIP+">\n";
+						map<string, Entry*>::iterator it = routingtable.find(myIt->first);
+						map<string, int>::iterator it2 = neighbours.find(myIt->first);
+
+						it->second->setNextHop(myIt->first);
+						it->second->setCost(it2->second);
+					}
+					myIt->second = stoi(line[2]); //link trsack stores the current clk
 				}
 				for (map<string, int>::iterator i = linktrack.begin() ; i != linktrack.end() ; i++){
-					if(i->second+3 < stoi(line[2]))
+
+					if(i->second == -1){ //link already down 192.168.10.1 192.168.10.2
+						// cout<<"Link down :<"+i->first+"> !- <"+myIP+">\n";
+
+					}
+					else if( i->second+3 < stoi(line[2])){
 						cout<<"Link failure found :<"+i->first+"> !- <"+myIP+">\n";
+						i->second = -1;
+						map<string, Entry*>::iterator notReachable = routingtable.find(i->first);
+						notReachable->second->setNextHop(i->first);
+						notReachable->second->setCost(INF);
+						for (map<string, Entry*>::iterator j = routingtable.begin() ; j != routingtable.end() ; j++)
+							if(j->second->getNextHop() == i->first){ //next hop is unreachable
+								j->second->setCost(INF);
+							}
+						}
+					}
 				
 				}
 			
-			}
 			else{
 				map<string, Entry*>::iterator ite = routingtable.find(line[0]);
 				map<string, Entry*>::iterator ite2 = routingtable.find(from);
 
 				if (ite != routingtable.end() && ite2 != routingtable.end()){
+					//if next hop is down check
+					// map<string, int>::iterator myIt = linktrack.find(ite->second->getNextHop());
+					// if (myIt != linktrack.end() && myIt->second == -1){ //when link is down, change next hop.(to reachable)
+					// 	ite->second->setNextHop(routingtable.find(myIP)->second->getNextHop());//next hop of own IP
+					// 	ite->second->setCost()
+					// }
+
 					int newCost = routingtable.find(from)->second->getCost() + stoi(line[2]);
 					if(newCost < ite->second->getCost()){
-						cout<<"Shorter path found.. cls:"+line[2]+" "<<newCost<<" < "<<ite->second->getCost()<<" updating routing table"<<endl;
+						cout<<"Shorter path found.. cost:"+line[2]+" "<<newCost<<" < "<<ite->second->getCost()<<" updating routing table"<<endl;
 						ite->second->setCost(newCost);
 						ite->second->setNextHop(ite2->second->getNextHop()); //Next hop of router to go to next
 						showRoutingTable();
@@ -187,23 +203,15 @@ void updateRoutingTable(string str){
 				}
 			}
 		}
-		
+
 	}
+		
 }
+
 
 void forwardmsg(string dst, string nexthop , string len, string msg){
 	
-	struct sockaddr_in client_address;
 	struct sockaddr_in server_address;
-	int sockfd; 
-	int bind_flag;
-
-	client_address.sin_family = AF_INET;
-	client_address.sin_port = htons(4747);
-	client_address.sin_addr.s_addr = inet_addr(myIP.c_str());
-	
-	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-	bind_flag = bind(sockfd, (struct sockaddr*) &client_address, sizeof(sockaddr_in));
 	
 	string tmp = "frwd-"+dst+"-"+len+"-"+msg;
 
@@ -215,7 +223,7 @@ void forwardmsg(string dst, string nexthop , string len, string msg){
 	char buffer[n+1];  
 	strcpy(buffer, tmp.c_str());
 	sendto(sockfd, buffer, n, 0, (struct sockaddr*) &server_address, sizeof(sockaddr_in));
-	close(sockfd);
+	// close(sockfd);
 	cout<<msg<<" packet forwarded to "<<nexthop<<endl;
 
 }
@@ -256,7 +264,7 @@ int main(int argc, char *argv[]){
 		string str(buffer);
 
 		if (str.find("clk") != string::npos){
-			printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
+			// printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
 			sendRoutingUpdates(str);
 		}
 		else if(str.find("show") != string::npos) //show 192.168.10.2
@@ -298,6 +306,10 @@ int main(int argc, char *argv[]){
 					it->second->setNextHop(ip2.c_str());
 
 				}
+				map<string, int>::iterator it2 = neighbours.find(ip2);
+				if(it2 != neighbours.end()){
+					it2->second = val;
+				}
 				
 			}
 			else{
@@ -310,7 +322,10 @@ int main(int argc, char *argv[]){
 					it->second->setNextHop(ip1.c_str());
 
 				}
-			
+				map<string, int>::iterator it2 = neighbours.find(ip1); //updating cost in neighbour table
+				if(it2 != neighbours.end()){
+					it2->second = val;
+				}	
 			}
 			cout<<"Link cost updated"<<endl;
 			showRoutingTable();
