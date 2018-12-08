@@ -35,6 +35,7 @@ Entry::Entry(string n , int c){
 map<string, Entry*> routingtable;
 map<string,int> neighbours;
 map<string,int> linktrack;
+int sockfd; 
 
 
 void showRoutingTable(){
@@ -93,71 +94,30 @@ void initRoutingTable(string file){
 	}
 }
 
-// void sendRoutingUpdates(string str){
-// 	routingupdate++;
-	
-// 	struct sockaddr_in client_address;
-// 	struct sockaddr_in server_address;
-// 	int sockfd; 
-// 	int bind_flag;
-
-// 	client_address.sin_family = AF_INET;
-// 	client_address.sin_port = htons(4747);
-// 	client_address.sin_addr.s_addr = inet_addr(myIP.c_str());
-// 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-// 	bind_flag = bind(sockfd, (struct sockaddr*) &client_address, sizeof(sockaddr_in));
-// 	map<string,int> sent;
-	
-// 	for (map<string, Entry*>::iterator j = routingtable.begin() ; j != routingtable.end() ; j++){
-
-// 		string tmp = "Update-"+myIP+"-"+to_string(routingupdate)+"\n";
-
-// 		server_address.sin_family = AF_INET;
-// 		server_address.sin_port = htons(4747);
-// 		if(sent.find(j->second->getNextHop()) == sent.end()){
-// 			server_address.sin_addr.s_addr = inet_addr(j->second->getNextHop().c_str());
-// 			sent.insert(pair<string, int>(j->second->getNextHop() ,j->second->getCost() ));
-// 		}
-// 		else
-// 			continue;
-		
-// 		for (map<string, Entry*>::iterator i = routingtable.begin() ; i != routingtable.end() ; i++)
-// 		{
-// 			if(i->second->getCost() != INF){
-// 				tmp += i->first +"-"+i->second->getNextHop()+"-"+to_string(i->second->getCost())+"\n"; 
-// 			}
-// 			// cout<<i->first<<" - "<<i->second->getNextHop()<<" - "<<i->second->getCost()<<endl;
-// 		}
-// 		int n = tmp.length();  
-		
-// 		char buffer[n+1];  
-// 		strcpy(buffer, tmp.c_str());
-// 		sendto(sockfd, buffer, n, 0, (struct sockaddr*) &server_address, sizeof(sockaddr_in));
-// 	}
-// 	close(sockfd);
-// }
 
 void sendRoutingUpdates(string str){
 	routingupdate++;
 	
-	struct sockaddr_in client_address;
+	// struct sockaddr_in client_address;
 	struct sockaddr_in server_address;
-	int sockfd; 
-	int bind_flag;
+	// int sockfd; 
+	// int bind_flag;
 
-	client_address.sin_family = AF_INET;
-	client_address.sin_port = htons(4747);
-	client_address.sin_addr.s_addr = inet_addr(myIP.c_str());
-	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-	bind_flag = bind(sockfd, (struct sockaddr*) &client_address, sizeof(sockaddr_in));
-	// map<string,int> sent;
-	
+	// client_address.sin_family = AF_INET;
+	// client_address.sin_port = htons(4747);
+	// client_address.sin_addr.s_addr = inet_addr(myIP.c_str());
+
+	// sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	// bind_flag = bind(sockfd, (struct sockaddr*) &client_address, sizeof(sockaddr_in));
+
+	server_address.sin_family = AF_INET;
+	server_address.sin_port = htons(4747);
+
+
 	for (map<string, int>::iterator j = neighbours.begin() ; j != neighbours.end() ; j++){
 	// for(int j =0 ; j< neighbours.size() ; j++){
 		string tmp = "Update-"+myIP+"-"+to_string(routingupdate)+"\n";
 
-		server_address.sin_family = AF_INET;
-		server_address.sin_port = htons(4747);
 		// map<string, Entry*>::iterator nei = routingtable.find(neighbours[j]);
 		if( j->second != INF){
 			server_address.sin_addr.s_addr = inet_addr(j->first.c_str());
@@ -180,7 +140,7 @@ void sendRoutingUpdates(string str){
 		strcpy(buffer, tmp.c_str());
 		sendto(sockfd, buffer, n, 0, (struct sockaddr*) &server_address, sizeof(sockaddr_in));
 	}
-	close(sockfd);
+	// close(sockfd);
 }
 
 void updateRoutingTable(string str){
@@ -199,7 +159,7 @@ void updateRoutingTable(string str){
 		if(line.size() > 0){
 			if(line[0] == "Update"){
 				from = line[1];
-				// cout<<"update from: "+from+" clk:"<<line[2]<<endl; //seg fault
+				cout<<"update from: "+from+" clk:"<<line[2]<<endl; //seg fault
 				//detect link failure.
 				map<string, int>::iterator myIt = linktrack.find(from);
 				if (myIt != linktrack.end() ){
@@ -262,10 +222,8 @@ void forwardmsg(string dst, string nexthop , string len, string msg){
 
 int main(int argc, char *argv[]){
 
-	int sockfd; 
 	int bind_flag;
-	int bind_flag2;
-
+	
 	int bytes_received;
 	socklen_t addrlen;
 	char buffer[1024];
@@ -297,8 +255,10 @@ int main(int argc, char *argv[]){
 		// printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
 		string str(buffer);
 
-		if (str.find("clk") != string::npos)
+		if (str.find("clk") != string::npos){
+			printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
 			sendRoutingUpdates(str);
+		}
 		else if(str.find("show") != string::npos) //show 192.168.10.2
 			showRoutingTable();
 		else if(str.find("cost") != string::npos){
@@ -356,6 +316,7 @@ int main(int argc, char *argv[]){
 			showRoutingTable();
 		}
 		else if(str.find("Update") != string::npos){
+			// printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
 			updateRoutingTable(str);
 		}
 		else if(str.find("send") != string::npos){ //send 192.168.10.1 192.168.10.4 5 hello
@@ -436,9 +397,7 @@ int main(int argc, char *argv[]){
 		else{
 			printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
 		}
-		// 	showRoutingTable();
-		// else if(str.find("show") != string::npos)
-		// 	showRoutingTable();
+		
 		
 	}
 
