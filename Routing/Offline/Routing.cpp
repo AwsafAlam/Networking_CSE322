@@ -189,7 +189,7 @@ void updateRoutingTable(string str){
 					if(ite->second->getNextHop() == from && line[1] != myIP){
 						int w = neighbours.find(from)->second;
 						ite->second->setCost(w+ stoi(line[2]));
-						showRoutingTable();
+						// showRoutingTable();
 					}
 					//Case 2 (Bellman Ford)
 					int costtoSender = ite2->second->getCost();
@@ -198,25 +198,37 @@ void updateRoutingTable(string str){
 						cout<<"Shorter From: "+from+" cost:"+line[2]+" "<<newCost<<" < "<<ite->second->getCost()<<" updating routing table"<<endl;
 						ite->second->setCost(newCost);
 						ite->second->setNextHop(ite2->second->getNextHop()); //Next hop of router to go to next
-						showRoutingTable();
+						// showRoutingTable();
 					}
-					
+					//Case 3 (check with neighbour cost)
+					int edgeCost;
+					if(neighbours.find(from) != neighbours.end())
+						edgeCost = neighbours.find(from)->second;
+					else
+						continue; 
+					if(edgeCost < ite2->second->getCost()){
+						ite2->second->setCost(edgeCost);
+						ite2->second->setNextHop(from);
+					}
+						
 					
 				}
+				// for (map<string, Entry*>::iterator j = routingtable.begin() ; j != routingtable.end() ; j++){
+			
+				// int edgeCost;
+				// if(neighbours.find(from) != neighbours.end())
+				// 	edgeCost = neighbours.find(from)->second;
+				// else
+				// 	continue; 
+				// if(edgeCost < ite2->second->getCost()){
+				// 	ite2->second->setCost(edgeCost);
+				// 	ite2->second->setNextHop(from);
+				// }
+				// // }
+
 			}
 
-			for (map<string, Entry*>::iterator j = routingtable.begin() ; j != routingtable.end() ; j++){
-				
-				int edgeCost;
-				if(neighbours.find(j->first) != neighbours.end())
-					edgeCost = neighbours.find(j->first)->second;
-				else
-					continue; 
-				if(edgeCost < j->second->getCost()){
-					j->second->setCost(edgeCost);
-					j->second->setNextHop(j->first);
-				}
-			}
+			
 		}
 
 	}
