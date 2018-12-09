@@ -179,8 +179,7 @@ void updateRoutingTable(string str){
 						}
 					}
 				
-				}
-			
+			}
 			else{
 				map<string, Entry*>::iterator ite = routingtable.find(line[0]);
 				map<string, Entry*>::iterator ite2 = routingtable.find(from);
@@ -192,13 +191,17 @@ void updateRoutingTable(string str){
 					// 	ite->second->setNextHop(routingtable.find(myIP)->second->getNextHop());//next hop of own IP
 					// 	ite->second->setCost()
 					// }
-
-					int newCost = routingtable.find(from)->second->getCost() + stoi(line[2]);
+					int costtoSender = routingtable.find(from)->second->getCost();
+					int newCost = costtoSender + stoi(line[2]);
 					if(newCost < ite->second->getCost()){
 						cout<<"Shorter path found.. cost:"+line[2]+" "<<newCost<<" < "<<ite->second->getCost()<<" updating routing table"<<endl;
 						ite->second->setCost(newCost);
 						ite->second->setNextHop(ite2->second->getNextHop()); //Next hop of router to go to next
 						showRoutingTable();
+					}
+					if(newCost > ite->second->getCost() && ite->second->getNextHop() == from){
+						cout<<"Cost Updated "<<newCost<<" < "<<ite->second->getCost()<<" updating routing table"<<endl;
+						ite->second->setCost(newCost);
 					}
 				}
 			}
@@ -377,7 +380,7 @@ int main(int argc, char *argv[]){
 
 		}
 		else if(str.find("frwd") != string::npos){
-			printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
+			// printf("[%s:%d]: %s\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port), buffer);
 			istringstream iss(str);
 			string s;
 			vector<string> line;
