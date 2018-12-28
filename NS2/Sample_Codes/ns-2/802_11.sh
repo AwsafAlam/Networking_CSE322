@@ -1,10 +1,4 @@
-# cd /
-# cd home
-# cd ubuntu
-# cd ns2\ programs/
-# 
-#		CHANGE PATH IN 4 PLACES *******************************************************
-# 
+
 #INPUT: output file AND number of iterations
 output_file_format="multi_radio_802_11_random"
 iteration_float=5.0
@@ -108,7 +102,7 @@ do
 
 
 	echo "$val"
-#                            CHNG PATH		3		######################################################
+
 done < multi_radio_802_11_random.out
 # done < /home/ubuntu/ns2\ programs/raw_data/multi_radio_802_11_random.out
 
@@ -124,9 +118,6 @@ done
 
 enr_nj=$(echo "scale=2; $energy_efficiency*1000000000.0" | bc)
 
-#dir="/home/ubuntu/ns2\ programs/raw_data/"
-#tdir="/home/ubuntu/ns2\ programs/multi-radio\ random\ topology/"
-#                            CHNG PATH		4		######################################################
 # dir="/home/ubuntu/ns2_data/multi_radio_random_topology/"
 dir=""
 under="_"

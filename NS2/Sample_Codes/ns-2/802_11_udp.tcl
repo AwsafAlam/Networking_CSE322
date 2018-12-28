@@ -396,9 +396,8 @@ proc finish {} {
 	close $tracefd
 	close $namtrace
 	close $topofile
-	close $nm
-	puts "finishing file operations"
-	exec nam out.nam &
+	
+	# exec nam out.nam &
 	exit 0
 }
 

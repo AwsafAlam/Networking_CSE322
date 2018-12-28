@@ -14,12 +14,12 @@ set ylabel "Force (kN)"
 # set xr [0.0:0.022]
 # set yr [0:325]
 
-# set terminal pdf
-# set output "Mydata.pdf"
+set terminal pdf
+set output "Mydata.pdf"
 plot  "data.txt" using 1:2  with lines title "Column" lw 2,\
 "data.txt" using 1:3 title 'Beam' with linespoints
 
-# set terminal png size 600,400
-# set output "Mydata.png"
-# plot  "data.txt" using 1:2  with lines title "Column" lw 2,\
-# "data.txt" using 1:3 title 'Beam' with linespoints
+set terminal png size 600,400
+set output "Mydata.png"
+plot  "data.txt" using 1:2  with lines title "Column" lw 2,\
+"data.txt" using 1:3 title 'Beam' with linespoints
