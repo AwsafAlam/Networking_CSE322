@@ -166,7 +166,7 @@ if {$num_sink_flow > 0} { ;#sink
 	set sink_start_gap [expr 1.0/$num_sink_flow]
 }
 
-#FULL CHNG
+#FULL CHNG position of nodes
 set x_start [expr $x_dim/($num_col*2)];
 set y_start [expr $y_dim/($num_row*2)];
 set i 0;
