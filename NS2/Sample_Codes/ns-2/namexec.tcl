@@ -1,0 +1,1 @@
+exec nam out.nam &

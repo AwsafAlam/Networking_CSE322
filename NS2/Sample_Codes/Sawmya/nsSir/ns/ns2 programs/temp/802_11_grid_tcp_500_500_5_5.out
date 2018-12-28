@@ -1,0 +1,4 @@
+Throughput:       161845.33 AverageDelay:         0.33193 
+Sent Packets:          323.00 Received Packets:          290.00 Dropped Packets:           24.00 
+PacketDeliveryRatio:      89.78 PacketDropRatio:       7.43
+Total time:   15.00000
