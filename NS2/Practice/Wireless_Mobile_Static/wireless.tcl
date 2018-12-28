@@ -55,6 +55,7 @@ $ns trace-all $tracefd ;# Done creation of trace file
 set namtrace [open $nm w]
 $ns namtrace-all-wireless $namtrace $x_dim $y_dim ;# Creation of nam
 
+$ns use-newtrace ;# to include new trace format. More details in docs.
 # Step 4 - Topology
 set topo    [new Topography]
 $topo load_flatgrid $x_dim $y_dim ;# FLATGRID MEANS NO z axis. So,  z axis = 0.0. The nodes are moving on a (2D)
