@@ -1,5 +1,5 @@
-
 #INPUT: output file AND number of iterations
+
 output_file_format="multi_radio_802_11_random"
 iteration_float=5.0
 start=5
@@ -35,28 +35,23 @@ do
 #################START AN ITERATION
 echo "                             EXECUTING $(($i+1)) th ITERATION"
 
-
-#                            CHNG PATH		1		######################################################
-ns 802_11_udp.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
-# ns /home/ubuntu/ns2\ programs/multi-radio\ random\ topology/802_11_udp.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
+ns 802_15_4.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
+# ns 802_11_udp.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
 echo "SIMULATION COMPLETE. BUILDING STAT......"
-#awk -f rule_th_del_enr_tcp.awk 802_11_grid_tcp_with_energy_random_traffic.tr > math_model1.out
-#                            CHNG PATH		2		######################################################
+
 awk -f rule_wireless_udp.awk multi_radio_802_11_random.tr > multi_radio_802_11_random.out
-# awk -f /home/ubuntu/ns2\ programs/multi-radio\ random\ topology/rule_wireless_udp.awk /home/ubuntu/ns2\ programs/raw_data/multi_radio_802_11_random.tr > /home/ubuntu/ns2\ programs/raw_data/multi_radio_802_11_random.out
 
 ok=1;
 while read val
 do
-#	l=$(($l+$inc))
 	l=$(($l+1))
-
 
 	if [ "$l" == "1" ]; then
 		if [ `echo "if($val > 0.0) 1; if($val <= 0.0) 0" | bc` -eq 0 ]; then
 			ok=0;
 			break
-			fi	
+		fi	
+	# calculating throughput -> Scale=5 represents 5 decimal places, | bc is a inline-commandd-line-calculator
 		thr=$(echo "scale=5; $thr+$val/$iteration_float" | bc)
 #		echo -ne "throughput: $thr "
 	elif [ "$l" == "2" ]; then
@@ -110,9 +105,12 @@ if [ "$ok" -eq "0" ]; then
 	l=0;
 	ok=1;
 	continue
-	fi
+fi
 i=$(($i+1))
 l=0
+
+# value of single iteration obtained here.
+
 #################END AN ITERATION
 done
 
