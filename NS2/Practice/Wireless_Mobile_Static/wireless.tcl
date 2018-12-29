@@ -56,6 +56,7 @@ set namtrace [open $nm w]
 $ns namtrace-all-wireless $namtrace $x_dim $y_dim ;# Creation of nam
 
 $ns use-newtrace ;# to include new trace format. More details in docs.
+
 # Step 4 - Topology
 set topo    [new Topography]
 $topo load_flatgrid $x_dim $y_dim ;# FLATGRID MEANS NO z axis. So,  z axis = 0.0. The nodes are moving on a (2D)
@@ -78,7 +79,7 @@ $ns node-config -adhocRouting $val(rp) -llType $val(ll) \
      -channel  $ch1 -topoInstance $topo \
      -agentTrace ON -routerTrace OFF\
      -macTrace ON \
-     -movementTrace OFF \
+     -movementTrace ON \
 			 -energyModel $val(energymodel_11) \
 			 -idlePower $val(idlepower_11) \
 			 -rxPower $val(rxpower_11) \
@@ -186,7 +187,7 @@ proc finish {} {
 	close $namtrace
 	close $topofile
 	
-	exec nam $nm &
+	# exec nam $nm &
 	exit 0
 }
 # Run Simulation

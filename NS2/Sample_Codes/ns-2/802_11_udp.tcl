@@ -31,7 +31,7 @@ set val(transitiontime_11) 2.36			;#LEAP (802.11g)
 #set val(transitionpower_11) 200e-3		;#Stargate (802.11b)	??????????????????????????????/
 #set val(transitiontime_11) 3			;#Stargate (802.11b)
 
-#puts "$MAC/802_11.dataRate_"
+#puts "$MAC/802_11.dataRate_ 11Mb"
 Mac/802_11 set dataRate_ 11Mb
 
 #CHNG
@@ -59,7 +59,7 @@ set tcp_sink Agent/Null
 # FACK:		Agent/TCP/Fack		Agent/TCPSink
 # LINUX:	Agent/TCP/Linux		Agent/TCPSink
 
-#	http://research.cens.ucla.edu/people/estrin/resources/conferences/2007may-Stathopoulos-Lukac-Dual_Radio.pdf
+#		
 
 #set frequency_ 2.461e+9
 #Phy/WirelessPhy set Rb_ 11*1e6            ;# Bandwidth
