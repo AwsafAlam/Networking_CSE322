@@ -95,7 +95,7 @@ BEGIN	{
 	}
 
 	if( 0 && temp <=25 && energy == "[energy" && event == "D") {
-		printf("%s %15.5f %d %s %15.5f %15.5f %15.5f %15.5f %15.5f \n", event, time, idPacket, energy, total_energy, idle_energy_consumption, sleep_energy_consumption, transmit_energy_consumption, receive_energy_consumption);
+		# printf("%s %15.5f %d %s %15.5f %15.5f %15.5f %15.5f %15.5f \n", event, time, idPacket, energy, total_energy, idle_energy_consumption, sleep_energy_consumption, transmit_energy_consumption, receive_energy_consumption);
 		temp+=1;
 	}
 
@@ -193,19 +193,19 @@ for(i=0; i<max_node;i++) {
 	# printf("%15.5f\n%15.5f\n%15.5f\n%15.5f\n%15.0f\n%15.9f\n", total_energy_consumption, avg_energy_per_bit, avg_energy_per_byte, avg_energy_per_packet, total_retransmit, rEnergyEfficeincy);
     # Printing individually
     # printf( "Throughput: %15.2f",rThroughput);
-    printf( "AverageDelay: %15.5f",rAverageDelay);
-    printf( "SentPackets: %15.2f",nSentPackets);
-    printf( "ReceivedPackets: %15.2f",nReceivedPackets);
-    printf( "DropPackets: %15.2f",nDropPackets);
-    printf( "PacketDeliveryRatio: %10.2f",rPacketDeliveryRatio);
-    printf( "PacketDropRatio: %10.2f",rPacketDropRatio);
+    printf( "AverageDelay: %15.5f\n",rAverageDelay);
+    printf( "SentPackets: %15.2f\n",nSentPackets);
+    printf( "ReceivedPackets: %15.2f\n",nReceivedPackets);
+    printf( "DropPackets: %15.2f\n",nDropPackets);
+    printf( "PacketDeliveryRatio: %10.2f\n",rPacketDeliveryRatio);
+    printf( "PacketDropRatio: %10.2f\n",rPacketDropRatio);
     
     printf("**********************\nEnergy:\n");
-    printf( "Throughput: %15.2f",total_energy_consumption);
-    printf( "AverageDelay: %15.5f",avg_energy_per_bit);
-    printf( "SentPackets: %15.2f",avg_energy_per_byte);
-    printf( "ReceivedPackets: %15.2f",avg_energy_per_packet);
-    printf( "DropPackets: %15.2f",total_retransmit);
-    printf( "PacketDeliveryRatio: %10.2f",rEnergyEfficeincy);
+    printf( "Total Energy Consumption: %15.2f\n",total_energy_consumption);
+    printf( "avg_energy_per_bit: %15.5f\n",avg_energy_per_bit);
+    printf( "avg_energy_per_byte: %15.2f\n",avg_energy_per_byte);
+    printf( "avg_energy_per_packet: %15.2f\n",avg_energy_per_packet);
+    printf( "total_retransmit: %15.2f\n",total_retransmit);
+    printf( "Energy Efficeincy: %10.2f\n",rEnergyEfficeincy);
     
 }

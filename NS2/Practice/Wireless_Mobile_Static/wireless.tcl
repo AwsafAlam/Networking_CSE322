@@ -178,7 +178,6 @@ $ns at 30.0 "finish"
 
 ## Finish
 proc finish {} {
-    puts "finishing"
 	global ns tracefd namtrace topofile nm
 	#global ns_ topofile
 
@@ -186,6 +185,7 @@ proc finish {} {
 	close $tracefd
 	close $namtrace
 	close $topofile
+    puts "finished closing files"
 	
 	# exec nam $nm &
 	exit 0
