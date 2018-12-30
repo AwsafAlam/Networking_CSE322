@@ -140,6 +140,7 @@ for {set i 0} {$i < [expr $num_row*$num_col]} {incr i} {
 
 # Step 5 - position of nodes (Only needed for wireless)
 set grid [lindex $argv 1]
+set speed [lindex $argv 3]
 
 set x_start [expr $x_dim/($num_col*2)];
 set y_start [expr $y_dim/($num_row*2)];
@@ -162,6 +163,8 @@ while {$i < $num_row } {
         $node_($m) set X_ $x_pos;
         $node_($m) set Y_ $y_pos;
         $node_($m) set Z_ 0.0
+		$ns at [expr rand()*($start_time+$time_duration)] "$node_($m) setdest [expr $x_dim - $x_pos] [expr $y_dim - $y_pos] $speed"
+
         #	puts "$m"
         puts -nonewline $topofile "$m x: [$node_($m) set X_] y: [$node_($m) set Y_] \n"
     }
@@ -176,9 +179,17 @@ puts "node creation and positioning complete"
 
 # - Any mobility ( If nodes are moving )
 # At what time, which node, at what speed?
-set speed [lindex $argv 3]
+# set speed [lindex $argv 3]
 #     Time  Node            src   dst    speed-> Node can move anywhere at any time, any speed
 # $ns at 3.0 "$node_(1) setdest 490.0 340.0 25.0"
+#
+# for {set i 0} {$i < [expr $num_row*$num_col]} {incr i} {
+
+# 	$ns at [expr rand()*$time_duration] "$node_($i) setdest [expr $i+(($num_col)*($num_row-1))] [expr $i+(($x_dim)*($y_dim-1))] $speed"
+
+# }
+
+
 
 set tcp_src Agent/TCP
 set tcp_sink Agent/TCPSink
