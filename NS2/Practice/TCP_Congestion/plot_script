@@ -1,0 +1,2 @@
+ns Congestion.tcl
+gnuplot 'plotter.plt'
