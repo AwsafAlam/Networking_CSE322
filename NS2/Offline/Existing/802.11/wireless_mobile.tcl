@@ -11,12 +11,13 @@ set x_dim 150 ; #[lindex $argv 1]
 set y_dim 150 ; #[lindex $argv 1]
 
 # Setting time duration
-set time_duration 25 ; #[lindex $argv 5] ;#50
-set start_time 50 ;#100
+set time_duration [lindex $argv 5] ;#50
+set start_time 5 ;#100
 set parallel_start_gap 1.0
 set num_parallel_flow [lindex $argv 2] ;# along column
-set extra_time 10 ;#10
+set extra_time 5 ;#10
 
+set routing_prot [lindex $argv 4]
 # (e) - protocols and models for different layers
 # A wireless environment can be modeled by configuring the protocol stack of each node.  
 

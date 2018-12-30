@@ -82,7 +82,7 @@ BEGIN {
 	}
 
 	if( 0 && temp <=25 && energy == "[energy" && event == "D") {
-		printf("%s %15.5f %d %s %15.5f %15.5f %15.5f %15.5f %15.5f \n", event, time, idPacket, energy, total_energy, idle_energy_consumption, sleep_energy_consumption, transmit_energy_consumption, receive_energy_consumption);
+		# printf("%s %15.5f %d %s %15.5f %15.5f %15.5f %15.5f %15.5f \n", event, time, idPacket, energy, total_energy, idle_energy_consumption, sleep_energy_consumption, transmit_energy_consumption, receive_energy_consumption);
 		temp+=1;
 	}
 

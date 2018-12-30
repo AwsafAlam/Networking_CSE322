@@ -1,9 +1,9 @@
 #INPUT: output file AND number of iterations
 
 output_file_format="wireless_802.11_mobile"
-iteration_float=5.0
-start=5
+iteration_float=2.0
 
+start=5
 end=5
 
 hop_15_4=5
@@ -19,12 +19,11 @@ row=10
 topology=1 # Grid
 flow_no=5
 speed=25
-
 time_sim=10
 
 iteration=$(printf %.0f $iteration_float);
 
-r=$start
+r=1
 
 while [ $r -le $end ]
 do
@@ -35,16 +34,19 @@ l=0;thr=0.0;del=0.0;s_packet=0.0;r_packet=0.0;d_packet=0.0;del_ratio=0.0;
 dr_ratio=0.0;time=0.0;t_energy=0.0;energy_bit=0.0;energy_byte=0.0;energy_packet=0.0;total_retransmit=0.0;energy_efficiency=0.0;
 
 i=0
+row=$(($r*10))
+
 while [ $i -lt $iteration ]
 do
 #################START AN ITERATION
 echo "                             EXECUTING $(($i+1)) th ITERATION"
 
 # ns 802_11.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
-
-ns wireless_mobile.tcl $row $topology $flow_no $speed
+echo "Row : $row"
+ns wireless_mobile.tcl $row $topology $flow_no $speed $routing $time_sim
 echo "SIMULATION COMPLETE. BUILDING STAT......"
-awk -f wireless_mobile.awk wireless.tr > wireless_mobile.out
+under="_"
+awk -f wireless_mobile.awk wireless.tr > "$output_file_format$under$r$under$i.out"
 
 ok=1;
 while read val
@@ -103,7 +105,7 @@ do
 
 	echo "$val"
 
-done < wireless_mobile.out
+done < "$output_file_format$under$r$under$i.out"
 
 if [ "$ok" -eq "0" ]; then
 	l=0;
@@ -123,26 +125,42 @@ enr_nj=$(echo "scale=2; $energy_efficiency*1000000000.0" | bc)
 dir=""
 under="_"
 
-output_file="$dir$output_file_format$under$r.out"
+# output_file="$dir$output_file_format$under$r.out"
+output_file="data.out"
 
-echo -ne "Throughput:          $thr " >> $output_file
-echo -ne "AverageDelay:         $del " >> $output_file
-echo -ne "Sent Packets:         $s_packet " >> $output_file
-echo -ne "Received Packets:         $r_packet " >> $output_file
-echo -ne "Dropped Packets:         $d_packet " >> $output_file
-echo -ne "PacketDeliveryRatio:      $del_ratio " >> $output_file
-echo -ne "PacketDropRatio:      $dr_ratio " >> $output_file
-echo -ne "Total time:  $time " >> $output_file
-echo -ne "" >> $output_file
-echo -ne "" >> $output_file
-echo -ne "Total energy consumption:        $t_energy " >> $output_file
-echo -ne "Average Energy per bit:         $energy_bit " >> $output_file
-echo -ne "Average Energy per byte:         $energy_byte " >> $output_file
-echo -ne "Average energy per packet:         $energy_packet " >> $output_file
-echo -ne "total_retransmit:         $total_retransmit " >> $output_file
-echo -ne "energy_efficiency(nj/bit):         $enr_nj " >> $output_file
+# echo -ne "Throughput:          $thr " >> $output_file
+# echo -ne "AverageDelay:         $del " >> $output_file
+# echo -ne "Sent Packets:         $s_packet " >> $output_file
+# echo -ne "Received Packets:         $r_packet " >> $output_file
+# echo -ne "Dropped Packets:         $d_packet " >> $output_file
+# echo -ne "PacketDeliveryRatio:      $del_ratio " >> $output_file
+# echo -ne "PacketDropRatio:      $dr_ratio " >> $output_file
+# echo -ne "Total time:  $time " >> $output_file
+# echo -ne "" >> $output_file
+# echo -ne "" >> $output_file
+# echo -ne "Total energy consumption:        $t_energy " >> $output_file
+# echo -ne "Average Energy per bit:         $energy_bit " >> $output_file
+# echo -ne "Average Energy per byte:         $energy_byte " >> $output_file
+# echo -ne "Average energy per packet:         $energy_packet " >> $output_file
+# echo -ne "total_retransmit:         $total_retransmit " >> $output_file
+# echo -ne "energy_efficiency(nj/bit):         $enr_nj " >> $output_file
+# echo "\n" >> $output_file
+echo -ne "$row " >> $output_file
+echo -ne "$thr " >> $output_file
+echo -ne "$del " >> $output_file
+echo -ne "$s_packet " >> $output_file
+echo -ne "$r_packet " >> $output_file
+echo -ne "$d_packet " >> $output_file
+echo -ne "$del_ratio " >> $output_file
+echo -ne "$dr_ratio " >> $output_file
+echo -ne "$time " >> $output_file
+echo -ne "$t_energy " >> $output_file
+echo -ne "$energy_bit " >> $output_file
+echo -ne "$energy_byte " >> $output_file
+echo -ne "$energy_packet " >> $output_file
+echo -ne "$total_retransmit " >> $output_file
+echo -ne "$enr_nj " >> $output_file
 echo "\n" >> $output_file
-
 r=$(($r+1))
 #######################################END A ROUND
 done
