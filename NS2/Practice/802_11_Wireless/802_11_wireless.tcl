@@ -26,8 +26,8 @@ set grid 0
 set extra_time 10 ;#10
 
 # TCP
-set tcp_src Agent/UDP
-set tcp_sink Agent/Null
+set tcp_src Agent/TCP
+set tcp_sink Agent/TCPSink
 
 # Transfer rate
 set cbr_size 64 ; #[lindex $argv 2]; #4,8,16,32,64
@@ -66,7 +66,7 @@ set val(rp) DSDV ; #[lindex $argv 4] ;# routing protocol
 
 #################################################################################################
 
-# Initialize ns
+# Initialize ns_
 #
 set ns_ [new Simulator]
 
@@ -170,10 +170,17 @@ if {$num_parallel_flow > $num_row} {
 	set num_parallel_flow $num_row
 }
 
-#CHNG
-if {$num_cross_flow > $num_col} {
-	set num_cross_flow $num_col
+
+proc TcpCongestion {tcpsrc file1} {
+	global ns_
+	set conges [$tcpsrc set cwnd_]
+	set now [$ns_ now]
+	puts $file1 "$now	$conges"
+	$ns_ at [expr $now+0.5] "TcpCongestion $tcpsrc $file1"
 }
+
+set conges_file [open cong.dat w]
+$ns_ at 0.0 "TcpCongestion $tcp_src $conges_file" 
 
 #CHNG
 for {set i 0} {$i < $num_parallel_flow} {incr i} { ;#sink
@@ -181,6 +188,8 @@ for {set i 0} {$i < $num_parallel_flow} {incr i} { ;#sink
 #    set null_($i) [new Agent/Null]
 
 	set udp_($i) [new $tcp_src]
+
+
 	$udp_($i) set class_ $i
 	set null_($i) [new $tcp_sink]
 	$udp_($i) set fid_ $i
@@ -191,6 +200,7 @@ for {set i 0} {$i < $num_parallel_flow} {incr i} { ;#sink
 	}
 
 } 
+
 
 ######## ------------  PARALLEL FLOW
 
@@ -238,6 +248,7 @@ $ns_ at [expr $start_time+$time_duration +$extra_time] "$ns_ nam-end-wireless [$
 
 $ns_ at [expr $start_time+$time_duration/2] "puts \"half of the simulation is finished\""
 $ns_ at [expr $start_time+$time_duration] "puts \"end of simulation duration\""
+
 
 proc finish {} {
 	puts "finishing"
