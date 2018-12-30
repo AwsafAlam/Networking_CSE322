@@ -17,7 +17,7 @@ set parallel_start_gap 1.0
 set num_parallel_flow [lindex $argv 2] ;# along column
 set extra_time 5 ;#10
 
-set routing_prot [lindex $argv 4]
+# set routing_prot [lindex $argv 4]
 # (e) - protocols and models for different layers
 # A wireless environment can be modeled by configuring the protocol stack of each node.  
 
@@ -73,7 +73,7 @@ set val(mac) Mac/802_11 ;# MAC type -> wifi
 set val(ifq) Queue/DropTail/PriQueue ;# interface queue type
 # set val(ifq) Queue/DropTail/REDQueue ;# interface queue type
 set val(ifqlen) 50 ;# max packet in ifq -> Queue length
-set val(rp) DSDV ; #[lindex $argv 4] ;# routing protocol
+set val(rp) [lindex $argv 4] ;# routing protocol
 
 #remove-all-packet-headers
 # add-packet-header DSDV AODV ARP LL MAC CBR IP

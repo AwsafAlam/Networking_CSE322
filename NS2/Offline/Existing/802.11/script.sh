@@ -1,7 +1,7 @@
 #INPUT: output file AND number of iterations
 
 output_file_format="wireless_802.11_mobile"
-iteration_float=2.0
+iteration_float=1.0
 
 start=5
 end=5
@@ -19,7 +19,7 @@ row=10
 topology=1 # Grid
 flow_no=5
 speed=25
-time_sim=10
+time_sim=5
 
 iteration=$(printf %.0f $iteration_float);
 
@@ -43,10 +43,10 @@ echo "                             EXECUTING $(($i+1)) th ITERATION"
 
 # ns 802_11.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
 echo "Row : $row"
-ns wireless_mobile.tcl $row $topology $flow_no $speed $routing $time_sim
+ns 802.11_mobile.tcl $row $topology $flow_no $speed $routing $time_sim
 echo "SIMULATION COMPLETE. BUILDING STAT......"
 under="_"
-awk -f wireless_mobile.awk wireless.tr > "$output_file_format$under$r$under$i.out"
+awk -f 802.11_mobile.awk wireless.tr > "$output_file_format$under$r$under$i.out"
 
 ok=1;
 while read val
@@ -120,7 +120,7 @@ l=0
 #################END AN ITERATION
 done
 
-enr_nj=$(echo "scale=2; $energy_efficiency*1000000000.0" | bc)
+enr_nj=$(echo "scale=2; $energy_efficiency*1000000.0" | bc)
 
 dir=""
 under="_"
@@ -164,3 +164,8 @@ echo "\n" >> $output_file
 r=$(($r+1))
 #######################################END A ROUND
 done
+
+####  Plotting graph
+gnuplot plot.plt
+
+# cleanup.sh
