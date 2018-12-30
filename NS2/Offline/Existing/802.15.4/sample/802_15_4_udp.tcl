@@ -1,4 +1,4 @@
-################################################################802.15.4 in Grid topology with cross folw
+################################################################ 802.15.4 in Grid topology with cross folw
 set cbr_size 64; #4,8,16,32,64
 set cbr_rate 11.0Mb
 set cbr_pckt_per_sec 500

@@ -27,9 +27,28 @@ set val(netif) Phy/WirelessPhy ;# network interface type
 # Phy/WirelessPhy set Pt 2.07983391e-01
 # Phy/WirelessPhy set RXThresh 2.591168e-08
 # Phy/WirelessPhy set CSThresh 3.497734e-09
-#set frequency_ 2.461e+9
-#Phy/WirelessPhy set Rb_ 11*1e6            ;# Bandwidth
-#Phy/WirelessPhy set freq_ $frequency_
+# set frequency_ 2.461e+9
+
+# Phy/WirelessPhy set Rb_ 11*1e6            ;# Bandwidth
+# Phy/WirelessPhy set freq_ $frequency_
+# Phy/WirelessPhy/802_15_4 ;# network interface type
+
+# set dist(5m)  7.69113e-06
+# set dist(9m)  2.37381e-06
+# set dist(10m) 1.92278e-06
+# set dist(11m) 1.58908e-06
+# set dist(12m) 1.33527e-06
+# set dist(13m) 1.13774e-06
+# set dist(14m) 9.81011e-07
+# set dist(15m) 8.54570e-07
+# set dist(16m) 7.51087e-07
+# set dist(20m) 4.80696e-07
+# set dist(25m) 3.07645e-07
+# set dist(30m) 2.13643e-07
+# set dist(35m) 1.56962e-07
+# set dist(40m) 1.20174e-07
+# Phy/WirelessPhy set CSThresh_ $dist(40m)
+# Phy/WirelessPhy set RXThresh_ $dist(40m)
 
 
 # Configuring propagation model
@@ -58,7 +77,7 @@ set val(rp) DSDV ; #[lindex $argv 4] ;# routing protocol
 #remove-all-packet-headers
 # add-packet-header DSDV AODV ARP LL MAC CBR IP
 
-################################# ENERGY PARAMETERS
+############# ENERGY PARAMETERS
 
 set val(energymodel_11)    EnergyModel     ;
 set val(initialenergy_11)  1000            ;# Initial energy in Joules
@@ -76,6 +95,18 @@ set val(transitiontime_11) 2.36			;#LEAP (802.11g)
 #set val(sleeppower_11) 300e-3			;#Stargate (802.11b)
 #set val(transitionpower_11) 200e-3		;#Stargate (802.11b)	??????????????????????????????/
 #set val(transitiontime_11) 3			;#Stargate (802.11b)
+
+### Init traffic parameters
+set cbr_size 64 ; #[lindex $argv 2]; #4,8,16,32,64
+set cbr_rate 11.0Mb
+set cbr_pckt_per_sec 500
+set cbr_interval [expr 1.0/$cbr_pckt_per_sec] ;# ?????? 1 for 1 packets per second and 0.1 for 10 packets per second
+#set cbr_interval 0.00005 ; #[expr 1/[lindex $argv 2]] ;# ?????? 1 for 1 packets per second and 0.1 for 10 packets per second
+
+#### MAC Layer properties
+Mac/802_11 set dataRate_ 11Mb
+Mac/802_11 set syncFlag_ 1
+Mac/802_11 set dutyCycle_ cbr_interval
 
 
 # Step 2 - Init simulator object
@@ -120,17 +151,6 @@ $ns node-config -adhocRouting $val(rp) -llType $val(ll) \
 			 -transitionTime $val(transitiontime_11) \
 			 -initialEnergy $val(initialenergy_11)
 
-### Init traffic parameters
-set cbr_size 64 ; #[lindex $argv 2]; #4,8,16,32,64
-set cbr_rate 11.0Mb
-set cbr_pckt_per_sec 500
-set cbr_interval [expr 1.0/$cbr_pckt_per_sec] ;# ?????? 1 for 1 packets per second and 0.1 for 10 packets per second
-#set cbr_interval 0.00005 ; #[expr 1/[lindex $argv 2]] ;# ?????? 1 for 1 packets per second and 0.1 for 10 packets per second
-
-#### MAC Layer properties
-# Mac/802_11 set dataRate_ 11Mb
-# Mac/802_11 set syncFlag_ 1
-# Mac/802_11 set dutyCycle_ cbr_interval
 
 puts "start node creation"
 for {set i 0} {$i < [expr $num_row*$num_col]} {incr i} {

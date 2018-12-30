@@ -9,14 +9,8 @@
 # use-newtrace in tcl, to get new format. It is easy to procss
 
 #  In NS2 new trace format, there can be 52 columns. Each column satisfy some parameteers. See documenttion for more
-
-BEGIN	{
-    receive_size = 0;
-    startTime = 1e6;
-    stopTime = 0;
-    NumOfRecPackt = 0;
-
-    max_node = 2000;
+BEGIN {
+	max_node = 2000;
 	nSentPackets = 0.0 ;		
 	nReceivedPackets = 0.0 ;
 	rTotalDelay = 0.0 ;
@@ -45,19 +39,12 @@ BEGIN	{
 	for (i=0; i<max_pckt; i++) {
 		retransmit[i] = 0;		
 	}
-}
-# Only works for new trace format
-{
-    # $1 == 1st col etc,
 
-    # event  = $1
-    # time = $3
-    # node_id= $5
-    # packet = $19
-    # pckt_id = $41
-    # flow_id = $39
-    # packet_size = $37
-    # flow_type = $45
+}
+# Only works for old trace format
+{
+#	event = $1;    time = $2;    node = $3;    type = $4;    reason = $5;    node2 = $5;    
+#	packetid = $6;    mac_sub_type=$7;    size=$8;    source = $11;    dest = $10;    energy=$14;
 
     event = $1 ;			time = $2 ;
 	node = $3 ;
@@ -91,11 +78,11 @@ BEGIN	{
 
     if (energy == "[energy") {
 		energy_consumption[node] = (idle_energy_consumption + sleep_energy_consumption + transmit_energy_consumption + receive_energy_consumption);
-#		printf("%d %15.5f\n", node, energy_consumption[node]);
+		# printf("%d %15.5f\n", node, energy_consumption[node]);
 	}
 
 	if( 0 && temp <=25 && energy == "[energy" && event == "D") {
-		# printf("%s %15.5f %d %s %15.5f %15.5f %15.5f %15.5f %15.5f \n", event, time, idPacket, energy, total_energy, idle_energy_consumption, sleep_energy_consumption, transmit_energy_consumption, receive_energy_consumption);
+		printf("%s %15.5f %d %s %15.5f %15.5f %15.5f %15.5f %15.5f \n", event, time, idPacket, energy, total_energy, idle_energy_consumption, sleep_energy_consumption, transmit_energy_consumption, receive_energy_consumption);
 		temp+=1;
 	}
 
@@ -103,7 +90,7 @@ BEGIN	{
 		if (idPacket > idHighestPacket) idHighestPacket = idPacket;
 		if (idPacket < idLowestPacket) idLowestPacket = idPacket;
 
-		if(time>rEndTime) rEndTime=time;
+		# if(time>rEndTime) rEndTime=time;
         # printf("********************\n");
 		if(time<rStartTime) {
 			# printf("********************\n");
@@ -148,24 +135,15 @@ BEGIN	{
 
 }
 END {
-    if(nReceivedBytes == 0)
-    {
-        printf("No packets \n");
-
-    }
-
+   
     time = rEndTime - rStartTime ;
 	rThroughput = (nReceivedBytes)/time*(8/1000);
 	rPacketDeliveryRatio = nReceivedPackets / nSentPackets * 100 ;
 	rPacketDropRatio = nDropPackets / nSentPackets * 100;
 
-    # printf(" Start Time: %d\n", rStartTime); 
-    # printf(" Stop Time: %d\n", rEndTime); 
-    # printf(" Packets: %d\n", nReceivedBytes); 
-    # printf(" Throughput in  kbps: %f \n", rThroughput); 
-
-for(i=0; i<max_node;i++) {
-#		printf("%d %15.5f\n", i, energy_consumption[i]);
+   
+	for(i=0; i<max_node;i++) {
+	#printf("%d %15.5f\n", i, energy_consumption[i]);
 		total_energy_consumption += energy_consumption[i];
 	}
 	if ( nReceivedPackets != 0 ) {
