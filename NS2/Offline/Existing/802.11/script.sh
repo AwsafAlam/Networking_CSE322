@@ -17,9 +17,9 @@ pckt_per_sec=1000
 routing=DSDV
 row=10
 topology=1 # Grid
-flow_no=5
+flow_no=2
 speed=25
-time_sim=5
+time_sim=15
 
 iteration=$(printf %.0f $iteration_float);
 
@@ -44,9 +44,13 @@ echo "                             EXECUTING $(($i+1)) th ITERATION"
 # ns 802_11.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
 echo "Row : $row"
 ns 802.11_mobile.tcl $row $topology $flow_no $speed $routing $time_sim
+# ns 802.11_udp.tcl $row $topology $flow_no $speed $routing $time_sim
+
 echo "SIMULATION COMPLETE. BUILDING STAT......"
+
 under="_"
 awk -f 802.11_mobile.awk wireless.tr > "$output_file_format$under$r$under$i.out"
+# awk -f 802.11_wireless_udp.awk wireless.tr > "$output_file_format$under$r$under$i.out"
 
 ok=1;
 while read val

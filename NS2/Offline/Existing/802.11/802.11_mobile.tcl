@@ -15,6 +15,7 @@ set time_duration [lindex $argv 5] ;#50
 set start_time 5 ;#100
 set parallel_start_gap 1.0
 set num_parallel_flow [lindex $argv 2] ;# along column
+set num_cross_flow [lindex $argv 2]
 set extra_time 5 ;#10
 
 # set routing_prot [lindex $argv 4]
@@ -142,7 +143,7 @@ $ns node-config -adhocRouting $val(rp) -llType $val(ll) \
      -channel  [new $val(chan)] -topoInstance $topo \
      -agentTrace ON -routerTrace OFF\
      -macTrace ON \
-     -movementTrace OFF \
+     -movementTrace ON \
 			 -energyModel $val(energymodel_11) \
 			 -idlePower $val(idlepower_11) \
 			 -rxPower $val(rxpower_11) \
@@ -211,7 +212,6 @@ puts "node creation and positioning complete"
 # }
 
 
-
 set tcp_src Agent/TCP
 set tcp_sink Agent/TCPSink
 
@@ -270,6 +270,121 @@ for {set i 0} {$i < $num_parallel_flow } {incr i} {
 for {set i 0} {$i < $num_parallel_flow } {incr i} {
      $ns at [expr $start_time+$i*$parallel_start_gap] "$cbr_($i) start"
 }
+
+###############---------------- CROSS FLOW
+#CHNG
+set k $num_parallel_flow 
+#for {set i 1} {$i < [expr $num_col-1] } {incr i} {
+#CHNG
+for {set i 0} {$i < $num_cross_flow } {incr i} {
+	set udp_node [expr $i*$num_col];#CHNG
+	set null_node [expr ($i+1)*$num_col-1];#CHNG
+	$ns attach-agent $node_($udp_node) $udp_($k)
+  	$ns attach-agent $node_($null_node) $null_($k)
+	puts -nonewline $topofile "CROSS: Src: $udp_node Dest: $null_node\n"
+	incr k
+} 
+
+#CHNG
+set k $num_parallel_flow
+#CHNG
+for {set i 0} {$i < $num_cross_flow } {incr i} {
+	$ns connect $udp_($k) $null_($k)
+	incr k
+}
+#CHNG
+set k $num_parallel_flow
+#CHNG
+for {set i 0} {$i < $num_cross_flow } {incr i} {
+	set cbr_($k) [new Application/Traffic/CBR]
+	$cbr_($k) set packetSize_ $cbr_size
+	$cbr_($k) set rate_ $cbr_rate
+	$cbr_($k) set interval_ $cbr_interval
+	$cbr_($k) attach-agent $udp_($k)
+	incr k
+} 
+
+#CHNG
+set k $num_parallel_flow
+#CHNG
+for {set i 0} {$i < $num_cross_flow } {incr i} {
+	$ns at [expr $start_time+$i*$parallel_start_gap] "$cbr_($k) start"
+	incr k
+}
+#########################------------RANDOM FLOW
+set r $k
+set rt $r
+set num_node [expr $num_row*$num_col]
+for {set i 1} {$i < [expr $num_cross_flow]} {incr i} {
+	set udp_node [expr int($num_node*rand())] ;# src node
+	set null_node $udp_node
+	while {$null_node==$udp_node} {
+		set null_node [expr int($num_node*rand())] ;# dest node
+	}
+	$ns attach-agent $node_($udp_node) $udp_($rt)
+  	$ns attach-agent $node_($null_node) $null_($rt)
+	puts -nonewline $topofile "RANDOM:  Src: $udp_node Dest: $null_node\n"
+	incr rt
+} 
+
+set rt $r
+for {set i 1} {$i < [expr $num_cross_flow]} {incr i} {
+	$ns connect $udp_($rt) $null_($rt)
+	incr rt
+}
+set rt $r
+for {set i 1} {$i < [expr $num_cross_flow]} {incr i} {
+	set cbr_($rt) [new Application/Traffic/CBR]
+	$cbr_($rt) set packetSize_ $cbr_size
+	$cbr_($rt) set rate_ $cbr_rate
+	$cbr_($rt) set interval_ $cbr_interval
+	$cbr_($rt) attach-agent $udp_($rt)
+	incr rt
+} 
+
+set rt $r
+for {set i 1} {$i < [expr $num_cross_flow]} {incr i} {
+	$ns at [expr $start_time] "$cbr_($rt) start"
+	incr rt
+}
+
+#######################################################################SINK FLOW
+# set r $rt
+# set rt $r
+# set num_node [expr $num_row*$num_col]
+# for {set i 1} {$i < [expr $num_sink_flow+1]} {incr i} {
+# 	set udp_node [expr $i-1] ;#[expr int($num_node*rand())] ;# src node
+# 	set null_node $sink_node
+# 	#while {$null_node==$udp_node} {
+# 	#	set null_node [expr int($num_node*rand())] ;# dest node
+# 	#}
+# 	$ns attach-agent $node_($udp_node) $udp_($rt)
+#   	$ns attach-agent $node_($null_node) $null_($rt)
+# 	puts -nonewline $topofile "SINK:  Src: $udp_node Dest: $null_node\n"
+# 	incr rt
+# } 
+
+# set rt $r
+# for {set i 1} {$i < [expr $num_sink_flow+1]} {incr i} {
+# 	$ns connect $udp_($rt) $null_($rt)
+# 	incr rt
+# }
+# set rt $r
+# for {set i 1} {$i < [expr $num_sink_flow+1]} {incr i} {
+# 	set cbr_($rt) [new Application/Traffic/CBR]
+# 	$cbr_($rt) set packetSize_ $cbr_size
+# 	$cbr_($rt) set rate_ $cbr_rate
+# 	$cbr_($rt) set interval_ $cbr_interval
+# 	$cbr_($rt) attach-agent $udp_($rt)
+# 	incr rt
+# } 
+
+# set rt $r
+# for {set i 1} {$i < [expr $num_sink_flow+1]} {incr i} {
+# 	$ns at [expr $start_time+$i*$sink_start_gap+rand()] "$cbr_($rt) start"
+# 	incr rt
+# }
+
 puts "flow creation complete"
 
 # Tell nodes when the simulation ends

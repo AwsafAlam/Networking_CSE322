@@ -1,7 +1,0 @@
-Throughput:          131.81 AverageDelay:         0.06879 
-Sent Packets:          343.00 Received Packets:          204.00 Dropped Packets:          142.00 
-PacketDeliveryRatio:      59.48 PacketDropRatio:      41.40
-Total time:  201.01817
-
-
-Total energy consumption:      1068.57300 Average Energy per bit:         0.04033 Average Energy per byte:         0.32264 Average energy per packet:         5.23810
