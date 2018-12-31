@@ -1,7 +1,7 @@
 ################################################################ 802.11 in Grid topology with cross folw
 set cbr_size 64 ; #[lindex $argv 2]; #4,8,16,32,64
 set cbr_rate 11.0Mb
-set cbr_pckt_per_sec 500
+set cbr_pckt_per_sec [lindex $argv 4]
 set cbr_interval [expr 1.0/$cbr_pckt_per_sec] ;# ?????? 1 for 1 packets per second and 0.1 for 10 packets per second
 #set cbr_interval 0.00005 ; #[expr 1/[lindex $argv 2]] ;# ?????? 1 for 1 packets per second and 0.1 for 10 packets per second
 set num_row [lindex $argv 0] ;#number of row
@@ -35,13 +35,15 @@ set val(transitiontime_11) 2.36			;#LEAP (802.11g)
 Mac/802_11 set dataRate_ 11Mb
 
 #CHNG
-set num_parallel_flow 0 ;#[lindex $argv 0]	# along column
-set num_cross_flow 0 ;#[lindex $argv 0]		#along row
-set num_random_flow 0
 set num_sink_flow [expr $num_row*$num_col] ;#sink
 set sink_node 100 ;#sink id, dummy here; updated next
 
-set grid 0
+set num_random_flow [lindex $argv 2]
+set num_parallel_flow [lindex $argv 2]
+set num_cross_flow [lindex $argv 2]
+set speed_node [lindex $argv 3]
+
+set grid [lindex $argv 1]
 set extra_time 10 ;#10
 
 #set tcp_src Agent/TCP/Vegas ;# Agent/TCP or Agent/TCP/Reno or Agent/TCP/Newreno or Agent/TCP/FullTcp/Sack or Agent/TCP/Vegas
@@ -193,6 +195,12 @@ while {$i < $num_row } {
     }
     incr i;
 }; 
+
+for {set i 0} {$i < [expr $num_row*$num_col]} {incr i} {
+    set movingTime [expr int([expr $start_time+$time_duration]*rand())]
+    $ns_ at $movingTime " $node_($i) setdest [expr $x_dim*rand()] [expr $y_dim*rand()] $speed_node"
+
+} 
 
 if {$grid == 1} {
 	puts "GRID topology"

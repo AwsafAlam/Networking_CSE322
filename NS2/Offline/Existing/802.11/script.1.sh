@@ -15,13 +15,13 @@ pckt_size=64
 
 echo "set   autoscale" >> plot.plt
 echo "set terminal pdf" >> plot.plt
-echo "set output \"802.15.4.pdf\"" >> plot.plt
+echo "set output \"802.11.pdf\"" >> plot.plt
 
 for((p=0;p<4;p++));
 do
 ######## parameter variation ##########
 	
-for((r=1;r<=5;r++));
+for((r=1;r<=4;r++));
 do
 
 echo "total iteration: $iteration"
@@ -48,7 +48,7 @@ i=0
 	then
 	echo "------------- VARIAION IN FLOW -----------------";
 
-	row=10
+	row=5
 	pckt_per_sec=500
 	routing=DSDV
 	topology=1 # Grid
@@ -60,7 +60,7 @@ i=0
 	then
 	echo "------------- VARIAION IN PACKET PER SEC -----------------";
 
-	row=10
+	row=5
 	pckt_per_sec=$(($r*100))
 	routing=DSDV
 	topology=1 # Grid
@@ -72,7 +72,7 @@ i=0
 	then
 	echo "------------- VARIAION IN SPEED -----------------";
 
-	row=10
+	row=5
 	pckt_per_sec=500
 	routing=DSDV
 	topology=1 # Grid
@@ -95,11 +95,11 @@ i=0
 	fi
 
 	# ns 802_11.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
-	echo "Row : $row -> $p"
-	ns 802.15.4_mobile.tcl $row $topology $flow_no $speed $pckt_per_sec $time_sim
+	echo "Row : $row"
+	ns 802_11_udp.tcl $row $topology $flow_no $speed $pckt_per_sec #$time_sim
 	echo "SIMULATION COMPLETE. BUILDING STAT......"
 	under="_"
-	awk -f 802.15.4_mobile.awk tcp_wireless.tr > "$output_file_format$under$r$under$i.out"
+	awk -f 802_11_udp.awk 802_11_wireless.tr > "$output_file_format$under$r$under$i.out"
 
 	ok=1;
 	while read val
@@ -250,19 +250,19 @@ done
 echo " Generating graphs ... for $p"
 if [ $p -eq 0 ] 
 then
-echo "set title \"802.15.4 Comparing metrics with variation in number of nodes\"" >> plot.plt
+echo "set title \"802.11 Comparing metrics with variation in number of nodes\"" >> plot.plt
 echo "set xlabel \"Number of Nodes\"" >> plot.plt
 elif [ $p -eq 1 ]
 then
-echo "set title \"802.15.4 Comparing metrics with variation in flow\"" >> plot.plt
+echo "set title \"802.11 Comparing metrics with variation in flow\"" >> plot.plt
 echo "set xlabel \"Number of Flows\"" >> plot.plt
 elif [ $p -eq 2 ]
 then
-echo "set title \"802.15.4 Comparing metrics with variation in Packets per second\"" >> plot.plt
+echo "set title \"802.11 Comparing metrics with variation in Packets per second\"" >> plot.plt
 echo "set xlabel \"Packets per second\"" >> plot.plt
 elif [ $p -eq 3 ]
 then
-echo "set title \"802.15.4 Comparing metrics with variation in speed\"" >> plot.plt
+echo "set title \"802.11 Comparing metrics with variation in speed\"" >> plot.plt
 echo "set xlabel \"Speed\"" >> plot.plt
 fi
 
@@ -281,7 +281,7 @@ echo "plot \"data_$p.out\" using 1:7 title 'Packet delivery Ratio' with linespoi
 echo "set ylabel \"Packet Drop Ratio\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:8 title 'Packet Drop Ratio' with linespoints lw 2" >> plot.plt
 
-echo "set title \"802.15.4 Comparing Energy variation\"" >> plot.plt
+echo "set title \"802.11 Comparing Energy variation\"" >> plot.plt
 echo "set ylabel \"Total Energy\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:10 title 'Total Energy' with linespoints lw 2" >> plot.plt 
 echo "set ylabel \"Energy Per bit\"" >> plot.plt
