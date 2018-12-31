@@ -52,10 +52,10 @@ fi
 
 # ns 802_11.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
 echo "Row : $row"
-ns 802.15.4_mobile.tcl $row $topology $flow_no $speed $pckt_per_sec $time_sim
+ns 802_11_udp.tcl $row #$topology $flow_no $speed $pckt_per_sec $time_sim
 echo "SIMULATION COMPLETE. BUILDING STAT......"
 under="_"
-awk -f 802.15.4_mobile.awk tcp_wireless.tr > "$output_file_format$under$r$under$i.out"
+awk -f 802_11_udp.awk 802_11_wireless.tr > "$output_file_format$under$r$under$i.out"
 
 ok=1;
 	while read val

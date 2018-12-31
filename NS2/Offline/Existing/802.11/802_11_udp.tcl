@@ -47,8 +47,8 @@ set extra_time 10 ;#10
 #set tcp_src Agent/TCP/Vegas ;# Agent/TCP or Agent/TCP/Reno or Agent/TCP/Newreno or Agent/TCP/FullTcp/Sack or Agent/TCP/Vegas
 #set tcp_sink Agent/TCPSink ;# Agent/TCPSink or Agent/TCPSink/Sack1
 
-set tcp_src Agent/TCP
-set tcp_sink Agent/TCPSink
+set tcp_src Agent/UDP
+set tcp_sink Agent/Null
 
 
 # TAHOE:	Agent/TCP		Agent/TCPSink
@@ -83,11 +83,11 @@ Mac/802_11 set syncFlag_ 1
 
 Mac/802_11 set dutyCycle_ cbr_interval
 
-set nm out.nam
+set nm 802_11_wireless.nam
 
 # set tr /home/ubuntu/ns2\ programs/raw_data/multi_radio_802_11_random.tr
-set tr ./multi_radio_802_11_random.tr
-set topo_file topo_multi_radio_802_11_random.txt
+set tr 802_11_wireless.tr
+set topo_file topo.txt
 
 #set topo_file 5.txt
 # 

@@ -28,8 +28,14 @@ set val(initialenergy) 100;
 set num_random_flow [lindex $argv 2]
 set num_parallel_flow [lindex $argv 2]
 set num_cross_flow [lindex $argv 2]
-
 set speed_node [lindex $argv 3]
+
+if { $num_random_flow > $num_col} {
+	set num_random_flow  [expr $num_col-1]
+	set num_cross_flow  [expr $num_col-1]
+	set num_random_flow  [expr $num_col-1]
+}
+
 
 set grid [lindex $argv 1]
 set extra_time 10 ;#10
@@ -166,34 +172,34 @@ for {set i 0} {$i <  $num_random_flow} {incr i} {
 #####################------------  PARALLEL FLOW
 
 #CHNG
-for {set i 0} {$i < $num_parallel_flow } {incr i} {
-	set udp_node $i
-	set null_node [expr $i+(($num_col)*($num_row-1))];#CHNG
-	$ns_ attach-agent $node_($udp_node) $udp_($i)
-  	$ns_ attach-agent $node_($null_node) $null_($i)
-	puts -nonewline $topofile "PARALLEL: Src: $udp_node Dest: $null_node\n"
-} 
+# for {set i 0} {$i < $num_parallel_flow } {incr i} {
+# 	set udp_node $i
+# 	set null_node [expr $i+(($num_col)*($num_row-1))];#CHNG
+# 	$ns_ attach-agent $node_($udp_node) $udp_($i)
+#   	$ns_ attach-agent $node_($null_node) $null_($i)
+# 	puts -nonewline $topofile "PARALLEL: Src: $udp_node Dest: $null_node\n"
+# } 
 
-#  $ns_ attach-agent $node_(0) $udp_(0)
-#  $ns_ attach-agent $node_(6) $null_(0)
+# #  $ns_ attach-agent $node_(0) $udp_(0)
+# #  $ns_ attach-agent $node_(6) $null_(0)
 
-#CHNG
-for {set i 0} {$i < $num_parallel_flow } {incr i} {
-     $ns_ connect $udp_($i) $null_($i)
-}
-#CHNG
-for {set i 0} {$i < $num_parallel_flow } {incr i} {
-	set cbr_($i) [new Application/Traffic/CBR]
-	$cbr_($i) set packetSize_ $cbr_size
-	$cbr_($i) set rate_ $cbr_rate
-	$cbr_($i) set interval_ $cbr_interval
-	$cbr_($i) attach-agent $udp_($i)
-} 
+# #CHNG
+# for {set i 0} {$i < $num_parallel_flow } {incr i} {
+#      $ns_ connect $udp_($i) $null_($i)
+# }
+# #CHNG
+# for {set i 0} {$i < $num_parallel_flow } {incr i} {
+# 	set cbr_($i) [new Application/Traffic/CBR]
+# 	$cbr_($i) set packetSize_ $cbr_size
+# 	$cbr_($i) set rate_ $cbr_rate
+# 	$cbr_($i) set interval_ $cbr_interval
+# 	$cbr_($i) attach-agent $udp_($i)
+# } 
 
-#CHNG
-for {set i 0} {$i < $num_parallel_flow } {incr i} {
-     $ns_ at [expr $start_time+$i*$parallel_start_gap] "$cbr_($i) start"
-}
+# #CHNG
+# for {set i 0} {$i < $num_parallel_flow } {incr i} {
+#      $ns_ at [expr $start_time+$i*$parallel_start_gap] "$cbr_($i) start"
+# }
 ###############---------------- CROSS FLOW
 #CHNG
 # set k $num_parallel_flow 
