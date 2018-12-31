@@ -141,7 +141,7 @@ $ns node-config -adhocRouting $val(rp) -llType $val(ll) \
      -ifqLen $val(ifqlen) -antType $val(ant) \
      -propType $val(prop) -phyType $val(netif) \
      -channel  [new $val(chan)] -topoInstance $topo \
-     -agentTrace ON -routerTrace OFF\
+     -agentTrace ON -routerTrace ON\
      -macTrace ON \
      -movementTrace ON \
 			 -energyModel $val(energymodel_11) \
