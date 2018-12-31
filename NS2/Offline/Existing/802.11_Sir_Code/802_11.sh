@@ -1,7 +1,7 @@
 #INPUT: output file AND number of iterations
 
 output_file_format="multi_radio_802_11_random"
-iteration_float=5.0
+iteration_float=2.0
 start=5
 
 end=5
@@ -138,7 +138,7 @@ echo -ne "Average Energy per byte:         $energy_byte " >> $output_file
 echo -ne "Average energy per packet:         $energy_packet " >> $output_file
 echo -ne "total_retransmit:         $total_retransmit " >> $output_file
 echo -ne "energy_efficiency(nj/bit):         $enr_nj " >> $output_file
-echo "" >> $output_file
+echo "\n" >> $output_file
 
 r=$(($r+1))
 #######################################END A ROUND
