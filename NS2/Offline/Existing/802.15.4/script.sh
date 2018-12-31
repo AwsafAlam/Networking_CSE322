@@ -2,62 +2,106 @@
 ./cleanup.sh
 clear
 
-output_file_format="wireless_802.11_mobile"
+output_file_format="wireless_802.15.4_mobile"
 iteration_float=2.0
-
-start=5
-end=5
+iteration=$(printf %.0f $iteration_float);
 
 hop_15_4=5
 dist_15_4=30
 dist_11=$ expr $hop_15_4*$dist_15_4*2
 pckt_size=64
-pckt_per_sec=500
 # pckt_interval=[expr 1 / $pckt_per_sec]
 # echo "INERVAL: $pckt_interval"
 
-routing=DSDV
-row=10
-topology=1 # Grid
-flow_no=5
-speed=25
-time_sim=25
+echo "set   autoscale" >> plot.plt
+echo "set terminal pdf" >> plot.plt
+echo "set output \"802.15.4.pdf\"" >> plot.plt
 
-iteration=$(printf %.0f $iteration_float);
-
-r=1
-
-while [ $r -le $end ]
+for((p=0;p<4;p++));
 do
+######## parameter variation ##########
+	
+for((r=1;r<=5;r++));
+do
+
 echo "total iteration: $iteration"
-###############################START A ROUND
+##################################START A ROUND
 
 l=0;thr=0.0;del=0.0;s_packet=0.0;r_packet=0.0;d_packet=0.0;del_ratio=0.0;failcount=0;
 dr_ratio=0.0;time=0.0;t_energy=0.0;energy_bit=0.0;energy_byte=0.0;energy_packet=0.0;total_retransmit=0.0;energy_efficiency=0.0;
 
 i=0
-row=$(($r*2))
 
-while [ $i -lt $iteration ]
-do
-#################START AN ITERATION
-echo "                             EXECUTING $(($i+1)) th ITERATION"
+	if [ $p -eq 0 ] 
+	then
+	echo "------------- VARIAION IN NODE NUMBER -----------------";
 
-if [ `echo $i%2 | bc` -eq 0 ] 
-then
+	row=$(($r*2))
+	pckt_per_sec=500
+	routing=DSDV
 	topology=1 # Grid
-else
-	topology=0 # Random
-fi
+	flow_no=5
+	speed=25
+	time_sim=25
 
-# ns 802_11.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
-echo "Row : $row"
-ns 802.15.4_mobile.tcl $row $topology $flow_no $speed $pckt_per_sec $time_sim
-echo "SIMULATION COMPLETE. BUILDING STAT......"
-under="_"
-awk -f 802.15.4_mobile.awk tcp_wireless.tr > "$output_file_format$under$r$under$i.out"
+	elif [ $p -eq 1 ]
+	then
+	echo "------------- VARIAION IN FLOW -----------------";
 
-ok=1;
+	row=10
+	pckt_per_sec=500
+	routing=DSDV
+	topology=1 # Grid
+	flow_no=$(($r*2))
+	speed=25
+	time_sim=25
+
+	elif [ $p -eq 2 ]
+	then
+	echo "------------- VARIAION IN PACKET PER SEC -----------------";
+
+	row=10
+	pckt_per_sec=$(($r*100))
+	routing=DSDV
+	topology=1 # Grid
+	flow_no=10
+	speed=25
+	time_sim=25
+
+	elif [ $p -eq 3 ]
+	then
+	echo "------------- VARIAION IN SPEED -----------------";
+
+	row=10
+	pckt_per_sec=500
+	routing=DSDV
+	topology=1 # Grid
+	flow_no=10
+	speed=$(($r*5))
+	time_sim=25
+
+	fi
+
+	while [ $i -lt $iteration ]
+	do
+	#################START AN ITERATION #############
+	echo "		EXECUTING $(($i+1)) th ITERATION"
+
+	if [ `echo $i%2 | bc` -eq 0 ] 
+	then
+		topology=1 # Grid
+	else
+		topology=0 # Random
+	fi
+
+	# ns 802_11.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
+	echo "Row : $row -> $p"
+	ns 802.15.4_mobile.tcl $row $topology $flow_no $speed $pckt_per_sec $time_sim
+	echo "SIMULATION COMPLETE. BUILDING STAT......"
+	under="_"
+	awk -f 802.15.4_mobile.awk tcp_wireless.tr > "$output_file_format$under$r$under$i.out"
+
+	ok=1;
 	while read val
 	do
 		l=$(($l+1))
@@ -117,74 +161,145 @@ ok=1;
 
 	done < "$output_file_format$under$r$under$i.out"
 
-if [ $failcount -ge 3 ] 
+	if [ $failcount -ge 3 ] 
+	then
+		echo "********************* Failed to generated output ***************\n";
+		break;
+	fi
+
+	if [ "$ok" -eq "0" ]; then
+		l=0;
+		ok=1;
+		continue
+	fi
+	i=$(($i+1))
+	l=0
+
+	# value of single iteration obtained here.
+
+	#################END AN ITERATION
+	done
+
+	enr_nj=$(echo "scale=2; $energy_efficiency*1000.0" | bc)
+	total_retransmit=$(echo "scale=3; $total_retransmit/100.0" | bc)
+
+	dir=""
+	under="_"
+
+	output_file2="$dir$output_file_format$under.out"
+	output_file="data_$p.out"
+
+	echo -ne "Throughput:          $thr " >> $output_file2
+	echo -ne "AverageDelay:         $del " >> $output_file2
+	echo -ne "Sent Packets:         $s_packet " >> $output_file2
+	echo -ne "Received Packets:         $r_packet " >> $output_file2
+	echo -ne "Dropped Packets:         $d_packet " >> $output_file2
+	echo -ne "PacketDeliveryRatio:      $del_ratio " >> $output_file2
+	echo -ne "PacketDropRatio:      $dr_ratio " >> $output_file2
+	echo -ne "Total time:  $time " >> $output_file2
+	echo -ne "" >> $output_file2
+	echo -ne "" >> $output_file2
+	echo -ne "Total energy consumption:        $t_energy " >> $output_file2
+	echo -ne "Average Energy per bit:         $energy_bit " >> $output_file2
+	echo -ne "Average Energy per byte:         $energy_byte " >> $output_file2
+	echo -ne "Average energy per packet:         $energy_packet " >> $output_file2
+	echo -ne "total_retransmit:         $total_retransmit " >> $output_file2
+	echo -ne "energy_efficiency(nj/bit):         $enr_nj " >> $output_file2
+	echo "" >> $output_file2
+
+	if [ $p -eq 0 ] 
+	then
+	echo -ne "$(($row*$row)) " >> $output_file
+
+	elif [ $p -eq 1 ]
+	then
+	# echo "------------- VARIAION IN FLOW -----------------";
+	echo -ne "$(($flow_no)) " >> $output_file
+
+	elif [ $p -eq 2 ]
+	then
+	# echo "------------- VARIAION IN PACKET PER SEC -----------------";
+	echo -ne "$(($pckt_per_sec)) " >> $output_file
+
+	elif [ $p -eq 3 ]
+	then
+	# echo "------------- VARIAION IN SPEED -----------------";
+	echo -ne "$(($speed)) " >> $output_file
+
+	fi
+
+	echo -ne "$thr " >> $output_file
+	echo -ne "$del " >> $output_file
+	echo -ne "$s_packet " >> $output_file
+	echo -ne "$r_packet " >> $output_file
+	echo -ne "$d_packet " >> $output_file
+	echo -ne "$del_ratio " >> $output_file
+	echo -ne "$dr_ratio " >> $output_file
+	echo -ne "$time " >> $output_file
+	echo -ne "$t_energy " >> $output_file
+	echo -ne "$energy_bit " >> $output_file
+	echo -ne "$energy_byte " >> $output_file
+	echo -ne "$energy_packet " >> $output_file
+	echo -ne "$total_retransmit " >> $output_file
+	echo -ne "$enr_nj " >> $output_file
+	echo "" >> $output_file
+	r=$(($r+1))
+	#######################################END A ROUND
+done
+
+echo " Generating graphs ... for $p"
+if [ $p -eq 0 ] 
 then
-	echo "********************* Failed to generated output ***************\n";
-	break;
+echo "set title \"802.15.4 Comparing metrics with variation in number of nodes\"" >> plot.plt
+echo "set xlabel \"Number of Nodes\"" >> plot.plt
+elif [ $p -eq 1 ]
+then
+echo "set title \"802.15.4 Comparing metrics with variation in flow\"" >> plot.plt
+echo "set xlabel \"Number of Flows\"" >> plot.plt
+elif [ $p -eq 2 ]
+then
+echo "set title \"802.15.4 Comparing metrics with variation in Packets per second\"" >> plot.plt
+echo "set xlabel \"Packets per second\"" >> plot.plt
+elif [ $p -eq 3 ]
+then
+echo "set title \"802.15.4 Comparing metrics with variation in speed\"" >> plot.plt
+echo "set xlabel \"Speed\"" >> plot.plt
 fi
 
-if [ "$ok" -eq "0" ]; then
-	l=0;
-	ok=1;
-	continue
-fi
-i=$(($i+1))
-l=0
+echo "set ylabel \"Throughput\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:2 title 'Throughput' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Sent Packets\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:3 title 'Avg delay' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Sent Packets\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:4 title 'Sent Packets' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Received Packets\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:5 title 'Received Packets' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Dropped packets\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:6 title 'Dropped packets' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Packet delivery Ratio\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:7 title 'Packet delivery Ratio' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Packet Drop Ratio\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:8 title 'Packet Drop Ratio' with linespoints lw 2" >> plot.plt
 
-# value of single iteration obtained here.
+echo "set title \"802.15.4 Comparing Energy variation with variation in number of nodes\"" >> plot.plt
+echo "set ylabel \"Total Energy\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:10 title 'Total Energy' with linespoints lw 2" >> plot.plt 
+echo "set ylabel \"Energy Per bit\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:11 title 'Energy Per bit' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Energy Per Byte\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:12 title 'Energy Per Byte' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Energy Per Packet\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:13 title 'Energy Per Packet' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Total retransmit\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:14 title 'Total retransmit' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Efficiency\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:15 title 'Efficiency' with linespoints lw 2" >> plot.plt
 
-#################END AN ITERATION
+# gnuplot plot.plt
+# gnuplot plot_pdf.plt
+
+echo "Plot file generation complete ..."
+
 done
 
-enr_nj=$(echo "scale=2; $energy_efficiency*1000.0" | bc)
-total_retransmit=$(echo "scale=3; $total_retransmit/100.0" | bc)
-
-dir=""
-under="_"
-
-output_file2="$dir$output_file_format$under.out"
-output_file="data.out"
-
-echo -ne "Throughput:          $thr " >> $output_file2
-echo -ne "AverageDelay:         $del " >> $output_file2
-echo -ne "Sent Packets:         $s_packet " >> $output_file2
-echo -ne "Received Packets:         $r_packet " >> $output_file2
-echo -ne "Dropped Packets:         $d_packet " >> $output_file2
-echo -ne "PacketDeliveryRatio:      $del_ratio " >> $output_file2
-echo -ne "PacketDropRatio:      $dr_ratio " >> $output_file2
-echo -ne "Total time:  $time " >> $output_file2
-echo -ne "" >> $output_file2
-echo -ne "" >> $output_file2
-echo -ne "Total energy consumption:        $t_energy " >> $output_file2
-echo -ne "Average Energy per bit:         $energy_bit " >> $output_file2
-echo -ne "Average Energy per byte:         $energy_byte " >> $output_file2
-echo -ne "Average energy per packet:         $energy_packet " >> $output_file2
-echo -ne "total_retransmit:         $total_retransmit " >> $output_file2
-echo -ne "energy_efficiency(nj/bit):         $enr_nj " >> $output_file2
-echo "" >> $output_file2
-
-echo -ne "$(($row*$row)) " >> $output_file
-echo -ne "$thr " >> $output_file
-echo -ne "$del " >> $output_file
-echo -ne "$s_packet " >> $output_file
-echo -ne "$r_packet " >> $output_file
-echo -ne "$d_packet " >> $output_file
-echo -ne "$del_ratio " >> $output_file
-echo -ne "$dr_ratio " >> $output_file
-echo -ne "$time " >> $output_file
-echo -ne "$t_energy " >> $output_file
-echo -ne "$energy_bit " >> $output_file
-echo -ne "$energy_byte " >> $output_file
-echo -ne "$energy_packet " >> $output_file
-echo -ne "$total_retransmit " >> $output_file
-echo -ne "$enr_nj " >> $output_file
-echo "" >> $output_file
-r=$(($r+1))
-#######################################END A ROUND
-done
-
-echo "Generating graphs ..."
 gnuplot plot.plt
-gnuplot plot_pdf.plt
-
-echo "Evaluation complete ..."
