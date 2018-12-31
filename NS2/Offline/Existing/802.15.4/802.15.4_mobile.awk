@@ -46,7 +46,7 @@ BEGIN {
 #	event = $1;    time = $2;    node = $3;    type = $4;    reason = $5;    node2 = $5;    
 #	packetid = $6;    mac_sub_type=$7;    size=$8;    source = $11;    dest = $10;    energy=$14;
 
-    event = $1 ;			time = $2 ;
+    strEvent = $1 ;			rTime = $2 ;
 	node = $3 ;
 	strAgt = $4 ;			idPacket = $6 ;
 	strType = $7 ;			nBytes = $8;
@@ -55,70 +55,48 @@ BEGIN {
 	idle_energy_consumption = $16;	sleep_energy_consumption = $18; 
 	transmit_energy_consumption = $20;	receive_energy_consumption = $22; 
 	num_retransmit = $30;
-
-    sub(/^_*/, "", node);
+	
+	sub(/^_*/, "", node);
 	sub(/_*$/, "", node);
 
-    # if(packet == "AGT" && sendTime[pckt_id] == 0 && (event == "+" || event == "s")){
-    #     if(time < startTime){
-    #         startTime = time;
-    #     }
-    #     sendTime[pckt_id] = time;
-    #     this_flow = flow_type;
-    # }
-
-    # if(packet == "AGT"  && event == "r" ){
-    #     if(time > stopTime){
-    #         stopTime = time;
-    #     }
-    #     receive_size += packet_size;
-    #     recvTime[pckt_id] = time
-    #     NumOfRecPackt ++;
-    # }
-
-    if (energy == "[energy") {
+	if (energy == "[energy") {
 		energy_consumption[node] = (idle_energy_consumption + sleep_energy_consumption + transmit_energy_consumption + receive_energy_consumption);
-		# printf("%d %15.5f\n", node, energy_consumption[node]);
+#		printf("%d %15.5f\n", node, energy_consumption[node]);
 	}
 
-	if( 0 && temp <=25 && energy == "[energy" && event == "D") {
-		# printf("%s %15.5f %d %s %15.5f %15.5f %15.5f %15.5f %15.5f \n", event, time, idPacket, energy, total_energy, idle_energy_consumption, sleep_energy_consumption, transmit_energy_consumption, receive_energy_consumption);
+	if( 0 && temp <=25 && energy == "[energy" && strEvent == "D") {
+		printf("%s %15.5f %d %s %15.5f %15.5f %15.5f %15.5f %15.5f \n", strEvent, rTime, idPacket, energy, total_energy, idle_energy_consumption, sleep_energy_consumption, transmit_energy_consumption, receive_energy_consumption);
 		temp+=1;
 	}
 
-	if ( strAgt == "AGT" ) {
+	if ( strAgt == "AGT"   &&   strType == "tcp" ) {
 		if (idPacket > idHighestPacket) idHighestPacket = idPacket;
 		if (idPacket < idLowestPacket) idLowestPacket = idPacket;
 
-		# if(time>rEndTime) rEndTime=time;
-        # printf("********************\n");
-		if(time<rStartTime) {
-			# printf("********************\n");
-			# printf("%10.0f %10.0f %10.0f\n",time, node, idPacket);
-			rStartTime=time;
-		}
+		if(rTime>rEndTime) rEndTime=rTime;
+		if(rTime<rStartTime) rStartTime=rTime;
 
-		if ( event == "s" ) {
-			nSentPackets += 1 ;	rSentTime[ idPacket ] = time ;
-			# printf("%15.5f\n", nSentPackets);
+		if ( strEvent == "s" ) {
+			nSentPackets += 1 ;	rSentTime[ idPacket ] = rTime ;
+#			printf("%15.5f\n", nSentPackets);
 		}
-#		if ( event == "r" ) {
-		if ( event == "r" && idPacket >= idLowestPacket) {
-			nReceivedPackets += 1 ;		nReceivedBytes += (nBytes-header);
-			# printf("%15.0f\n", $6); #nBytes);
-			rReceivedTime[ idPacket ] = time ;
+#		if ( strEvent == "r" ) {
+		if ( strEvent == "r" && idPacket >= idLowestPacket) {
+			nReceivedPackets += 1 ;		nReceivedBytes += nBytes;
+#			printf("%15.0f\n", nBytes);
+			rReceivedTime[ idPacket ] = rTime ;
 			rDelay[idPacket] = rReceivedTime[ idPacket] - rSentTime[ idPacket ];
-			# rTotalDelay += rReceivedTime[ idPacket] - rSentTime[ idPacket ];
+#			rTotalDelay += rReceivedTime[ idPacket] - rSentTime[ idPacket ];
 			rTotalDelay += rDelay[idPacket]; 
 
 #			printf("%15.5f   %15.5f\n", rDelay[idPacket], rReceivedTime[ idPacket] - rSentTime[ idPacket ]);
 		}
 	}
 
-	if( event == "D")
+	if( strEvent == "D"   &&   strType == "tcp" )
 	{
-		if(time>rEndTime) rEndTime=time;
-#		if(time<rStartTime) rStartTime=time;
+		if(rTime>rEndTime) rEndTime=rTime;
+		if(rTime<rStartTime) rStartTime=rTime;
 		nDropPackets += 1;
 	}
 
@@ -128,22 +106,18 @@ BEGIN {
 #		printf("%d %15d\n", idPacket, num_retransmit);
 		retransmit[idPacket] = num_retransmit;		
 	}
-	
-	# if(time<rStartTime) rStartTime=time;
-	if(time>rEndTime) rEndTime=time;
-
 
 }
 END {
    
-    time = rEndTime - rStartTime ;
-	rThroughput = (nReceivedBytes)/time*(8/1000);
+   	rTime = rEndTime - rStartTime ;
+	rThroughput = nReceivedBytes*8 / rTime;
 	rPacketDeliveryRatio = nReceivedPackets / nSentPackets * 100 ;
 	rPacketDropRatio = nDropPackets / nSentPackets * 100;
 
-   
+
 	for(i=0; i<max_node;i++) {
-	#printf("%d %15.5f\n", i, energy_consumption[i]);
+#		printf("%d %15.5f\n", i, energy_consumption[i]);
 		total_energy_consumption += energy_consumption[i];
 	}
 	if ( nReceivedPackets != 0 ) {
@@ -167,21 +141,24 @@ END {
 
 	printf( "%15.2f\n%15.5f\n%15.2f\n%15.2f\n%15.2f\n%10.2f\n%10.2f\n%10.5f\n", rThroughput, rAverageDelay, nSentPackets, nReceivedPackets, nDropPackets, rPacketDeliveryRatio, rPacketDropRatio,rTime) ;
 	printf("%15.5f\n%15.5f\n%15.5f\n%15.5f\n%15.0f\n%15.9f\n", total_energy_consumption, avg_energy_per_bit, avg_energy_per_byte, avg_energy_per_packet, total_retransmit, rEnergyEfficeincy);
-    # Printing individually
+	
+	# Printing individually
+
+	printf( "Time: %15.5f\n",rTime);
+	printf( "Throughput: %15.5f\n",rThroughput);
+	printf( "AverageDelay: %15.5f\n",rAverageDelay);
+    printf( "SentPackets: %15.2f\n",nSentPackets);
+    printf( "ReceivedPackets: %15.2f\n",nReceivedPackets);
+    printf( "DropPackets: %15.2f\n",nDropPackets);
+    printf( "PacketDeliveryRatio: %10.2f\n",rPacketDeliveryRatio);
+    printf( "PacketDropRatio: %10.2f\n",rPacketDropRatio);
     
-	# printf( "AverageDelay: %15.5f\n",rAverageDelay);
-    # printf( "SentPackets: %15.2f\n",nSentPackets);
-    # printf( "ReceivedPackets: %15.2f\n",nReceivedPackets);
-    # printf( "DropPackets: %15.2f\n",nDropPackets);
-    # printf( "PacketDeliveryRatio: %10.2f\n",rPacketDeliveryRatio);
-    # printf( "PacketDropRatio: %10.2f\n",rPacketDropRatio);
-    
-    # printf("**********************\nEnergy:\n");
-    # printf( "Total Energy Consumption: %15.2f\n",total_energy_consumption);
-    # printf( "avg_energy_per_bit: %15.5f\n",avg_energy_per_bit);
-    # printf( "avg_energy_per_byte: %15.2f\n",avg_energy_per_byte);
-    # printf( "avg_energy_per_packet: %15.2f\n",avg_energy_per_packet);
-    # printf( "total_retransmit: %15.2f\n",total_retransmit);
-    # printf( "Energy Efficeincy: %10.2f\n",rEnergyEfficeincy);
+    printf("**********************\nEnergy:\n");
+    printf( "Total Energy Consumption: %15.5f\n",total_energy_consumption);
+    printf( "avg_energy_per_bit: %15.5f\n",avg_energy_per_bit);
+    printf( "avg_energy_per_byte: %15.5f\n",avg_energy_per_byte);
+    printf( "avg_energy_per_packet: %15.5f\n",avg_energy_per_packet);
+    printf( "total_retransmit: %15.5f\n",total_retransmit);
+    printf( "Energy Efficeincy: %15.9f\n",rEnergyEfficeincy);
     
 }

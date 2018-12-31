@@ -40,7 +40,7 @@ set val(ifq) Queue/DropTail/PriQueue ;# interface queue type
 set val(ll) LL ;# link layer type
 set val(ant) Antenna/OmniAntenna ;# antenna model
 set val(ifqlen) 50 ;# max packet in ifq
-set val(rp) AODV ;# routing protocol
+set val(rp) DSDV ;# routing protocol
 set val(energymodel) EnergyModel;
 set val(initialenergy) 100;
 
@@ -319,7 +319,7 @@ proc finish {} {
 	close $tracefd
 	close $namtrace
 	close $topofile
-#        exec nam $nm &
+       exec nam $nm &
         exit 0
 }
 
