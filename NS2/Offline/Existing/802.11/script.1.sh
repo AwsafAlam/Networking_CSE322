@@ -21,7 +21,7 @@ for((p=0;p<4;p++));
 do
 ######## parameter variation ##########
 	
-for((r=1;r<=4;r++));
+for((r=1;r<=5;r++));
 do
 
 echo "total iteration: $iteration"
