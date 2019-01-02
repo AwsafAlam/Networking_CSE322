@@ -29,6 +29,7 @@
 set tcp2 [new Agent/TCP/Vegas]
 $ns attach-agent $n1 $tcp2
 
+$tcp1 set windowOption_ 9
 
   # Add a TCP receiving module to node n4
   set sink1 [new Agent/TCPSink]
