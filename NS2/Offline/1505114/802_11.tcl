@@ -50,8 +50,10 @@ set extra_time 10 ;#10
 #set tcp_src Agent/TCP/Vegas ;# Agent/TCP or Agent/TCP/Reno or Agent/TCP/Newreno or Agent/TCP/FullTcp/Sack or Agent/TCP/Vegas
 #set tcp_sink Agent/TCPSink ;# Agent/TCPSink or Agent/TCPSink/Sack1
 
-set tcp_src Agent/UDP
-set tcp_sink Agent/Null
+# set tcp_src Agent/UDP
+# set tcp_sink Agent/Null
+set tcp_src Agent/TCP/Vegas
+set tcp_sink Agent/TCPSink
 
 # =====================
 # source / sink options
@@ -94,15 +96,15 @@ set conges_data [open conges_data.txt w]
 
 
 # Initialize ns
-set ns_ [new Simulator]
+set ns [new Simulator]
 
 set tracefd [open $tr w]
-$ns_ trace-all $tracefd
+$ns trace-all $tracefd
 
-#$ns_ use-newtrace ;# use the new wireless trace file format
+#$ns use-newtrace ;# use the new wireless trace file format
 
 # set namtrace [open $nm w]
-# $ns_ namtrace-all-wireless $namtrace $x_dim $y_dim
+# $ns namtrace-all-wireless $namtrace $x_dim $y_dim
 
 set topofile [open $topo_file "w"]
 
@@ -114,7 +116,7 @@ $topo load_flatgrid $x_dim $y_dim
 create-god [expr $num_row * $num_col ] ;# general operations director
 
 
-$ns_ node-config -adhocRouting $val(rp) -llType $val(ll) \
+$ns node-config -adhocRouting $val(rp) -llType $val(ll) \
      -macType $val(mac)  -ifqType $val(ifq) \
      -ifqLen $val(ifqlen) -antType $val(ant) \
      -propType $val(prop) -phyType $val(netif) \
@@ -134,11 +136,11 @@ $ns_ node-config -adhocRouting $val(rp) -llType $val(ll) \
 
 puts "start node creation"
 for {set i 0} {$i < [expr $num_row*$num_col]} {incr i} {
-	set node_($i) [$ns_ node]
+	set node_($i) [$ns node]
 #	$node_($i) random-motion 0
     set st_ime [expr int([expr $start_time+$time_duration]*rand())]
 
-	$ns_ at $st_ime "$node_($i) setdest [expr $x_dim*rand()] [expr $y_dim*rand()] $speed_node"
+	$ns at $st_ime "$node_($i) setdest [expr $x_dim*rand()] [expr $y_dim*rand()] $speed_node"
 }
 
 
@@ -195,9 +197,9 @@ for {set i 0} {$i < [expr $num_parallel_flow + $num_cross_flow + $num_random_flo
 	set null_($i) [new $tcp_sink]
 	$udp_($i) set fid_ $i
 	if { [expr $i%2] == 0} {
-		$ns_ color $i Blue
+		$ns color $i Blue
 	} else {
-		$ns_ color $i Red
+		$ns color $i Red
 	}
 
 } 
@@ -208,17 +210,17 @@ for {set i 0} {$i < [expr $num_parallel_flow + $num_cross_flow + $num_random_flo
 for {set i 0} {$i < $num_parallel_flow } {incr i} {
 	set udp_node $i
 	set null_node [expr $i+(($num_col)*($num_row-1))];#CHNG
-	$ns_ attach-agent $node_($udp_node) $udp_($i)
-  	$ns_ attach-agent $node_($null_node) $null_($i)
+	$ns attach-agent $node_($udp_node) $udp_($i)
+  	$ns attach-agent $node_($null_node) $null_($i)
 	puts -nonewline $topofile "PARALLEL: Src: $udp_node Dest: $null_node\n"
 } 
 
-#  $ns_ attach-agent $node_(0) $udp_(0)
-#  $ns_ attach-agent $node_(6) $null_(0)
+#  $ns attach-agent $node_(0) $udp_(0)
+#  $ns attach-agent $node_(6) $null_(0)
 
 #CHNG
 for {set i 0} {$i < $num_parallel_flow } {incr i} {
-     $ns_ connect $udp_($i) $null_($i)
+     $ns connect $udp_($i) $null_($i)
 	 $ns  at  0.0  "plotWindow $udp_($i)  $conges_data"
 }
 #CHNG
@@ -232,7 +234,7 @@ for {set i 0} {$i < $num_parallel_flow } {incr i} {
 
 #CHNG
 for {set i 0} {$i < $num_parallel_flow } {incr i} {
-     $ns_ at [expr $start_time+$i*$parallel_start_gap] "$cbr_($i) start"
+     $ns at [expr $start_time+$i*$parallel_start_gap] "$cbr_($i) start"
 }
 ###############---------------- CROSS FLOW
 #CHNG
@@ -242,8 +244,8 @@ set k $num_parallel_flow
 for {set i 0} {$i < $num_cross_flow } {incr i} {
 	set udp_node [expr $i*$num_col];#CHNG
 	set null_node [expr ($i+1)*$num_col-1];#CHNG
-	$ns_ attach-agent $node_($udp_node) $udp_($k)
-  	$ns_ attach-agent $node_($null_node) $null_($k)
+	$ns attach-agent $node_($udp_node) $udp_($k)
+  	$ns attach-agent $node_($null_node) $null_($k)
 	puts -nonewline $topofile "CROSS: Src: $udp_node Dest: $null_node\n"
 	incr k
 } 
@@ -252,7 +254,7 @@ for {set i 0} {$i < $num_cross_flow } {incr i} {
 set k $num_parallel_flow
 #CHNG
 for {set i 0} {$i < $num_cross_flow } {incr i} {
-	$ns_ connect $udp_($k) $null_($k)
+	$ns connect $udp_($k) $null_($k)
 	$ns  at  0.0  "plotWindow $udp_($k)  $conges_data"
 
 	incr k
@@ -273,7 +275,7 @@ for {set i 0} {$i < $num_cross_flow } {incr i} {
 set k $num_parallel_flow
 #CHNG
 for {set i 0} {$i < $num_cross_flow } {incr i} {
-	$ns_ at [expr $start_time+$i*$cross_start_gap] "$cbr_($k) start"
+	$ns at [expr $start_time+$i*$cross_start_gap] "$cbr_($k) start"
 	incr k
 }
 #########################------------RANDOM FLOW
@@ -286,15 +288,15 @@ for {set i 1} {$i < [expr $num_random_flow+1]} {incr i} {
 	while {$null_node==$udp_node} {
 		set null_node [expr int($num_node*rand())] ;# dest node
 	}
-	$ns_ attach-agent $node_($udp_node) $udp_($rt)
-  	$ns_ attach-agent $node_($null_node) $null_($rt)
+	$ns attach-agent $node_($udp_node) $udp_($rt)
+  	$ns attach-agent $node_($null_node) $null_($rt)
 	puts -nonewline $topofile "RANDOM:  Src: $udp_node Dest: $null_node\n"
 	incr rt
 } 
 
 set rt $r
 for {set i 1} {$i < [expr $num_random_flow+1]} {incr i} {
-	$ns_ connect $udp_($rt) $null_($rt)
+	$ns connect $udp_($rt) $null_($rt)
 	$ns  at  0.0  "plotWindow $udp_($rt)  $conges_data"
 	incr rt
 }
@@ -310,7 +312,7 @@ for {set i 1} {$i < [expr $num_random_flow+1]} {incr i} {
 
 set rt $r
 for {set i 1} {$i < [expr $num_random_flow+1]} {incr i} {
-	$ns_ at [expr $start_time] "$cbr_($rt) start"
+	$ns at [expr $start_time] "$cbr_($rt) start"
 	incr rt
 }
 puts "flow creation complete"
@@ -331,22 +333,22 @@ proc plotWindow {tcpSource outfile} {
 # Tell nodes when the simulation ends
 #
 for {set i 0} {$i < [expr $num_row*$num_col] } {incr i} {
-    $ns_ at [expr $start_time+$time_duration] "$node_($i) reset";
+    $ns at [expr $start_time+$time_duration] "$node_($i) reset";
 }
-$ns_ at [expr $start_time+$time_duration +$extra_time] "finish"
-$ns_ at [expr $start_time+$time_duration +20] "puts \"NS Exiting...\"; $ns_ halt"
-# $ns_ at [expr $start_time+$time_duration +$extra_time] "$ns_ nam-end-wireless [$ns_ now]; puts \"NS Exiting...\"; $ns_ halt"
+$ns at [expr $start_time+$time_duration +$extra_time] "finish"
+$ns at [expr $start_time+$time_duration +20] "puts \"NS Exiting...\"; $ns halt"
+# $ns at [expr $start_time+$time_duration +$extra_time] "$ns nam-end-wireless [$ns now]; puts \"NS Exiting...\"; $ns halt"
 
-$ns_ at [expr $start_time+$time_duration/2] "puts \"half of the simulation is finished\""
-$ns_ at [expr $start_time+$time_duration] "puts \"end of simulation duration\""
+$ns at [expr $start_time+$time_duration/2] "puts \"half of the simulation is finished\""
+$ns at [expr $start_time+$time_duration] "puts \"end of simulation duration\""
 
 proc finish {} {
 	puts "finishing"
-	# global ns_ tracefd namtrace topofile nm
-	global ns_ tracefd topofile
-	#global ns_ topofile
+	# global ns tracefd namtrace topofile nm
+	global ns tracefd topofile
+	#global ns topofile
 
-	$ns_ flush-trace
+	$ns flush-trace
 	close $tracefd
 	# close $namtrace
 	close $topofile
@@ -356,9 +358,9 @@ proc finish {} {
 }
 
 for {set i 0} {$i < [expr $num_row*$num_col]  } { incr i} {
-	$ns_ initial_node_pos $node_($i) 4
+	$ns initial_node_pos $node_($i) 4
 }
 
 puts "Starting Simulation..."
-$ns_ run 
+$ns run 
 

@@ -45,7 +45,8 @@ datapoints=5
 if [ $option -eq 1 ] 
 then
 tcl=802_11.tcl
-awk_file=awk_udp.awk
+# awk_file=awk_udp.awk
+awk_file=awk_tcp.awk
 dist=$dist_11
 elif [ $option -eq 2 ] 
 then
@@ -302,8 +303,6 @@ echo "set ylabel \"Packet delivery Ratio\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:7 title 'Packet delivery Ratio' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Packet Drop Ratio\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:8 title 'Packet Drop Ratio' with linespoints lw 2" >> plot.plt
-echo "set ylabel \"Congestion Window size\"" >> plot.plt
-echo "plot  \"conges_data.txt\" using 1:2  with lines title \"$tcl Congestion Window\" lw 2" >> plot.plt
 
 echo "set title \"$tcl Comparing Energy variation\"" >> plot.plt
 echo "set ylabel \"Total Energy\"" >> plot.plt
@@ -319,6 +318,10 @@ echo "plot \"data_$p.out\" using 1:14 title 'Total retransmit' with linespoints 
 echo "set ylabel \"Efficiency\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:15 title 'Efficiency' with linespoints lw 2" >> plot.plt
 
+echo "set title \"$tcl Comparing variation in congestion window size with time\"" >> plot.plt
+echo "set xlabel \"Time\"" >> plot.plt
+echo "set ylabel \"Congestion Window size\"" >> plot.plt
+echo "plot  \"conges_data.txt\" using 1:2  with lines title \"$tcl Congestion Window\" lw 2" >> plot.plt
 
 echo "Plot file generation complete ..."
 
