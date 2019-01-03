@@ -90,6 +90,7 @@ Mac/802_11 set dutyCycle_ cbr_interval
 # set nm 802_11_wireless.nam
 set tr trace.tr
 set topo_file topo_802.11.txt
+set conges_data [open conges_data.txt w]
 
 
 # Initialize ns
@@ -218,6 +219,7 @@ for {set i 0} {$i < $num_parallel_flow } {incr i} {
 #CHNG
 for {set i 0} {$i < $num_parallel_flow } {incr i} {
      $ns_ connect $udp_($i) $null_($i)
+	 $ns  at  0.0  "plotWindow $udp_($i)  $conges_data"
 }
 #CHNG
 for {set i 0} {$i < $num_parallel_flow } {incr i} {
@@ -251,6 +253,8 @@ set k $num_parallel_flow
 #CHNG
 for {set i 0} {$i < $num_cross_flow } {incr i} {
 	$ns_ connect $udp_($k) $null_($k)
+	$ns  at  0.0  "plotWindow $udp_($k)  $conges_data"
+
 	incr k
 }
 #CHNG
@@ -291,6 +295,7 @@ for {set i 1} {$i < [expr $num_random_flow+1]} {incr i} {
 set rt $r
 for {set i 1} {$i < [expr $num_random_flow+1]} {incr i} {
 	$ns_ connect $udp_($rt) $null_($rt)
+	$ns  at  0.0  "plotWindow $udp_($rt)  $conges_data"
 	incr rt
 }
 set rt $r
@@ -310,6 +315,18 @@ for {set i 1} {$i < [expr $num_random_flow+1]} {incr i} {
 }
 puts "flow creation complete"
 ######################---------------------- END OF FLOW GENERATION
+#======= Congestion Window size ============
+proc plotWindow {tcpSource outfile} {
+     global ns
+
+     set now [$ns now]
+     set cwnd [$tcpSource set cwnd_]
+
+  	###Print TIME CWND   for  gnuplot to plot progressing on CWND
+     puts  $outfile  "$now $cwnd"
+
+     $ns at [expr $now+0.2] "plotWindow $tcpSource  $outfile"
+  }
 
 # Tell nodes when the simulation ends
 #

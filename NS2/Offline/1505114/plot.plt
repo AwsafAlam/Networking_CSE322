@@ -1,7 +1,7 @@
 set   autoscale
 set terminal pdf
 set output "802_15_4.tcl.1.pdf"
-set title "802.11 Comparing metrics with variation in number of nodes"
+set title "802_15_4.tcl Comparing metrics with variation in number of nodes"
 set xlabel "Number of Nodes"
 set ylabel "Throughput"
 plot "data_1.out" using 1:2 title 'Throughput' with linespoints lw 2
@@ -17,7 +17,9 @@ set ylabel "Packet delivery Ratio"
 plot "data_1.out" using 1:7 title 'Packet delivery Ratio' with linespoints lw 2
 set ylabel "Packet Drop Ratio"
 plot "data_1.out" using 1:8 title 'Packet Drop Ratio' with linespoints lw 2
-set title "802.11 Comparing Energy variation"
+set ylabel "Congestion Window size"
+plot  "conges_data.txt" using 1:2  with lines title "802_15_4.tcl Congestion Window" lw 2
+set title "802_15_4.tcl Comparing Energy variation"
 set ylabel "Total Energy"
 plot "data_1.out" using 1:10 title 'Total Energy' with linespoints lw 2
 set ylabel "Energy Per bit"

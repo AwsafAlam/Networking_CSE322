@@ -22,10 +22,9 @@ printf "Choose Variation \n-------------------\n\
 1 - Number of mobile nodes\n\
 2. Number of flows\n\
 3. Number of packets per second\n\
-4. Packet Size\n\
-5. Speed of the mobile nodes\n\
-6. Hop distance\n\
-7. Congestion window size over time\n--------------\n"
+4. Speed of the mobile nodes\n\
+5. Packet Size\n\
+6. Hop distance\n--------------\n"
 read p
 
 
@@ -72,26 +71,30 @@ dr_ratio=0.0;time=0.0;t_energy=0.0;energy_bit=0.0;energy_byte=0.0;energy_packet=
 
 i=0
 
-if [ $p -eq 1 ] 
-then
+if [ $p -eq 1 ]; then
 echo "------------- VARIAION IN NODE NUMBER -----------------";
 row=$(($r*2))
 
-elif [ $p -eq 2 ]
-then
+elif [ $p -eq 2 ]; then
 echo "------------- VARIAION IN FLOW -----------------";
 flow_no=$(($r*2))
 
-elif [ $p -eq 3 ]
-then
+elif [ $p -eq 3 ]; then
 echo "------------- VARIAION IN PACKET PER SEC -----------------";
 
 pckt_per_sec=$(($r*100))
 
-elif [ $p -eq 4 ]
-then
+elif [ $p -eq 4 ]; then
 echo "------------- VARIAION IN SPEED -----------------";
 speed=$(($r*5))
+
+elif [ $p -eq 5 ]; then
+echo "------------- VARIAION IN Packet Size -----------------";
+pckt_size=$(($r*12))
+
+elif [ $p -eq 6 ]; then
+echo "------------- VARIAION IN Hop distance -----------------";
+dist=$((10 + $dist))
 
 fi
 
@@ -100,7 +103,7 @@ fi
 	#################START AN ITERATION #############
 	echo "		EXECUTING $(($i+1)) th ITERATION"
 
-	if [ `echo $i%2 | bc` -eq 0 ] 
+	if [ `echo $i%2 | bc` -eq 0 ]
 	then
 		topology=1 # Grid
 		# routing=DSDV
@@ -111,6 +114,8 @@ fi
 
 	# ns 802_11.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
 	echo "Row : $row"
+	echo "Flow : $flow_no"
+	echo "Speed: $speed"
 	ns $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec #$routing $time_sim
 	echo "SIMULATION COMPLETE. BUILDING STAT......"
 	under="_"
@@ -176,8 +181,7 @@ fi
 
 	done < "$output_file_format$under$r$under$i.out"
 
-	if [ $failcount -ge 3 ] 
-	then
+	if [ $failcount -ge 3 ]; then
 		echo "********************* Failed to generated output ***************\n";
 		break;
 	fi
@@ -222,25 +226,25 @@ fi
 	echo -ne "energy_efficiency(nj/bit):         $enr_nj " >> $output_file2
 	echo "" >> $output_file2
 
-	if [ $p -eq 1 ] 
-	then
+	if [ $p -eq 1 ]; then
 	echo -ne "$(($row*$row)) " >> $output_file
 
-	elif [ $p -eq 2 ]
-	then
+	elif [ $p -eq 2 ]; then
 	# echo "------------- VARIAION IN FLOW -----------------";
 	echo -ne "$(($flow_no)) " >> $output_file
 
-	elif [ $p -eq 3 ]
-	then
+	elif [ $p -eq 3 ]; then
 	# echo "------------- VARIAION IN PACKET PER SEC -----------------";
 	echo -ne "$(($pckt_per_sec)) " >> $output_file
 
-	elif [ $p -eq 4 ]
-	then
-	# echo "------------- VARIAION IN SPEED -----------------";
+	elif [ $p -eq 4 ]; then
 	echo -ne "$(($speed)) " >> $output_file
 
+	elif [ $p -eq 5 ]; then
+	echo -ne "$(($pckt_size)) " >> $output_file
+
+	elif [ $p -eq 6 ]; then
+		echo -ne "$(($dist)) " >> $output_file
 	fi
 
 	echo -ne "$thr " >> $output_file
@@ -263,22 +267,25 @@ fi
 done
 
 echo " Generating graphs ... for $p"
-if [ $p -eq 1 ] 
-then
+
+if [ $p -eq 1 ]; then
 echo "set title \"$tcl Comparing metrics with variation in number of nodes\"" >> plot.plt
 echo "set xlabel \"Number of Nodes\"" >> plot.plt
-elif [ $p -eq 2 ]
-then
+elif [ $p -eq 2 ]; then
 echo "set title \"$tcl Comparing metrics with variation in flow\"" >> plot.plt
 echo "set xlabel \"Number of Flows\"" >> plot.plt
-elif [ $p -eq 3 ]
-then
+elif [ $p -eq 3 ]; then
 echo "set title \"$tcl Comparing metrics with variation in Packets per second\"" >> plot.plt
 echo "set xlabel \"Packets per second\"" >> plot.plt
-elif [ $p -eq 4 ]
-then
+elif [ $p -eq 4 ]; then
 echo "set title \"$tcl Comparing metrics with variation in speed\"" >> plot.plt
 echo "set xlabel \"Speed\"" >> plot.plt
+elif [ $p -eq 5 ]; then
+echo "set title \"$tcl Comparing metrics with variation in Packet Size\"" >> plot.plt
+echo "set xlabel \"Packet Size\"" >> plot.plt
+elif [ $p -eq 6 ]; then
+echo "set title \"$tcl Comparing metrics with variation in Grid Dimension\"" >> plot.plt
+echo "set xlabel \"Grid Dimension\"" >> plot.plt
 fi
 
 echo "set ylabel \"Throughput\"" >> plot.plt
@@ -295,6 +302,8 @@ echo "set ylabel \"Packet delivery Ratio\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:7 title 'Packet delivery Ratio' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Packet Drop Ratio\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:8 title 'Packet Drop Ratio' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Congestion Window size\"" >> plot.plt
+echo "plot  \"conges_data.txt\" using 1:2  with lines title \"$tcl Congestion Window\" lw 2" >> plot.plt
 
 echo "set title \"$tcl Comparing Energy variation\"" >> plot.plt
 echo "set ylabel \"Total Energy\"" >> plot.plt
