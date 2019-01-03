@@ -17,15 +17,6 @@ printf "Choose Network Topology \n-------------------\n\
 3 - Wimax 802.16\n-------------\n"
 read option
 
-if [ $option -eq 1 ] 
-then
-tcl=802_11.tcl
-awk_file=awk_udp.awk
-elif [ $option -eq 2 ] 
-then
-tcl=802_15_4.tcl
-awk_file=awk_tcp.awk
-fi
 
 printf "Choose Variation \n-------------------\n\
 1 - Number of mobile nodes\n\
@@ -37,10 +28,6 @@ printf "Choose Variation \n-------------------\n\
 7. Congestion window size over time\n--------------\n"
 read p
 
-# ============== Graph init
-echo "set   autoscale" >> plot.plt
-echo "set terminal pdf" >> plot.plt
-echo "set output \"$tcl.$p.pdf\"" >> plot.plt
 
 ######## parameter initialization ##########
 hop_15_4=5
@@ -55,6 +42,23 @@ flow_no=5
 speed=25
 datapoints=5
 
+# === Simulation file
+if [ $option -eq 1 ] 
+then
+tcl=802_11.tcl
+awk_file=awk_udp.awk
+dist=$dist_11
+elif [ $option -eq 2 ] 
+then
+tcl=802_15_4.tcl
+awk_file=awk_tcp.awk
+dist=$dist_15_4
+fi
+
+# ============== Graph init
+echo "set   autoscale" >> plot.plt
+echo "set terminal pdf" >> plot.plt
+echo "set output \"$tcl.$p.pdf\"" >> plot.plt
 
 
 for((r=1;r<=$datapoints;r++));
@@ -107,7 +111,7 @@ fi
 
 	# ns 802_11.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
 	echo "Row : $row"
-	ns $tcl $row $topology $flow_no $speed $dist_11 $pckt_size $pckt_per_sec #$routing $time_sim
+	ns $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec #$routing $time_sim
 	echo "SIMULATION COMPLETE. BUILDING STAT......"
 	under="_"
 	awk -f $awk_file trace.tr > "$output_file_format$under$r$under$i.out"
@@ -259,21 +263,21 @@ fi
 done
 
 echo " Generating graphs ... for $p"
-if [ $p -eq 0 ] 
+if [ $p -eq 1 ] 
 then
-echo "set title \"802.11 Comparing metrics with variation in number of nodes\"" >> plot.plt
+echo "set title \"$tcl Comparing metrics with variation in number of nodes\"" >> plot.plt
 echo "set xlabel \"Number of Nodes\"" >> plot.plt
-elif [ $p -eq 1 ]
-then
-echo "set title \"802.11 Comparing metrics with variation in flow\"" >> plot.plt
-echo "set xlabel \"Number of Flows\"" >> plot.plt
 elif [ $p -eq 2 ]
 then
-echo "set title \"802.11 Comparing metrics with variation in Packets per second\"" >> plot.plt
-echo "set xlabel \"Packets per second\"" >> plot.plt
+echo "set title \"$tcl Comparing metrics with variation in flow\"" >> plot.plt
+echo "set xlabel \"Number of Flows\"" >> plot.plt
 elif [ $p -eq 3 ]
 then
-echo "set title \"802.11 Comparing metrics with variation in speed\"" >> plot.plt
+echo "set title \"$tcl Comparing metrics with variation in Packets per second\"" >> plot.plt
+echo "set xlabel \"Packets per second\"" >> plot.plt
+elif [ $p -eq 4 ]
+then
+echo "set title \"$tcl Comparing metrics with variation in speed\"" >> plot.plt
 echo "set xlabel \"Speed\"" >> plot.plt
 fi
 
@@ -292,7 +296,7 @@ echo "plot \"data_$p.out\" using 1:7 title 'Packet delivery Ratio' with linespoi
 echo "set ylabel \"Packet Drop Ratio\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:8 title 'Packet Drop Ratio' with linespoints lw 2" >> plot.plt
 
-echo "set title \"802.11 Comparing Energy variation\"" >> plot.plt
+echo "set title \"$tcl Comparing Energy variation\"" >> plot.plt
 echo "set ylabel \"Total Energy\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:10 title 'Total Energy' with linespoints lw 2" >> plot.plt 
 echo "set ylabel \"Energy Per bit\"" >> plot.plt

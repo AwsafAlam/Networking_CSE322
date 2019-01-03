@@ -1,6 +1,6 @@
-#============================================ 802.11 in Grid topology with cross folw
+#============================================ 802.11 ================================
 # Network Parameters
-# ==============================================================================
+set cbr_type CBR
 set cbr_size [lindex $argv 5]; #4,8,16,32,64
 set cbr_rate 11.0Mb
 set cbr_pckt_per_sec [lindex $argv 6]
@@ -10,11 +10,11 @@ set num_col [lindex $argv 0] ;#number of column
 set x_dim [lindex $argv 4] ;# 150
 set y_dim [lindex $argv 4] ;# 150
 set time_duration 25 ; #[lindex $argv 5] ;#50
-set start_time 50 ;#100
+set start_time 50 ;# 100
 set parallel_start_gap 0.0
 set cross_start_gap 0.0
 
-#============================================== ENERGY PARAMETERS
+#============= ENERGY PARAMETERS =====================
 set val(energymodel_11)    EnergyModel     ;
 set val(initialenergy_11)  1000            ;# Initial energy in Joules
 
@@ -38,6 +38,12 @@ set num_parallel_flow [lindex $argv 2]
 set num_cross_flow [lindex $argv 2]
 set speed_node [lindex $argv 3]
 
+if { $num_random_flow > $num_col} {
+	set num_random_flow  [expr $num_col-1]
+	set num_cross_flow  [expr $num_col-1]
+	set num_parallel_flow  [expr $num_col-1]
+}
+
 set grid [lindex $argv 1]
 set extra_time 10 ;#10
 
@@ -47,7 +53,10 @@ set extra_time 10 ;#10
 set tcp_src Agent/UDP
 set tcp_sink Agent/Null
 
-
+# =====================
+# source / sink options
+# =====================
+# UDP:		Agent/UDP		Agent/Null
 # TAHOE:	Agent/TCP		Agent/TCPSink
 # RENO:		Agent/TCP/Reno		Agent/TCPSink
 # NEWRENO:	Agent/TCP/Newreno	Agent/TCPSink
@@ -65,10 +74,8 @@ set tcp_sink Agent/Null
 
 set val(chan) Channel/WirelessChannel ;# channel type
 set val(prop) Propagation/TwoRayGround ;# radio-propagation model
-#set val(prop) Propagation/FreeSpace ;# radio-propagation model
 set val(netif) Phy/WirelessPhy ;# network interface type
 set val(mac) Mac/802_11 ;# MAC type
-#set val(mac) SMac/802_15_4 ;# MAC type
 set val(ifq) Queue/DropTail/PriQueue ;# interface queue type
 set val(ll) LL ;# link layer type
 set val(ant) Antenna/OmniAntenna ;# antenna model
@@ -82,7 +89,7 @@ Mac/802_11 set dutyCycle_ cbr_interval
 
 # set nm 802_11_wireless.nam
 set tr trace.tr
-set topo_file topo.txt
+set topo_file topo_802.11.txt
 
 
 # Initialize ns
@@ -128,6 +135,9 @@ puts "start node creation"
 for {set i 0} {$i < [expr $num_row*$num_col]} {incr i} {
 	set node_($i) [$ns_ node]
 #	$node_($i) random-motion 0
+    set st_ime [expr int([expr $start_time+$time_duration]*rand())]
+
+	$ns_ at $st_ime "$node_($i) setdest [expr $x_dim*rand()] [expr $y_dim*rand()] $speed_node"
 }
 
 
@@ -153,17 +163,10 @@ while {$i < $num_row } {
 	$node_($m) set X_ $x_pos;
 	$node_($m) set Y_ $y_pos;
 	$node_($m) set Z_ 0.0
-#	puts "$m"
 	puts -nonewline $topofile "$m x: [$node_($m) set X_] y: [$node_($m) set Y_] \n"
     }
     incr i;
 }; 
-
-for {set i 0} {$i < [expr $num_row*$num_col]} {incr i} {
-    set movingTime [expr int([expr $start_time+$time_duration]*rand())]
-    $ns_ at $movingTime " $node_($i) setdest [expr $x_dim*rand()] [expr $y_dim*rand()] $speed_node"
-
-} 
 
 if {$grid == 1} {
 	puts "GRID topology"
@@ -305,7 +308,7 @@ for {set i 1} {$i < [expr $num_random_flow+1]} {incr i} {
 	$ns_ at [expr $start_time] "$cbr_($rt) start"
 	incr rt
 }
-
+puts "flow creation complete"
 ######################---------------------- END OF FLOW GENERATION
 
 # Tell nodes when the simulation ends
