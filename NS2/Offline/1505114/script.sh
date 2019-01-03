@@ -19,7 +19,7 @@ read option
 
 
 printf "Choose Variation \n-------------------\n\
-1 - Number of mobile nodes\n\
+1. Number of mobile nodes\n\
 2. Number of flows\n\
 3. Number of packets per second\n\
 4. Speed of the mobile nodes\n\
@@ -75,28 +75,27 @@ i=0
 if [ $p -eq 1 ]; then
 echo "------------- VARIAION IN NODE NUMBER -----------------";
 row=$(($r*2))
-
+vari=$(($row*$row))
 elif [ $p -eq 2 ]; then
 echo "------------- VARIAION IN FLOW -----------------";
 flow_no=$(($r*2))
-
+vari=$flow_no
 elif [ $p -eq 3 ]; then
 echo "------------- VARIAION IN PACKET PER SEC -----------------";
-
 pckt_per_sec=$(($r*100))
-
+vari=$pckt_per_sec
 elif [ $p -eq 4 ]; then
 echo "------------- VARIAION IN SPEED -----------------";
 speed=$(($r*5))
-
+vari=$speed
 elif [ $p -eq 5 ]; then
 echo "------------- VARIAION IN Packet Size -----------------";
 pckt_size=$(($r*12))
-
+vari=$pckt_size
 elif [ $p -eq 6 ]; then
 echo "------------- VARIAION IN Hop distance -----------------";
 dist=$((10 + $dist))
-
+vari=$dist
 fi
 
 	while [ $i -lt $iteration ]
@@ -120,7 +119,7 @@ fi
 	ns $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec #$routing $time_sim
 	echo "SIMULATION COMPLETE. BUILDING STAT......"
 	under="_"
-	awk -f $awk_file trace.tr > "$output_file_format$under$r$under$i.out"
+	awk -f $awk_file trace.tr > "$output_file_format$under$i$under$r.out"
 
 	ok=1;
 	while read val
@@ -180,7 +179,7 @@ fi
 
 		echo "$val"
 
-	done < "$output_file_format$under$r$under$i.out"
+	done < "$output_file_format$under$i$under$r.out"
 
 	if [ $failcount -ge 3 ]; then
 		echo "********************* Failed to generated output ***************\n";
@@ -192,12 +191,13 @@ fi
 		ok=1;
 		continue
 	fi
+	
+	# value of single iteration obtained here.
+	mv "conges_data.txt" "conges_data_$i$under$r.$vari.out"
+	
+	#################END AN ITERATION
 	i=$(($i+1))
 	l=0
-
-	# value of single iteration obtained here.
-
-	#################END AN ITERATION
 	done
 
 	enr_nj=$(echo "scale=2; $energy_efficiency*1000.0" | bc)
@@ -208,6 +208,33 @@ fi
 
 	output_file2="$dir$output_file_format$under.out"
 	output_file="data_$p.out"
+
+	if [ $p -eq 1 ]; then
+		echo -ne "$(($row*$row)) " >> $output_file
+		echo -ne "$(($row*$row)) " >> $output_file2
+
+	elif [ $p -eq 2 ]; then
+	# echo "------------- VARIAION IN FLOW -----------------";
+	echo -ne "$flow_no " >> $output_file
+	echo -ne "$flow_no " >> $output_file2
+
+	elif [ $p -eq 3 ]; then
+	# echo "------------- VARIAION IN PACKET PER SEC -----------------";
+	echo -ne "$pckt_per_sec " >> $output_file
+	echo -ne "$pckt_per_sec " >> $output_file2
+
+	elif [ $p -eq 4 ]; then
+	echo -ne "$speed " >> $output_file
+	echo -ne "$speed " >> $output_file2
+
+	elif [ $p -eq 5 ]; then
+	echo -ne "$pckt_size " >> $output_file
+	echo -ne "$pckt_size " >> $output_file2
+
+	elif [ $p -eq 6 ]; then
+	echo -ne "$dist " >> $output_file
+	echo -ne "$dist " >> $output_file2
+	fi
 
 	echo -ne "Throughput:          $thr " >> $output_file2
 	echo -ne "AverageDelay:         $del " >> $output_file2
@@ -227,27 +254,6 @@ fi
 	echo -ne "energy_efficiency(nj/bit):         $enr_nj " >> $output_file2
 	echo "" >> $output_file2
 
-	if [ $p -eq 1 ]; then
-	echo -ne "$(($row*$row)) " >> $output_file
-
-	elif [ $p -eq 2 ]; then
-	# echo "------------- VARIAION IN FLOW -----------------";
-	echo -ne "$(($flow_no)) " >> $output_file
-
-	elif [ $p -eq 3 ]; then
-	# echo "------------- VARIAION IN PACKET PER SEC -----------------";
-	echo -ne "$(($pckt_per_sec)) " >> $output_file
-
-	elif [ $p -eq 4 ]; then
-	echo -ne "$(($speed)) " >> $output_file
-
-	elif [ $p -eq 5 ]; then
-	echo -ne "$(($pckt_size)) " >> $output_file
-
-	elif [ $p -eq 6 ]; then
-		echo -ne "$(($dist)) " >> $output_file
-	fi
-
 	echo -ne "$thr " >> $output_file
 	echo -ne "$del " >> $output_file
 	echo -ne "$s_packet " >> $output_file
@@ -264,7 +270,8 @@ fi
 	echo -ne "$enr_nj " >> $output_file
 	echo "" >> $output_file
 	# r=$(($r+1))
-	#######################################END A ROUND
+	####################################### END A ROUND
+
 done
 
 echo " Generating graphs ... for $p"
@@ -321,9 +328,27 @@ echo "plot \"data_$p.out\" using 1:15 title 'Efficiency' with linespoints lw 2" 
 echo "set title \"$tcl Comparing variation in congestion window size with time\"" >> plot.plt
 echo "set xlabel \"Time\"" >> plot.plt
 echo "set ylabel \"Congestion Window size\"" >> plot.plt
-echo "plot  \"conges_data.txt\" using 1:2  with lines title \"$tcl Congestion Window\" lw 2" >> plot.plt
+echo -ne "plot " >> plot.plt
+
+find -iname "conges_data_*.out"| cut -c 3- | while read plt_flie
+do
+tmp=`echo "$plt_flie" | cut -d "." -f2`
+# echo $tmp
+echo -ne "\"$plt_flie\" using 1:2  with lines title \"$tmp\", " >> plot.plt
+
+done
+echo "" >> plot.plt
+
+find -iname "conges_data_*.out"| cut -c 3- | while read plt_flie
+do
+tmp=`echo "$plt_flie" | cut -d "." -f2`
+# echo $tmp
+echo "plot \"$plt_flie\" using 1:2  with lines title \"$tmp\" lw 2, " >> plot.plt
+
+done
 
 echo "Plot file generation complete ..."
 
 gnuplot plot.plt
 echo "Graph generation complete ..."
+# rm *.out
