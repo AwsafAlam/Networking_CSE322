@@ -17,11 +17,14 @@ echo "set   autoscale" >> plot.plt
 echo "set terminal pdf" >> plot.plt
 echo "set output \"802.11.pdf\"" >> plot.plt
 
+echo "Enter Number of data points"
+read datapoints
+
 for((p=0;p<4;p++));
 do
 ######## parameter variation ##########
 	
-for((r=1;r<=5;r++));
+for((r=1;r<=$datapoints;r++));
 do
 
 echo "total iteration: $iteration"

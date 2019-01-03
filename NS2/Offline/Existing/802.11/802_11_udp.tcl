@@ -1,4 +1,4 @@
-################################################################ 802.11 in Grid topology with cross folw
+#============================================ 802.11 in Grid topology with cross folw
 set cbr_size 64 ; #[lindex $argv 2]; #4,8,16,32,64
 set cbr_rate 11.0Mb
 set cbr_pckt_per_sec [lindex $argv 4]
@@ -13,7 +13,7 @@ set start_time 50 ;#100
 set parallel_start_gap 0.0
 set cross_start_gap 0.0
 
-#############################################################ENERGY PARAMETERS
+#============================================== ENERGY PARAMETERS
 set val(energymodel_11)    EnergyModel     ;
 set val(initialenergy_11)  1000            ;# Initial energy in Joules
 
@@ -21,7 +21,7 @@ set val(idlepower_11) 869.4e-3			;#LEAP (802.11g)
 set val(rxpower_11) 1560.6e-3			;#LEAP (802.11g)
 set val(txpower_11) 1679.4e-3			;#LEAP (802.11g)
 set val(sleeppower_11) 37.8e-3			;#LEAP (802.11g)
-set val(transitionpower_11) 176.695e-3		;#LEAP (802.11g)	??????????????????????????????/
+set val(transitionpower_11) 176.695e-3		;#LEAP (802.11g)
 set val(transitiontime_11) 2.36			;#LEAP (802.11g)
 
 #set val(idlepower_11) 900e-3			;#Stargate (802.11b) 
@@ -31,10 +31,6 @@ set val(transitiontime_11) 2.36			;#LEAP (802.11g)
 #set val(transitionpower_11) 200e-3		;#Stargate (802.11b)	??????????????????????????????/
 #set val(transitiontime_11) 3			;#Stargate (802.11b)
 
-#puts "$MAC/802_11.dataRate_ 11Mb"
-Mac/802_11 set dataRate_ 11Mb
-
-#CHNG
 set num_sink_flow [expr $num_row*$num_col] ;#sink
 set sink_node 100 ;#sink id, dummy here; updated next
 
@@ -61,13 +57,12 @@ set tcp_sink Agent/Null
 # FACK:		Agent/TCP/Fack		Agent/TCPSink
 # LINUX:	Agent/TCP/Linux		Agent/TCPSink
 
-#		
 
 #set frequency_ 2.461e+9
 #Phy/WirelessPhy set Rb_ 11*1e6            ;# Bandwidth
 #Phy/WirelessPhy set freq_ $frequency_
 
-
+#==========================================================================
 
 set val(chan) Channel/WirelessChannel ;# channel type
 set val(prop) Propagation/TwoRayGround ;# radio-propagation model
@@ -82,19 +77,16 @@ set val(ifqlen) 50 ;# max packet in ifq
 set val(rp) DSDV ; #[lindex $argv 4] ;# routing protocol
 
 Mac/802_11 set syncFlag_ 1
-
+Mac/802_11 set dataRate_ 11Mb
 Mac/802_11 set dutyCycle_ cbr_interval
 
-set nm 802_11_wireless.nam
 
-# set tr /home/ubuntu/ns2\ programs/raw_data/multi_radio_802_11_random.tr
+set nm 802_11_wireless.nam
 set tr 802_11_wireless.tr
 set topo_file topo.txt
 
-#set topo_file 5.txt
-# 
+
 # Initialize ns
-#
 set ns_ [new Simulator]
 
 set tracefd [open $tr w]
@@ -105,28 +97,15 @@ $ns_ trace-all $tracefd
 set namtrace [open $nm w]
 $ns_ namtrace-all-wireless $namtrace $x_dim $y_dim
 
-#set topofilename "topo_ex3.txt"
 set topofile [open $topo_file "w"]
 
 # set up topography object
 set topo       [new Topography]
 $topo load_flatgrid $x_dim $y_dim
-#$topo load_flatgrid 1000 1000
-
-if {$num_sink_flow > 0} { ;#sink
-	create-god [expr $num_row * $num_col + 1 ]
-} else {
-	create-god [expr $num_row * $num_col ] ;# general operations director
-}
 
 
-#remove-all-packet-headers
-# add-packet-header DSDV AODV ARP LL MAC CBR IP
+create-god [expr $num_row * $num_col ] ;# general operations director
 
-
-
-#set val(prop)		Propagation/TwoRayGround
-#set prop	[new $val(prop)]
 
 $ns_ node-config -adhocRouting $val(rp) -llType $val(ll) \
      -macType $val(mac)  -ifqType $val(ifq) \
@@ -146,29 +125,14 @@ $ns_ node-config -adhocRouting $val(rp) -llType $val(ll) \
 			 -initialEnergy $val(initialenergy_11)
 
 
-#          		 -transitionTime 0.005 \
- 
-
 puts "start node creation"
 for {set i 0} {$i < [expr $num_row*$num_col]} {incr i} {
 	set node_($i) [$ns_ node]
 #	$node_($i) random-motion 0
 }
 
-if {$num_sink_flow > 0} { ;#sink
-	set sink_node [expr $num_row*$num_col] ;#sink id
-	set node_($sink_node) [$ns_ node]
-	$node_($sink_node) set X_ $x_dim
-	$node_($sink_node) set Y_ $y_dim;
-	$node_($sink_node) set Z_ 0.0
-	puts -nonewline $topofile "SINK NODE $sink_node : at $x_dim $y_dim \n"
-	if {$sink_node < $num_row*$num_col} {
-		puts "*********ERROR: SINK NODE id($sink_node) is too LOW********"		
-	}
-	set sink_start_gap [expr 1.0/$num_sink_flow]
-}
 
-#FULL CHNG position of nodes
+# position of nodes
 set x_start [expr $x_dim/($num_col*2)];
 set y_start [expr $y_dim/($num_row*2)];
 set i 0;
@@ -343,44 +307,6 @@ for {set i 1} {$i < [expr $num_random_flow+1]} {incr i} {
 	incr rt
 }
 
-#######################################################################SINK FLOW
-set r $rt
-set rt $r
-set num_node [expr $num_row*$num_col]
-for {set i 1} {$i < [expr $num_sink_flow+1]} {incr i} {
-	set udp_node [expr $i-1] ;#[expr int($num_node*rand())] ;# src node
-	set null_node $sink_node
-	#while {$null_node==$udp_node} {
-	#	set null_node [expr int($num_node*rand())] ;# dest node
-	#}
-	$ns_ attach-agent $node_($udp_node) $udp_($rt)
-  	$ns_ attach-agent $node_($null_node) $null_($rt)
-	puts -nonewline $topofile "SINK:  Src: $udp_node Dest: $null_node\n"
-	incr rt
-} 
-
-set rt $r
-for {set i 1} {$i < [expr $num_sink_flow+1]} {incr i} {
-	$ns_ connect $udp_($rt) $null_($rt)
-	incr rt
-}
-set rt $r
-for {set i 1} {$i < [expr $num_sink_flow+1]} {incr i} {
-	set cbr_($rt) [new Application/Traffic/CBR]
-	$cbr_($rt) set packetSize_ $cbr_size
-	$cbr_($rt) set rate_ $cbr_rate
-	$cbr_($rt) set interval_ $cbr_interval
-	$cbr_($rt) attach-agent $udp_($rt)
-	incr rt
-} 
-
-set rt $r
-for {set i 1} {$i < [expr $num_sink_flow+1]} {incr i} {
-	$ns_ at [expr $start_time+$i*$sink_start_gap+rand()] "$cbr_($rt) start"
-	incr rt
-}
-
-puts "flow creation complete"
 ######################---------------------- END OF FLOW GENERATION
 
 # Tell nodes when the simulation ends
@@ -409,16 +335,10 @@ proc finish {} {
 	exit 0
 }
 
-#set opt(mobility) "position.txt"
-#source $opt(mobility)
-#set opt(traff) "traffic.txt"
-#source $opt(traff)
-
 for {set i 0} {$i < [expr $num_row*$num_col]  } { incr i} {
 	$ns_ initial_node_pos $node_($i) 4
 }
 
 puts "Starting Simulation..."
 $ns_ run 
-#$ns_ nam-end-wireless [$ns_ now]
 

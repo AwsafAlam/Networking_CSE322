@@ -1,4 +1,4 @@
- #Make a NS simulator   
+#Make a NS simulator   
   set ns [new Simulator]	
 
   # Define a 'finish' procedure
@@ -25,17 +25,14 @@
   set tcp1 [new Agent/TCP/Reno]
   $ns attach-agent $n0 $tcp1
 
-# Add a TCP sending module to node n1
-set tcp2 [new Agent/TCP/Vegas]
-$ns attach-agent $n1 $tcp2
-
-$tcp1 set windowOption_ 9
+   # Add a TCP sending module to node n0
+  set tcp2 [new Agent/TCP/Vegas]
+  $ns attach-agent $n1 $tcp2
 
   # Add a TCP receiving module to node n4
   set sink1 [new Agent/TCPSink]
   $ns attach-agent $n4 $sink1
 
-  # Add a TCP receiving module to node n3
   set sink2 [new Agent/TCPSink]
   $ns attach-agent $n3 $sink2
 
@@ -46,12 +43,11 @@ $tcp1 set windowOption_ 9
   # Setup a FTP traffic generator on "tcp1"
   set ftp1 [new Application/FTP]
   $ftp1 attach-agent $tcp1
-  $ftp1 set type_ FTP          ;#     (no necessary)
+  $ftp1 set type_ FTP              ;# (no necessary)
 
-  # Setup a FTP traffic generator on "tcp2"
-  set ftp2 [new Application/FTP]
+   set ftp2 [new Application/FTP]
   $ftp2 attach-agent $tcp2
-  
+
   # Schedule start/stop times
   $ns at 0.1   "$ftp1 start"
   $ns at 100.0 "$ftp1 stop"
@@ -60,7 +56,7 @@ $tcp1 set windowOption_ 9
   $ns at 100.0 "$ftp2 stop"
 
   # Set simulation end time
-  $ns at 125.0 "finish"		 ;#   (Will invoke "exit 0")   
+  $ns at 125.0 "finish"		    ;#(Will invoke "exit 0")   
 
 
   ##################################################
@@ -78,11 +74,11 @@ $tcp1 set windowOption_ 9
 
      $ns at [expr $now+0.1] "plotWindow $tcpSource  $outfile"
   }
-  set reno [open reno_data.txt w]
-  set vegas [open vegas_data.txt w]
+   set reno [open reno_data.txt w]
+   set vegas [open vegas_data.txt w]
 
-$ns  at  0.0  "plotWindow $tcp1  $reno"  ;# // Start the probe !!    
-$ns  at  0.0  "plotWindow $tcp2  $vegas"  ;# // Start the probe !!    
+  $ns  at  0.0  "plotWindow $tcp1  $reno" 
+  $ns  at  0.0  "plotWindow $tcp2  $vegas" 
 
   # Run simulation !!!!
   $ns run
