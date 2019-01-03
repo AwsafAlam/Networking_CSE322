@@ -1,5 +1,10 @@
 #INPUT: output file AND number of iterations
-./cleanup.sh
+# ./cleanup.sh
+rm *.out
+rm *.tr
+rm *.nam
+rm plot.plt
+
 clear
 
 output_file_format="wireless_802.15.4_mobile"
