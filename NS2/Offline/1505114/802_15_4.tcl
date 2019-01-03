@@ -54,8 +54,8 @@ set tcp_src Agent/TCP ;# Agent/TCP or Agent/TCP/Reno or Agent/TCP/Newreno or Age
 set tcp_sink Agent/TCPSink ;# Agent/TCPSink or Agent/TCPSink/Sack1
 
 
-set nm tcp_wireless.nam
-set tr tcp_wireless.tr
+# set nm tcp_wireless.nam
+set tr tace.tr
 set topo_file topo_tcp_wireless.txt
 
 
@@ -64,8 +64,8 @@ set ns_ [new Simulator]
 set tracefd [open $tr w]
 $ns_ trace-all $tracefd
 
-set namtrace [open $nm w]
-$ns_ namtrace-all-wireless $namtrace $x_dim $y_dim
+# set namtrace [open $nm w]
+# $ns_ namtrace-all-wireless $namtrace $x_dim $y_dim
 
 set topofile [open $topo_file "w"]
 
@@ -282,19 +282,20 @@ for {set i 0} {$i < [expr $num_row*$num_col] } {incr i} {
     $ns_ at [expr $start_time+$time_duration] "$node_($i) reset";
 }
 $ns_ at [expr $start_time+$time_duration +$extra_time] "finish"
-#$ns_ at [expr $start_time+$time_duration +20] "puts \"NS Exiting...\"; $ns_ halt"
-$ns_ at [expr $start_time+$time_duration +$extra_time] "$ns_ nam-end-wireless [$ns_ now]; puts \"NS Exiting...\"; $ns_ halt"
+$ns_ at [expr $start_time+$time_duration +20] "puts \"NS Exiting...\"; $ns_ halt"
+# $ns_ at [expr $start_time+$time_duration +$extra_time] "$ns_ nam-end-wireless [$ns_ now]; puts \"NS Exiting...\"; $ns_ halt"
 
 $ns_ at [expr $start_time+$time_duration/2] "puts \"half of the simulation is finished\""
 $ns_ at [expr $start_time+$time_duration] "puts \"end of simulation duration\""
 
 proc finish {} {
 	puts "finishing"
-	global ns_ tracefd namtrace topofile nm
+	# global ns_ tracefd namtrace topofile nm
+	global ns_ tracefd topofile
 	#global ns_ topofile
 	$ns_ flush-trace
 	close $tracefd
-	close $namtrace
+	# close $namtrace
 	close $topofile
 	#exec xgraph tcp_wireless.tr -geometry 800x400 &
         # exec nam $nm &

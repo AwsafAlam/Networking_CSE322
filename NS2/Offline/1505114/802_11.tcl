@@ -80,8 +80,8 @@ Mac/802_11 set dataRate_ 11Mb
 Mac/802_11 set dutyCycle_ cbr_interval
 
 
-set nm 802_11_wireless.nam
-set tr 802_11_wireless.tr
+# set nm 802_11_wireless.nam
+set tr trace.tr
 set topo_file topo.txt
 
 
@@ -93,8 +93,8 @@ $ns_ trace-all $tracefd
 
 #$ns_ use-newtrace ;# use the new wireless trace file format
 
-set namtrace [open $nm w]
-$ns_ namtrace-all-wireless $namtrace $x_dim $y_dim
+# set namtrace [open $nm w]
+# $ns_ namtrace-all-wireless $namtrace $x_dim $y_dim
 
 set topofile [open $topo_file "w"]
 
@@ -314,20 +314,21 @@ for {set i 0} {$i < [expr $num_row*$num_col] } {incr i} {
     $ns_ at [expr $start_time+$time_duration] "$node_($i) reset";
 }
 $ns_ at [expr $start_time+$time_duration +$extra_time] "finish"
-#$ns_ at [expr $start_time+$time_duration +20] "puts \"NS Exiting...\"; $ns_ halt"
-$ns_ at [expr $start_time+$time_duration +$extra_time] "$ns_ nam-end-wireless [$ns_ now]; puts \"NS Exiting...\"; $ns_ halt"
+$ns_ at [expr $start_time+$time_duration +20] "puts \"NS Exiting...\"; $ns_ halt"
+# $ns_ at [expr $start_time+$time_duration +$extra_time] "$ns_ nam-end-wireless [$ns_ now]; puts \"NS Exiting...\"; $ns_ halt"
 
 $ns_ at [expr $start_time+$time_duration/2] "puts \"half of the simulation is finished\""
 $ns_ at [expr $start_time+$time_duration] "puts \"end of simulation duration\""
 
 proc finish {} {
 	puts "finishing"
-	global ns_ tracefd namtrace topofile nm
+	# global ns_ tracefd namtrace topofile nm
+	global ns_ tracefd topofile
 	#global ns_ topofile
 
 	$ns_ flush-trace
 	close $tracefd
-	close $namtrace
+	# close $namtrace
 	close $topofile
 	
 	# exec nam out.nam &

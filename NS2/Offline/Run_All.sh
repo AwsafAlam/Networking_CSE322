@@ -2,6 +2,7 @@
 # ./cleanup.sh
 rm *.out
 rm *.tr
+rm *.nam
 rm plot.plt
 
 clear
@@ -10,22 +11,19 @@ output_file_format="wireless_mobile"
 iteration_float=2.0
 iteration=$(printf %.0f $iteration_float);
 
+hop_15_4=5
+dist_15_4=30
+dist_11=$(($hop_15_4*$dist_15_4*2))
+pckt_size=64
+# pckt_interval=[expr 1 / $pckt_per_sec]
+# echo "INERVAL: $pckt_interval"
 
-printf "Choose Network Topology \n-------------------\n\
-1 - Wireless 802.11 (mobile)\n\
-2 - Wireless 802.15.4 (mobile)\n\
-3 - Wimax 802.16\n-------------\n"
-read option
+echo "set   autoscale" >> plot.plt
+echo "set terminal pdf" >> plot.plt
+echo "set output \"802.11.pdf\"" >> plot.plt
 
-if [ $option -eq 1 ] 
-then
-tcl=802_11.tcl
-awk_file=awk_udp.awk
-elif [ $option -eq 2 ] 
-then
-tcl=802_15_4.tcl
-awk_file=awk_tcp.awk
-fi
+echo "Enter Number of data points"
+read datapoints
 
 printf "Choose Variation \n-------------------\n\
 1 - Number of mobile nodes\n\
@@ -33,63 +31,73 @@ printf "Choose Variation \n-------------------\n\
 3. Number of packets per second\n\
 4. Packet Size\n\
 5. Speed of the mobile nodes\n\
-6. Hop distance\n\
-7. Congestion window size over time\n--------------\n"
-read p
+6. Hop distance\n--------------\n"
+read option
 
-# ============== Graph init
-echo "set   autoscale" >> plot.plt
-echo "set terminal pdf" >> plot.plt
-echo "set output \"$tcl.$p.pdf\"" >> plot.plt
-
-######## parameter initialization ##########
-hop_15_4=5
-dist_15_4=30
-dist_11=$(($hop_15_4*$dist_15_4*2))
-pckt_size=64
-pckt_per_sec=500
-# pckt_interval=[expr 1 / $pckt_per_sec]
-# echo "INERVAL: $pckt_interval"
-row=5
-flow_no=5
-speed=25
-datapoints=5
-
-
-
+for((p=0;p<4;p++));
+do
+######## parameter variation ##########
+	
 for((r=1;r<=$datapoints;r++));
 do
 
 echo "total iteration: $iteration"
-#=============================  START A ROUND
+##################################START A ROUND
 
 l=0;thr=0.0;del=0.0;s_packet=0.0;r_packet=0.0;d_packet=0.0;del_ratio=0.0;failcount=0;
 dr_ratio=0.0;time=0.0;t_energy=0.0;energy_bit=0.0;energy_byte=0.0;energy_packet=0.0;total_retransmit=0.0;energy_efficiency=0.0;
 
 i=0
 
-if [ $p -eq 1 ] 
-then
-echo "------------- VARIAION IN NODE NUMBER -----------------";
-row=$(($r*2))
+	if [ $p -eq 0 ] 
+	then
+	echo "------------- VARIAION IN NODE NUMBER -----------------";
 
-elif [ $p -eq 2 ]
-then
-echo "------------- VARIAION IN FLOW -----------------";
-flow_no=$(($r*2))
+	row=$(($r*2))
+	pckt_per_sec=500
+	routing=DSDV
+	topology=1 # Grid
+	flow_no=5
+	speed=25
+	time_sim=25
 
-elif [ $p -eq 3 ]
-then
-echo "------------- VARIAION IN PACKET PER SEC -----------------";
+	elif [ $p -eq 1 ]
+	then
+	echo "------------- VARIAION IN FLOW -----------------";
 
-pckt_per_sec=$(($r*100))
+	row=5
+	pckt_per_sec=500
+	routing=DSDV
+	topology=1 # Grid
+	flow_no=$(($r*2))
+	speed=25
+	time_sim=25
 
-elif [ $p -eq 4 ]
-then
-echo "------------- VARIAION IN SPEED -----------------";
-speed=$(($r*5))
+	elif [ $p -eq 2 ]
+	then
+	echo "------------- VARIAION IN PACKET PER SEC -----------------";
 
-fi
+	row=5
+	pckt_per_sec=$(($r*100))
+	routing=DSDV
+	topology=1 # Grid
+	flow_no=10
+	speed=25
+	time_sim=25
+
+	elif [ $p -eq 3 ]
+	then
+	echo "------------- VARIAION IN SPEED -----------------";
+
+	row=5
+	pckt_per_sec=500
+	routing=DSDV
+	topology=1 # Grid
+	flow_no=10
+	speed=$(($r*5))
+	time_sim=25
+
+	fi
 
 	while [ $i -lt $iteration ]
 	do
@@ -99,18 +107,16 @@ fi
 	if [ `echo $i%2 | bc` -eq 0 ] 
 	then
 		topology=1 # Grid
-		# routing=DSDV
 	else
 		topology=0 # Random
-		# routing=AODV
 	fi
 
 	# ns 802_11.tcl $start # $dist_11 $pckt_size $pckt_per_sec $routing $time_sim
 	echo "Row : $row"
-	ns $tcl $row $topology $flow_no $speed $dist_11 $pckt_size $pckt_per_sec #$routing $time_sim
+	ns 802_11.tcl $row $topology $flow_no $speed $dist_11 $pckt_size $pckt_per_sec #$time_sim
 	echo "SIMULATION COMPLETE. BUILDING STAT......"
 	under="_"
-	awk -f $awk_file trace.tr > "$output_file_format$under$r$under$i.out"
+	awk -f awk_udp.awk 802_11_wireless.tr > "$output_file_format$under$r$under$i.out"
 
 	ok=1;
 	while read val
@@ -218,21 +224,21 @@ fi
 	echo -ne "energy_efficiency(nj/bit):         $enr_nj " >> $output_file2
 	echo "" >> $output_file2
 
-	if [ $p -eq 1 ] 
+	if [ $p -eq 0 ] 
 	then
 	echo -ne "$(($row*$row)) " >> $output_file
 
-	elif [ $p -eq 2 ]
+	elif [ $p -eq 1 ]
 	then
 	# echo "------------- VARIAION IN FLOW -----------------";
 	echo -ne "$(($flow_no)) " >> $output_file
 
-	elif [ $p -eq 3 ]
+	elif [ $p -eq 2 ]
 	then
 	# echo "------------- VARIAION IN PACKET PER SEC -----------------";
 	echo -ne "$(($pckt_per_sec)) " >> $output_file
 
-	elif [ $p -eq 4 ]
+	elif [ $p -eq 3 ]
 	then
 	# echo "------------- VARIAION IN SPEED -----------------";
 	echo -ne "$(($speed)) " >> $output_file
@@ -306,8 +312,13 @@ echo "plot \"data_$p.out\" using 1:14 title 'Total retransmit' with linespoints 
 echo "set ylabel \"Efficiency\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:15 title 'Efficiency' with linespoints lw 2" >> plot.plt
 
+# gnuplot plot.plt
+# gnuplot plot_pdf.plt
 
 echo "Plot file generation complete ..."
 
+done
+
 gnuplot plot.plt
-echo "Graph generation complete ..."
+# rm -rf ./out
+# rm *.out

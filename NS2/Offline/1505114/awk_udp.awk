@@ -64,11 +64,9 @@ BEGIN {
 
 #		if(rTime>rEndTime) rEndTime=rTime;
 #			printf("********************\n");
-		if(rTime<rStartTime) {
-#			printf("********************\n");
-#			printf("%10.0f %10.0f %10.0f\n",rTime, node, idPacket);
-			rStartTime=rTime;
-		}
+		if(rTime<rStartTime) rStartTime=rTime;
+		if(rTime>rEndTime) rEndTime=rTime;
+
 
 		if ( strEvent == "s" ) {
 			nSentPackets += 1 ;	rSentTime[ idPacket ] = rTime ;
