@@ -24,7 +24,8 @@ printf "Choose Variation \n-------------------\n\
 3. Number of packets per second\n\
 4. Speed of the mobile nodes\n\
 5. Packet Size\n\
-6. Hop distance\n--------------\n"
+6. Grid/Hop distance\n\
+7. Queue length\n--------------\n"
 read p
 
 
@@ -39,6 +40,7 @@ pckt_per_sec=500
 row=5
 flow_no=5
 speed=25
+qlen=50
 datapoints=5
 
 # === Simulation file
@@ -93,9 +95,13 @@ echo "------------- VARIAION IN Packet Size -----------------";
 pckt_size=$(($r*12))
 vari=$pckt_size
 elif [ $p -eq 6 ]; then
-echo "------------- VARIAION IN Hop distance -----------------";
+echo "------------- VARIAION IN Grid/Hop distance -----------------";
 dist=$((10 + $dist))
 vari=$dist
+elif [ $p -eq 7 ]; then
+echo "------------- VARIAION IN Queue length -----------------";
+qlen=$(($r*10))
+vari=$qlen
 fi
 
 	while [ $i -lt $iteration ]
@@ -116,7 +122,7 @@ fi
 	echo "Row : $row"
 	echo "Flow : $flow_no"
 	echo "Speed: $speed"
-	ns $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec #$routing $time_sim
+	ns $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec $qlen #$routing $time_sim
 	echo "SIMULATION COMPLETE. BUILDING STAT......"
 	under="_"
 	awk -f $awk_file trace.tr > "$output_file_format$under$i$under$r.out"
@@ -193,8 +199,10 @@ fi
 	fi
 	
 	# value of single iteration obtained here.
-	mv "conges_data.txt" "conges_data_$i$under$r.$vari.out"
-	
+	# mv "conges_data.txt" "conges_data_$i$under$r.$vari.out"
+	# sort "conges_data_$i$under$r.$vari.out" | uniq -u
+	uniq "conges_data.txt" "conges_data_$i$under$r.$vari.out"
+
 	#################END AN ITERATION
 	i=$(($i+1))
 	l=0
@@ -234,6 +242,10 @@ fi
 	elif [ $p -eq 6 ]; then
 	echo -ne "$dist " >> $output_file
 	echo -ne "$dist " >> $output_file2
+	
+	elif [ $p -eq 7 ]; then
+	echo -ne "$qlen " >> $output_file
+	echo -ne "$qlen " >> $output_file2
 	fi
 
 	echo -ne "Throughput:          $thr " >> $output_file2
@@ -294,6 +306,9 @@ echo "set xlabel \"Packet Size\"" >> plot.plt
 elif [ $p -eq 6 ]; then
 echo "set title \"$tcl Comparing metrics with variation in Grid Dimension\"" >> plot.plt
 echo "set xlabel \"Grid Dimension\"" >> plot.plt
+elif [ $p -eq 7 ]; then
+echo "set title \"$tcl Comparing metrics with variation in Queue length\"" >> plot.plt
+echo "set xlabel \"Queue length\"" >> plot.plt
 fi
 
 echo "set ylabel \"Throughput\"" >> plot.plt

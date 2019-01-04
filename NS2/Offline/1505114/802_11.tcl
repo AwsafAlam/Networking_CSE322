@@ -9,8 +9,8 @@ set num_row [lindex $argv 0] ;#number of row
 set num_col [lindex $argv 0] ;#number of column
 set x_dim [lindex $argv 4] ;# 150
 set y_dim [lindex $argv 4] ;# 150
-set time_duration 25 ; #[lindex $argv 5] ;#50
-set start_time 50 ;# 100
+set time_duration 50 ; #[lindex $argv 5] ;#50
+set start_time 25 ;# 100
 set parallel_start_gap 0.0
 set cross_start_gap 0.0
 
@@ -81,8 +81,8 @@ set val(mac) Mac/802_11 ;# MAC type
 set val(ifq) Queue/DropTail/PriQueue ;# interface queue type
 set val(ll) LL ;# link layer type
 set val(ant) Antenna/OmniAntenna ;# antenna model
-set val(ifqlen) 50 ;# max packet in ifq
-set val(rp) DSDV ; #[lindex $argv 4] ;# routing protocol
+set val(ifqlen) [lindex $argv 7];# 50  max packet in ifq
+set val(rp) AODV ; #[lindex $argv 4] ;# routing protocol
 
 Mac/802_11 set syncFlag_ 1
 Mac/802_11 set dataRate_ 11Mb
@@ -327,7 +327,7 @@ proc plotWindow {tcpSource outfile} {
   	###Print TIME CWND   for  gnuplot to plot progressing on CWND
      puts  $outfile  "$now $cwnd"
 
-     $ns at [expr $now+0.2] "plotWindow $tcpSource  $outfile"
+     $ns at [expr $now+0.7] "plotWindow $tcpSource  $outfile"
   }
 
 # Tell nodes when the simulation ends
