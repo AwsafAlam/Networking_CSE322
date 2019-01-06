@@ -1,15 +1,20 @@
 #INPUT: output file AND number of iterations
 # ./cleanup.sh
-rm *.out
-rm *.tr
-rm plot.plt
-
 clear
-
 output_file_format="wireless_mobile"
 iteration_float=2.0
 iteration=$(printf %.0f $iteration_float);
 
+
+printf "For Existing press 1\n\
+For modification press 0\n-------------------\n"
+read mod
+
+if [ $mod -eq 1 ]; then
+ns_ver=ns
+else
+ns_ver=./ns
+fi
 
 printf "Choose Network Topology \n-------------------\n\
 1 - Wireless 802.11 (mobile)\n\
@@ -47,7 +52,6 @@ datapoints=5
 if [ $option -eq 1 ] 
 then
 tcl=802_11.tcl
-# awk_file=awk_udp.awk
 awk_file=awk_tcp.awk
 dist=$dist_11
 elif [ $option -eq 2 ] 
@@ -55,7 +59,26 @@ then
 tcl=802_15_4.tcl
 awk_file=awk_tcp.awk
 dist=$dist_15_4
+elif [ $option -eq 3 ]; then
+cd ~/Documents/ns_wm/ns-allinone-2.35/ns-2.35/
+./ns test-be-mod.tcl 1 2 ul 300
+cd ~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
+# Execute awk for wimax
+# tcl=802_15_4.tcl
+# awk=awk_wimax.awk
 fi
+
+#Copying latest files
+cp $tcl ~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
+cp $awk_file ~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
+
+# Moving to Modified NS dir
+cd ~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
+#Cleanup
+# rm *.out
+# rm *.tr
+# rm plot.plt
+# clear
 
 # ============== Graph init
 echo "set   autoscale" >> plot.plt
@@ -122,7 +145,11 @@ fi
 	echo "Row : $row"
 	echo "Flow : $flow_no"
 	echo "Speed: $speed"
-	ns $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec $qlen #$routing $time_sim
+
+	$ns_ver $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec $qlen #$routing $time_sim
+	# cd ~/Desktop/Networking_CSE322/NS2/Offline/1505114
+
+	# ns $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec $qlen #$routing $time_sim
 	echo "SIMULATION COMPLETE. BUILDING STAT......"
 	under="_"
 	awk -f $awk_file trace.tr > "$output_file_format$under$i$under$r.out"
@@ -207,7 +234,8 @@ fi
 	i=$(($i+1))
 	l=0
 	done
-
+	# uniq "conges_data.txt" "conges_data_$i$under$r.$vari.out" # Plotting forlast iteration only
+  
 	enr_nj=$(echo "scale=2; $energy_efficiency*1000.0" | bc)
 	total_retransmit=$(echo "scale=3; $total_retransmit/100.0" | bc)
 
@@ -366,4 +394,13 @@ echo "Plot file generation complete ..."
 
 gnuplot plot.plt
 echo "Graph generation complete ..."
-# rm *.out
+
+rm $tcl
+rm $awk_file
+rm *.out
+rm *.tr
+rm plot.plt
+rm *.txt
+mv "$tcl.$p.pdf" ~/Desktop/Networking_CSE322/NS2/Offline/1505114
+cd ~/Desktop/Networking_CSE322/NS2/Offline/1505114
+evince "$tcl.$p.pdf"

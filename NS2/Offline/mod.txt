@@ -1,0 +1,30 @@
+1. Changes in AODV.h
+
+#define ACTIVE_ROUTE_TIMEOUT    30				// 50 seconds
+
+Changed from 10 to 30 seconds ( increase in active route timeout will cause the route to be deleted later. So, there
+will be less update req sent. )
+
+Dis adv : Also slow down link fail detection. since it willhave towait for aa greater activetimeout to realize packet is not forwarded anymore
+
+2.
+/* Various constants used for the expanding ring search */
+#define TTL_START     5
+#define TTL_THRESHOLD 7
+#define TTL_INCREMENT 2 
+
+Modified
+/* Various constants used for the expanding ring search */
+#define TTL_START     3
+#define TTL_THRESHOLD 7
+#define TTL_INCREMENT 2 
+
+Start with an initial small value, so there is even less overhead.
+We are assuming dst probably hasn't moved far. this willl be more effective in case of 802.15.4
+
+1
+MODIFICATION : https://www.academia.edu/20743570/Implementation_of_New_TCP_Congestion_Control_Mechanism_over_Long_Term_Evolution_Advanced_Networks?fbclid=IwAR1DwoTvg2wPSo3RBUlKl6cmfdzIjzjAObUClxmAPB-emq9cts_QfkhhrYo*/
+
+// f = wnd_const_ * ssthresh_ / cwnd_ * pow(cwnd_, k_parameter_); 
+// cwnd_ = cwnd_ + ( f / cwnd_); 
+TCP congestion calculation
