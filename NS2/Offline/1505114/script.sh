@@ -19,7 +19,8 @@ fi
 printf "Choose Network Topology \n-------------------\n\
 1 - Wireless 802.11 (mobile)\n\
 2 - Wireless 802.15.4 (mobile)\n\
-3 - Wimax 802.16\n-------------\n"
+3 - Wimax 802.16\n\
+4 - Wired\n-------------\n"
 read option
 
 
@@ -66,6 +67,9 @@ cd ~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
 # Execute awk for wimax
 # tcl=802_15_4.tcl
 # awk=awk_wimax.awk
+elif [ $option -eq 4 ]; then
+tcl=wired.tcl
+awk_file=wired.awk
 fi
 
 #Copying latest files
