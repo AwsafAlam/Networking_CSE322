@@ -5,6 +5,7 @@ output_file_format="wireless_mobile"
 iteration_float=2.0
 iteration=$(printf %.0f $iteration_float);
 
+rootDir=~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
 
 printf "For Existing press 1\n\
 For modification press 0\n-------------------\n"
@@ -61,23 +62,25 @@ tcl=802_15_4.tcl
 awk_file=awk_tcp.awk
 dist=$dist_15_4
 elif [ $option -eq 3 ]; then
-cd ~/Documents/ns_wm/ns-allinone-2.35/ns-2.35/
-./ns test-be-mod.tcl 1 2 ul 300
-cd ~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
+# ./ns test-be-mod.tcl 1 2 ul 300
+# cd ~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
 # Execute awk for wimax
-# tcl=802_15_4.tcl
-# awk=awk_wimax.awk
+rootDir=~/Documents/ns_wm/ns-allinone-2.35/ns-2.35/
+tcl=802_16.tcl
+awk_file=awk_udp.awk
+
+# awk_file=awk_wimax.awk
 elif [ $option -eq 4 ]; then
 tcl=wired.tcl
 awk_file=wired.awk
 fi
 
 #Copying latest files
-cp $tcl ~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
-cp $awk_file ~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
+cp -f $tcl $rootDir
+cp -f $awk_file $rootDir
 
 # Moving to Modified NS dir
-cd ~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
+cd $rootDir
 #Cleanup
 # rm *.out
 # rm *.tr
@@ -101,20 +104,19 @@ dr_ratio=0.0;time=0.0;t_energy=0.0;energy_bit=0.0;energy_byte=0.0;energy_packet=
 
 i=0
 
-
 if [ $p -eq 1 ]; then
-metric=Number of Nodes
 echo "------------- VARIAION IN NODE NUMBER -----------------";
+metric="Number of Nodes"
 row=$(($r*2))
 vari=$(($row*$row))
 elif [ $p -eq 2 ]; then
 echo "------------- VARIAION IN FLOW -----------------";
-metric=Number of Flows
+metric="Number of Flows"
 flow_no=$(($r*2))
 vari=$flow_no
 elif [ $p -eq 3 ]; then
 echo "------------- VARIAION IN PACKET PER SEC -----------------";
-metric=Packets per second
+metric="Packets per second"
 pckt_per_sec=$(($r*100))
 vari=$pckt_per_sec
 elif [ $p -eq 4 ]; then
@@ -124,17 +126,17 @@ speed=$(($r*5))
 vari=$speed
 elif [ $p -eq 5 ]; then
 echo "------------- VARIAION IN Packet Size -----------------";
-metric=Packet Size
+metric="Packet Size"
 pckt_size=$(($r*12))
 vari=$pckt_size
 elif [ $p -eq 6 ]; then
 echo "------------- VARIAION IN Grid/Hop distance -----------------";
-metric=Grid Dimension
+metric="Grid Dimension"
 dist=$((10 + $dist))
 vari=$dist
 elif [ $p -eq 7 ]; then
 echo "------------- VARIAION IN Queue length -----------------";
-metric=Queue length
+metric="Queue length"
 qlen=$(($r*10))
 vari=$qlen
 fi
@@ -353,7 +355,7 @@ find -iname "conges_data_*.out"| cut -c 3- | while read plt_flie
 do
 tmp=`echo "$plt_flie" | cut -d "." -f2`
 # echo $tmp
-echo "plot \"$plt_flie\" using 1:2  with lines title \"$tmp\" lw 2, " >> plot.plt
+echo "plot \"$plt_flie\" using 1:2  with lines title \"$tmp $metric\" lw 2, " >> plot.plt
 
 done
 
