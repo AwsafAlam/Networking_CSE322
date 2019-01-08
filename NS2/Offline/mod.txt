@@ -1,30 +1,51 @@
-1. Changes in AODV.h
-
-#define ACTIVE_ROUTE_TIMEOUT    30				// 50 seconds
-
-Changed from 10 to 30 seconds ( increase in active route timeout will cause the route to be deleted later. So, there
-will be less update req sent. )
-
-Dis adv : Also slow down link fail detection. since it willhave towait for aa greater activetimeout to realize packet is not forwarded anymore
-
-2.
-/* Various constants used for the expanding ring search */
-#define TTL_START     5
-#define TTL_THRESHOLD 7
-#define TTL_INCREMENT 2 
-
-Modified
-/* Various constants used for the expanding ring search */
-#define TTL_START     3
-#define TTL_THRESHOLD 7
-#define TTL_INCREMENT 2 
-
-Start with an initial small value, so there is even less overhead.
-We are assuming dst probably hasn't moved far. this willl be more effective in case of 802.15.4
-
-1
-MODIFICATION : https://www.academia.edu/20743570/Implementation_of_New_TCP_Congestion_Control_Mechanism_over_Long_Term_Evolution_Advanced_Networks?fbclid=IwAR1DwoTvg2wPSo3RBUlKl6cmfdzIjzjAObUClxmAPB-emq9cts_QfkhhrYo*/
-
-// f = wnd_const_ * ssthresh_ / cwnd_ * pow(cwnd_, k_parameter_); 
-// cwnd_ = cwnd_ + ( f / cwnd_); 
-TCP congestion calculation
+// Has been added by Dumisa Ngwenya at the //University of Pretoria
+for experimatation - SPC
+void UP_SPC_TcpAgent::rtt_update(double tao)
+{
+double now = Scheduler::instance().clock();
+if (ts_option_)
+t_rtt_ = int(tao /tcp_tick_ + 0.5);
+else {
+double sendtime = now - tao;
+sendtime += boot_time_;
+double tickoff = fmod(sendtime, tcp_tick_);
+t_rtt_ = int((tao + tickoff) / tcp_tick_);
+}
+if (t_rtt_ < 1)
+t_rtt_ = 1;
+//
+// srtt has 3 bits to the right of the binary point
+// rttvar has 2
+//
+double diff = t_rtt_*tcp_tick_ - (t_srtt_ >>
+T_SRTT_BITS)*tcp_tick_;
+if (diff < 0)
+diff = -diff;
+if (diff > 3*(t_rttvar_*tcp_tick_/4)) {
+t_srtt_ = t_rtt_ << T_SRTT_BITS;
+t_rttvar_ = t_rtt_ << (T_RTTVAR_BITS -1);
+} else if (t_srtt_ != 0) {
+register short delta;
+delta = t_rtt_ - (t_srtt_ >> T_SRTT_BITS); // d = (m - a0)
+if ((t_srtt_ += delta) <= 0) // a1 = 7/8 a0 + 1/8 m
+t_srtt_ = 1;
+if (delta < 0)
+delta = -delta;
+delta -= (t_rttvar_ >> T_RTTVAR_BITS);
+if ((t_rttvar_ += delta) <= 0) // var1 = 3/4 var0 + 1/4 |d|
+t_rttvar_ = 1;
+} else {
+    t_srtt_ = t_rtt_ << T_SRTT_BITS; // srtt = rtt
+t_rttvar_ = t_rtt_ << (T_RTTVAR_BITS-1); // rttvar = rtt / 2
+}
+//
+// Current retransmit value is
+// (unscaled) smoothed round trip estimate
+// plus 2^rttvar_exp_ times (unscaled) rttvar.
+//
+t_rtxcur_ = (((t_rttvar_ << (rttvar_exp_ + (T_SRTT_BITS -
+T_RTTVAR_BITS))) +
+t_srtt_) >> T_SRTT_BITS ) * tcp_tick_;
+t_rtxtimeout_ = t_rtxcur_; //declared in the .h file
+return;
+}

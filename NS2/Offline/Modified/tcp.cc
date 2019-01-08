@@ -34,7 +34,7 @@
 
 #ifndef lint
 static const char rcsid[] =
-    "@(#) $Header: /cvsroot/nsnam/ns-2/tcp/tcp.cc,v 1.172 2006/06/14 18:05:31 sallyfloyd Exp $ (LBL)";
+    "@(#) $Header: /cvsroot/nsnam/ns-2/tcp/tcp.cc,v 1.180 2008/12/18 05:15:40 sallyfloyd Exp $ (LBL)";
 #endif
 
 #include <stdlib.h>
@@ -48,6 +48,56 @@ static const char rcsid[] =
 #include "hdr_qs.h"
 
 int hdr_tcp::offset_;
+
+int fallon_rtt;
+float fallon_alpha, fallon_beta;
+
+int q_learning_rtt;
+int cur_state, prev_state;
+float q_rtt[2], q_threshold, q_max;
+float beta, q_gamma[2], alpha[2];
+#define Q_SUCCESS 1
+#define Q_FAILURE 0
+
+int trace_cwnd;
+float iteration_cwnd;
+FILE *fp_cwnd;
+#define TAHOE_CWND_FILE_NAME "cwnd_reno.txt"
+void open_cwnd(int flag, FILE** fp, char* name);
+void close_cwnd(int flag, FILE* fp);
+void print_cwnd(int flag, FILE* fp, float iteration, float cwnd);
+int num_timeout, num_dupack;
+
+double wcch, wcc, wci, wcd, wcs, wti, wtd, wts, wai, wad, was, wid, wic, wdd, wdc, wsd, wsc, wdch, wchc;
+int itcp;
+double base_of_log, base_of_expo;
+double f_i_max, f_d_max, f_s_max;
+double f_i_th, f_d_th;
+double inc_precesion;
+double prob_rand_decision;
+double max_itcp_cwnd, t_cwnd;
+void init_itcp(void);
+double linear(double x);
+double log_base(double x);
+double negative_linear(double x);
+double expo(double x);
+double f_inc(double x);
+double f_dec(double x);
+double f_same(double x);
+double itcp_nn(double cwnd, double t_out, double dupack);
+double itcp_cwnd(double cwnd, double t_out, double dupack, double cwnd_normal);
+
+
+int mabcc, new_sent_mabcc;
+double cur_rtt_mabcc, old_rtt_mabcc, cur_cwnd_mabcc, max_cwnd_mabcc, step_inc_mabcc, cur_inc_mabcc, additive_inc_mabcc, cur_dec_mabcc, additive_dec_mabcc, num_suc_loss_mabcc, num_rtt_inc_mabcc, thr_inc_mabcc;
+void init_mabcc(void);
+double mabcc_cwnd(double cwnd, double t_out, double dupack, double cwnd_normal);
+
+
+int trace_th, trace_t_out;
+FILE *fp, *t_out_fp;
+#define THRESHOLD_FILE_NAME "threshold.txt"
+#define TIMEOUT_FILE_NAME "timeout.txt"
 
 static class TCPHeaderClass : public PacketHeaderClass {
 public:
@@ -67,19 +117,16 @@ public:
 
 TcpAgent::TcpAgent() 
 	: Agent(PT_TCP), 
-	  t_seqno_(0), t_rtt_(0), t_srtt_(0), t_rttvar_(0), 
-	  t_backoff_(0), ts_peer_(0), ts_echo_(0),
-	  tss(NULL), tss_size_(100), 
+	  t_seqno_(0), dupacks_(0), curseq_(0), highest_ack_(0), 
+          cwnd_(0), ssthresh_(0), maxseq_(0), count_(0), 
+          rtt_active_(0), rtt_seq_(-1), rtt_ts_(0.0), 
+          lastreset_(0.0), closed_(0), t_rtt_(0), t_srtt_(0), t_rttvar_(0), 
+	  t_backoff_(0), ts_peer_(0), ts_echo_(0), tss(NULL), tss_size_(100), 
 	  rtx_timer_(this), delsnd_timer_(this), burstsnd_timer_(this), 
-	  dupacks_(0), curseq_(0), highest_ack_(0), cwnd_(0), ssthresh_(0), 
-	  maxseq_(0), count_(0), rtt_active_(0), rtt_seq_(-1), rtt_ts_(0.0), 
-	  lastreset_(0.0), closed_(0), use_rtt_(0),
-	  first_decrease_(1), fcnt_(0), 
-	  nrexmit_(0), restart_bugfix_(1), cong_action_(0), 
-	  ecn_burst_(0), ecn_backoff_(0), ect_(0), 
-	  qs_requested_(0), qs_approved_(0),
+	  first_decrease_(1), fcnt_(0), nrexmit_(0), restart_bugfix_(1), 
+          cong_action_(0), ecn_burst_(0), ecn_backoff_(0), ect_(0), 
+          use_rtt_(0), qs_requested_(0), qs_approved_(0),
 	  qs_window_(0), qs_cwnd_(0), frto_(0)
-	
 {
 #ifdef TCP_DELAY_BIND_ALL
         // defined since Dec 1999.
@@ -106,7 +153,6 @@ TcpAgent::TcpAgent()
 	bind("ncwndcuts1_", &ncwndcuts1_);
 #endif /* TCP_DELAY_BIND_ALL */
 
-	bind( "FixedWindowSize", &FixedWindowSize);
 }
 
 void
@@ -119,6 +165,7 @@ TcpAgent::delay_bind_init_all()
         delay_bind_init_one("windowInitOption_");
 
         delay_bind_init_one("syn_");
+        delay_bind_init_one("max_connects_");
         delay_bind_init_one("windowOption_");
         delay_bind_init_one("windowConstant_");
         delay_bind_init_one("windowThresh_");
@@ -229,6 +276,7 @@ TcpAgent::delay_bind_dispatch(const char *varName, const char *localName, TclObj
         if (delay_bind(varName, localName, "windowInit_", &wnd_init_, tracer)) return TCL_OK;
         if (delay_bind(varName, localName, "windowInitOption_", &wnd_init_option_, tracer)) return TCL_OK;
         if (delay_bind_bool(varName, localName, "syn_", &syn_, tracer)) return TCL_OK;
+        if (delay_bind(varName, localName, "max_connects_", &max_connects_, tracer)) return TCL_OK;
         if (delay_bind(varName, localName, "windowOption_", &wnd_option_ , tracer)) return TCL_OK;
         if (delay_bind(varName, localName, "windowConstant_",  &wnd_const_, tracer)) return TCL_OK;
         if (delay_bind(varName, localName, "windowThresh_", &wnd_th_ , tracer)) return TCL_OK;
@@ -424,10 +472,17 @@ TcpAgent::trace(TracedVar* v)
 void
 TcpAgent::set_initial_window()
 {
-	if (syn_ && delay_growth_)
+	if (syn_ && delay_growth_) {
+		//t_cwnd = cwnd_;
 		cwnd_ = 1.0; 
-	else
+		//cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+		syn_connects_ = 0;
+	} else
+		//t_cwnd = cwnd_;
 		cwnd_ = initial_window();
+		//cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+
+	print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
 }
 
 void
@@ -485,6 +540,7 @@ TcpAgent::reset()
 	necnresponses_ = 0;
 	ncwndcuts_ = 0;
 	ncwndcuts1_ = 0;
+        cancel_timers();      // suggested by P. Anelli.
 
 	if (control_increase_) {
 		prev_highest_ack_ = highest_ack_ ; 
@@ -512,6 +568,13 @@ TcpAgent::reset()
 			reset_qoption();
 		}
 	}
+
+	// iTCP initialization
+	num_dupack = 0;
+	num_timeout = 0;
+	init_itcp();
+	init_mabcc();
+
 }
 
 /*
@@ -519,44 +582,195 @@ TcpAgent::reset()
  */
 void TcpAgent::rtt_init()
 {
+//	fprintf(stderr, "******RTT INITIALIZER******\n");
 	t_rtt_ = 0;
 	t_srtt_ = int(srtt_init_ / tcp_tick_) << T_SRTT_BITS;
 	t_rttvar_ = int(rttvar_init_ / tcp_tick_) << T_RTTVAR_BITS;
 	t_rtxcur_ = rtxcur_init_;
 	t_backoff_ = 1;
+
+	//log threshold
+	trace_th = 0;
+	//log t_out
+	trace_t_out = 0;
+
+
+	//Fallon rtt approximation
+	fallon_rtt = 0;
+	fallon_alpha = 1.0; //0.2;
+	fallon_beta = 0.7;
+
+	static int fallon_message = 2;
+	if(fallon_rtt == 1 && fallon_message ==2)
+	{
+		fprintf(stderr, "\t\t*****NOTE: Fallon rtt estimation enabled*****\n");
+		fallon_message = 0;
+	}
+
+	//Q-Learning rtt approximation
+	q_learning_rtt = 0;// 1 to enable, else disable
+	
+
+	static int q_message = 2;
+	if(q_learning_rtt == 1 && q_message ==2)
+	{
+		fprintf(stderr, "\t\t*****NOTE: Q-Learnig rtt estimation enabled*****\n");
+		q_message = 0;
+	}
+	prev_state = cur_state = Q_SUCCESS; 
+
+	q_threshold = 0.01;//minimum q_rtt
+	q_max = 64;
+	float q_init = 3.5;
+	q_rtt[Q_SUCCESS] = q_rtt[Q_FAILURE] = q_init;
+	beta = 1.5;
+	q_gamma[Q_SUCCESS] = -0.90;
+	q_gamma[Q_FAILURE] = 0.10;
+	alpha[Q_SUCCESS] = 0.9;
+	alpha[Q_FAILURE] = 0.1;
+
+/*	q_threshold = 0.01;//minimum q_rtt
+	q_max = 64;
+	float q_init = 5;
+	q_rtt[Q_SUCCESS] = q_rtt[Q_FAILURE] = q_init;
+	beta = 1.5;
+	q_gamma[Q_SUCCESS] = -0.05;
+	q_gamma[Q_FAILURE] = 0.04;
+	alpha[Q_SUCCESS] = 0.25;
+	alpha[Q_FAILURE] = 0.25;
+*/
+
+	if(trace_th == 1)
+	{
+		static int trace_thrshold_file_open = 0;
+		if(trace_thrshold_file_open == 0)
+		{
+			fprintf(stderr, "THRESHOLD FILE OPENED\n");
+			fp = fopen(THRESHOLD_FILE_NAME, "wt");
+			trace_thrshold_file_open = 1;
+		}
+		else
+		{
+//			fprintf(stderr, "THRESHOLD FILE CLOSED\n");
+//			fclose(fp);
+		}
+	}
+	if(trace_t_out == 1)
+	{
+		static int trace_t_out_file_open = 0;
+		if(trace_t_out_file_open == 0)
+		{
+			fprintf(stderr, "TIMEOUT FILE OPENED\n");
+			t_out_fp = fopen(TIMEOUT_FILE_NAME, "wt");
+			trace_t_out_file_open = 1;
+		}
+		else
+		{
+//			fprintf(stderr, "THRESHOLD FILE CLOSED\n");
+//			fclose(fp);
+		}
+	}
+
+//	CWND Trace parameters
+	trace_cwnd = 0;
+	open_cwnd(trace_cwnd, &fp_cwnd, TAHOE_CWND_FILE_NAME);
+	iteration_cwnd = 0.0;
+
+	static int itcp_print = 1;
+	if(itcp==1 && itcp_print == 1)
+	{
+		fprintf(stderr, "\n\t\t\t***** NOTE: iTCP enabled *****\n");
+		itcp_print = 0;
+	}
+	
+	static int mabcc_print = 1;
+	if(mabcc==1 && mabcc_print == 1)
+	{
+		fprintf(stderr, "\n\t\t\t***** NOTE: MABCC enabled *****\n");
+		mabcc_print = 0;
+	}
+	
 }
+
+//void log_threshold(int j_rtt, int r_bits, int j_rtt_var, int v_bits, int j_tick, double q_s, double q_f, double t_out, int state);
+void log_threshold(double j_rtt, double j_rtt_var, double q_s, double q_f, double t_out, int state);
+
 
 double TcpAgent::rtt_timeout()
 {
 	double timeout;
-	if (rfc2988_) {
-	// Correction from Tom Kelly to be RFC2988-compliant, by
-	// clamping minrto_ before applying t_backoff_.
-		if (t_rtxcur_ < minrto_ && !use_rtt_)
-			timeout = minrto_ * t_backoff_;
-		else
-			timeout = t_rtxcur_ * t_backoff_;
-	} else {
-		// only of interest for backwards compatibility
-		timeout = t_rtxcur_ * t_backoff_;
-		if (timeout < minrto_)
-			timeout = minrto_;
-	}
+	// Q-Learning timeout calculation
+	if(q_learning_rtt == 1)
+	{
+//		fprintf(stderr, "timeout cal\n");
 
-	if (timeout > maxrto_)
-		timeout = maxrto_;
-
-        if (timeout < 2.0 * tcp_tick_) {
-		if (timeout < 0) {
+		timeout = (double)beta * (double)q_rtt[cur_state];
+		if(timeout < 0)
+		{
 			fprintf(stderr, "TcpAgent: negative RTO!  (%f)\n",
 				timeout);
+			if(cur_state == Q_SUCCESS)
+				fprintf(stderr, "Qlearning state: SUCCESS\n");
+			else
+				fprintf(stderr, "Qlearning state: FAIL\n");
 			exit(1);
-		} else if (use_rtt_ && timeout < tcp_tick_)
-			timeout = tcp_tick_;
-		else
-			timeout = 2.0 * tcp_tick_;
+		}
+		use_rtt_ = 0;
+//		fprintf(stderr, "Qlearning timeout: %d %f %f ", cur_state, q_rtt[cur_state], timeout);
+
+		//return timeout;
 	}
-	use_rtt_ = 0;
+
+	else
+	{
+		if (rfc2988_) {
+		// Correction from Tom Kelly to be RFC2988-compliant, by
+		// clamping minrto_ before applying t_backoff_.
+			if (t_rtxcur_ < minrto_ && !use_rtt_)
+				timeout = minrto_ * t_backoff_;
+			else
+				timeout = t_rtxcur_ * t_backoff_;
+		} else {
+			// only of interest for backwards compatibility
+			timeout = t_rtxcur_ * t_backoff_;
+			if (timeout < minrto_)
+				timeout = minrto_;
+		}
+	
+		if (timeout > maxrto_)
+			timeout = maxrto_;
+	
+        	if (timeout < 2.0 * tcp_tick_) {
+			if (timeout < 0) {
+				fprintf(stderr, "TcpAgent: negative RTO!  (%f)\n",
+					timeout);
+				exit(1);
+			} else if (use_rtt_ && timeout < tcp_tick_)
+				timeout = tcp_tick_;
+			else
+				timeout = 2.0 * tcp_tick_;
+		}
+		use_rtt_ = 0;
+	
+	//	fprintf(stderr, "Normal timeout: %f \n", timeout);
+	}
+
+/*
+//	trace_th = 1;
+	if(trace_th == 1)
+	{
+//		trace_threshold(t_srtt_, t_rttvar_, q_rtt[Q_SUCCESS], q_rtt[Q_FAILURE]);
+		fprintf(fp, "Threshold (J_RTT, J_RTT_VAR, Q_suc, Q_fail, Timeout): %3.5f %3.5f %3.5f %3.5f %3.5f %d ", (double)((t_srtt_ >> T_SRTT_BITS)  * tcp_tick_), (double)((t_rttvar_ >> T_RTTVAR_BITS)  * tcp_tick_), (double)q_rtt[Q_SUCCESS], (double)q_rtt[Q_FAILURE], (double)timeout, cur_state);
+		if(cur_state)
+			fprintf(fp, "SUCCESS");
+		else
+			fprintf(fp, "FAILURE");
+		fprintf(fp, "\n");
+		fflush(fp);
+	}
+*/
+
+//	printf("minrto_:%f maxrto_:%f\n", minrto_, maxrto_);
 	return (timeout);
 }
 
@@ -583,16 +797,41 @@ void TcpAgent::rtt_update(double tao)
 	// Similarly, "t_rttvar_ >> T_RTTVAR_BITS" is the actual rttvar,
 	//   and "t_rttvar_" is 4*rttvar.
 	//
+
+	float q_delay = (float)(t_rtt_);// << T_SRTT_BITS);
+	float t_out_max = (float)rtt_timeout();
+	q_delay = (q_delay>t_out_max ? t_out_max : q_delay);
+	
+	//cur_rtt_mabcc = q_delay;
+	//cur_rtt_mabcc = t_srtt_ >> T_SRTT_BITS;
+	cur_rtt_mabcc = (int(t_srtt_) >> T_SRTT_BITS);
+	cur_rtt_mabcc = (cur_rtt_mabcc<1)?1:cur_rtt_mabcc;
+
         if (t_srtt_ != 0) {
-		register short delta;
-		delta = t_rtt_ - (t_srtt_ >> T_SRTT_BITS);	// d = (m - a0)
-		if ((t_srtt_ += delta) <= 0)	// a1 = 7/8 a0 + 1/8 m
-			t_srtt_ = 1;
-		if (delta < 0)
-			delta = -delta;
-		delta -= (t_rttvar_ >> T_RTTVAR_BITS);
-		if ((t_rttvar_ += delta) <= 0)	// var1 = 3/4 var0 + 1/4 |d|
-			t_rttvar_ = 1;
+		if(fallon_rtt == 1)
+		{//my code; newly added for fallon's rtt
+			//printf("EXECUTING FALLON's RTT\n");
+			t_srtt_ = t_srtt_ >> T_SRTT_BITS;
+			t_rttvar_ = t_rttvar_ >> T_RTTVAR_BITS;
+
+			t_rttvar_ = (1 - fallon_beta) * t_rttvar_ + fallon_beta * (t_srtt_ - t_rtt_);
+			t_srtt_ = (1 - fallon_alpha) * t_srtt_ + fallon_alpha * t_rtt_;
+
+			t_srtt_ = t_srtt_ << T_SRTT_BITS;
+			t_rttvar_ = t_rttvar_ << T_RTTVAR_BITS;
+		}
+		else
+		{ //original code in ns-2
+			register short delta;
+			delta = t_rtt_ - (t_srtt_ >> T_SRTT_BITS);	// d = (m - a0)
+			if ((t_srtt_ += delta) <= 0)	// a1 = 7/8 a0 + 1/8 m
+				t_srtt_ = 1;
+			if (delta < 0)
+				delta = -delta;
+			delta -= (t_rttvar_ >> T_RTTVAR_BITS);
+			if ((t_rttvar_ += delta) <= 0)	// var1 = 3/4 var0 + 1/4 |d|
+				t_rttvar_ = 1;
+		}
 	} else {
 		t_srtt_ = t_rtt_ << T_SRTT_BITS;		// srtt = rtt
 		t_rttvar_ = t_rtt_ << (T_RTTVAR_BITS-1);	// rttvar = rtt / 2
@@ -605,13 +844,35 @@ void TcpAgent::rtt_update(double tao)
 	t_rtxcur_ = (((t_rttvar_ << (rttvar_exp_ + (T_SRTT_BITS - T_RTTVAR_BITS))) +
 		t_srtt_)  >> T_SRTT_BITS ) * tcp_tick_;
 
+	//Q-Learning rtt update
+//	fprintf(stderr, "step1\n");
+	cur_state = Q_SUCCESS;
+//	fprintf(stderr, "%d %d\n", prev_state, cur_state);
+//	fprintf(stderr, "%f %f %f %f %f %f\n",q_rtt[prev_state], q_rtt[cur_state], alpha[cur_state], q_gamma[cur_state], q_threshold, q_delay);
+//	float temp = q_rtt[prev_state];
+	q_rtt[prev_state] += (float)(alpha[cur_state] * (q_delay - q_rtt[prev_state] + q_gamma[cur_state] * q_rtt[cur_state]));
+//	if(temp-q_rtt[prev_state]<(-5) || temp-q_rtt[prev_state]>5)
+//		fprintf(stderr, "%f %f, %f, %f %f %f\n", temp, q_delay, temp,q_delay - temp, q_gamma[cur_state] * q_rtt[cur_state], q_rtt[prev_state]);
+	q_rtt[prev_state] = (q_rtt[prev_state] < q_threshold ? q_threshold : q_rtt[prev_state]);
+	q_rtt[prev_state] = (q_rtt[prev_state] > q_max ? q_max : q_rtt[prev_state]);
+	prev_state = cur_state;
+//	fprintf(stderr, "step1 end\n");
+
+//	trace_th = 1;
+	if(trace_th == 1)
+	{
+		log_threshold((double)((t_srtt_ >> T_SRTT_BITS)  * tcp_tick_), (double)((t_rttvar_ >> T_RTTVAR_BITS)  * tcp_tick_), q_rtt[Q_SUCCESS], q_rtt[Q_FAILURE], rtt_timeout(), cur_state);
+	}
+
 	return;
 }
 
 void TcpAgent::rtt_backoff()
 {
-	if (t_backoff_ < 64)
-		t_backoff_ <<= 1;
+	if (t_backoff_ < 64 || rfc2988_)
+        	t_backoff_ <<= 1;
+        // RFC2988 allows a maximum for the backed-off RTO of 60 seconds.
+        // This is applied by maxrto_.
 
 	if (t_backoff_ > 8) {
 		/*
@@ -622,6 +883,14 @@ void TcpAgent::rtt_backoff()
 		t_rttvar_ += (t_srtt_ >> T_SRTT_BITS);
 		t_srtt_ = 0;
 	}
+
+	//Q-Learning rtt update
+	int t_cur_state = Q_FAILURE;
+//	q_rtt[prev_state] += (alpha[t_cur_state] * ((rtt_timeout()/beta) - q_rtt[prev_state] + q_gamma[t_cur_state] * q_rtt[t_cur_state]));
+//	q_rtt[prev_state] = (q_rtt[prev_state] < q_threshold ? q_threshold : q_rtt[prev_state]);
+//	q_rtt[prev_state] = (q_rtt[prev_state] > q_max ? q_max : q_rtt[prev_state]);
+	cur_state = t_cur_state;
+	prev_state = cur_state;
 }
 
 /*
@@ -666,10 +935,10 @@ void TcpAgent::output(int seqno, int reason)
                 if (tss==NULL) exit(1);
         }
         //dynamically grow the timestamp array if it's getting full
-        if (bugfix_ts_ && window() > tss_size_* 0.9) {
+        if (bugfix_ts_ && ((seqno - highest_ack_) > tss_size_* 0.9)) {
                 double *ntss;
                 ntss = (double*) calloc(tss_size_*2, sizeof(double));
-                printf("resizing timestamp table\n");
+                printf("%p resizing timestamp table\n", this);
                 if (ntss == NULL) exit(1);
                 for (int i=0; i<tss_size_; i++)
                         ntss[(highest_ack_ + i) % (tss_size_ * 2)] =
@@ -699,6 +968,17 @@ void TcpAgent::output(int seqno, int reason)
 			databytes = 0;
 			curseq_ += 1;
 			hdr_cmn::access(p)->size() = tcpip_base_hdr_size_;
+			++syn_connects_;
+			//fprintf(stderr, "TCPAgent: syn_connects_ %d max_connects_ %d\n",
+			//	syn_connects_, max_connects_);
+			if (max_connects_ > 0 &&
+                               syn_connects_ > max_connects_) {
+			      // Abort the connection.	
+			      // What is the best way to abort the connection?	
+			      curseq_ = 0;
+	                      rtx_timer_.resched(10000);
+                              return;
+                        }
 		}
 		if (ecn_) {
 			hf->ecnecho() = 1;
@@ -786,6 +1066,7 @@ void TcpAgent::output(int seqno, int reason)
  */
 void TcpAgent::sendmsg(int nbytes, const char* /*flags*/)
 {
+	new_sent_mabcc=1;
 	if (nbytes == -1 && curseq_ <= TCP_MAXSEQ)
 		curseq_ = TCP_MAXSEQ; 
 	else
@@ -848,13 +1129,19 @@ int TcpAgent::command(int argc, const char*const* argv)
 		if (strcmp(argv[1], "persist") == 0) {
 			TcpAgent *other
 			  = (TcpAgent*)TclObject::lookup(argv[2]);
+			
+			t_cwnd = cwnd_;			
 			cwnd_ = other->cwnd_;
+			cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+
 			awnd_ = other->awnd_;
 			ssthresh_ = other->ssthresh_;
 			t_rtt_ = other->t_rtt_;
 			t_srtt_ = other->t_srtt_;
 			t_rttvar_ = other->t_rttvar_;
 			t_backoff_ = other->t_backoff_;
+
+			print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
 			return (TCL_OK);
 		}
 	}
@@ -1100,38 +1387,18 @@ double TcpAgent::increase_param()
 
 /*
  * open up the congestion window
-
-   ++++ Cheung's note:
-
-	This function is called to update CWND for each NEW ACK
-
-	Case 1 is the standard algorithm
  */
 void TcpAgent::opencwnd()
 {
-	printf("Awsaf's improvement");
-
 	double increment;
+	int chng = 0;//cwnd change
 	if (cwnd_ < ssthresh_) {
-
-	   switch (wnd_option_)
-	   {
-	         /* ++++ Cheung's note: you can try other 
-			slow start algorithms too */
-
-	      case 99:
-			cwnd_ = 10;
-			break;
-
-	      case 98:
-			cwnd_ = FixedWindowSize;
-			break;
-
-	      default: /* slow-start (exponential) */
-			cwnd_ += 1;   /* Looks like the unit is PACKET */
-
-	   }
-
+		/* slow-start (exponential) */
+		t_cwnd = cwnd_;		
+		cwnd_ += 1;
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+		chng = 1;
+//		print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
 	} else {
 		/* linear */
 		double f;
@@ -1139,7 +1406,11 @@ void TcpAgent::opencwnd()
 		case 0:
 			if (++count_ >= cwnd_) {
 				count_ = 0;
+				t_cwnd = cwnd_;
 				++cwnd_;
+				cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+				chng = 1;
+//				print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
 			}
 			break;
 
@@ -1152,39 +1423,35 @@ void TcpAgent::opencwnd()
 				increment = limited_slow_start(cwnd_,
 				  max_ssthresh_, increment);
 			}
+			t_cwnd = cwnd_;
 			cwnd_ += increment;
+			cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+			chng = 1;
+//			print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
 			break;
 
-	/* These are window increase algorithms
-	 * for experimental purposes only. */
-
 		case 2:
-			printf("Awsaf's improvement");
+			/* These are window increase algorithms
+			 * for experimental purposes only. */
 			/* This is the Constant-Rate increase algorithm 
                          *  from the 1991 paper by S. Floyd on "Connections  
 			 *  with Multiple Congested Gateways". 
 			 *  The window is increased by roughly 
 			 *  wnd_const_*RTT^2 packets per round-trip time.  */
-
 			f = (t_srtt_ >> T_SRTT_BITS) * tcp_tick_;
-				/* t_srtt_ = smoothed round-trip time */
-				/* T_SRTT_BITS = exponent of weight for 
-						 updating t_srtt_ */
-				/* tcp_tick_ = clock granularity, default 0.1 */
-				/* Effect: f ~= RTT */
 			f *= f;
-				/* f = RTT^2 */
 			f *= wnd_const_;
-				/* f = c*RTT^2 */
-			        /* f = wnd_const_ * RTT^2 */
+			/* f = wnd_const_ * RTT^2 */
 			f += fcnt_;
-				/* f = coumulative total */
-			if (f > cwnd_) 
-			{
+			if (f > cwnd_) {
+				fcnt_ = 0;
+				t_cwnd = cwnd_;
 				++cwnd_;
-				fcnt_ = 0;	/* Reset cumulative total */
+				cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+				chng = 1;
+//				print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
 			} else
-				fcnt_ = f;	/* Keep cumulative total */
+				fcnt_ = f;
 			break;
 
 		case 3:
@@ -1197,7 +1464,11 @@ void TcpAgent::opencwnd()
 			f += fcnt_;
 			if (f > cwnd_) {
 				fcnt_ = 0;
+				t_cwnd = cwnd_;
 				++cwnd_;
+				cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+				chng = 1;
+//				print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
 			} else
 				fcnt_ = f;
 			break;
@@ -1211,7 +1482,11 @@ void TcpAgent::opencwnd()
                         f += fcnt_;
                         if (f > cwnd_) {
                                 fcnt_ = 0;
+				t_cwnd = cwnd_;
                                 ++cwnd_;
+				cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+				chng = 1;
+//				print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
                         } else
                                 fcnt_ = f;
                         break;
@@ -1221,25 +1496,25 @@ void TcpAgent::opencwnd()
 			 *  the 1992 paper by S. Floyd on "On Traffic 
 			 *  Phase Effects in Packet-Switched Gateways". */
                         f = (t_srtt_ >> T_SRTT_BITS) * tcp_tick_;
-				/* t_srtt_ = smoothed round-trip time */
-				/* T_SRTT_BITS = exponent of weight for 
-						 updating t_srtt_ */
-				/* tcp_tick_ = clock granularity, default 0.1 */
-				/* Effect: f ~= RTT */
                         f *= wnd_const_;
-				/* f ~= c * RTT */
                         f += fcnt_;
-				/* f = coumulative total */
-                        if (f > cwnd_) 
-			{
-                                ++cwnd_;
+                        if (f > cwnd_) {
                                 fcnt_ = 0;
+				t_cwnd = cwnd_;
+                                ++cwnd_;
+				cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+				chng = 1;
+//				print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
                         } else
-                                fcnt_ = f;	/* Keep running count */
+                                fcnt_ = f;
                         break;
                 case 6:
                         /* binomial controls */ 
+			t_cwnd = cwnd_;
                         cwnd_ += increase_num_ / (cwnd_*pow(cwnd_,k_parameter_));                
+			cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+			chng = 1;
+//			print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
                         break; 
  		case 8: 
 			/* high-speed TCP, RFC 3649 */
@@ -1250,16 +1525,12 @@ void TcpAgent::opencwnd()
 				increment = limited_slow_start(cwnd_,
 				  max_ssthresh_, increment);
 			}
+			t_cwnd = cwnd_;
 			cwnd_ += increment;
+			cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+			chng = 1;
+//			print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
                         break;
-
-		case 99: /* Cheung's code */
-
-			/* Static CWND */
-
-			cwnd_ = 10;
-			break;
-
 		default:
 #ifdef notdef
 			/*XXX*/
@@ -1270,173 +1541,159 @@ void TcpAgent::opencwnd()
 	}
 	// if maxcwnd_ is set (nonzero), make it the cwnd limit
 	if (maxcwnd_ && (int(cwnd_) > maxcwnd_))
+	{
+		//t_cwnd = cwnd_;
 		cwnd_ = maxcwnd_;
+		//cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+		chng = 1;
+//		print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
+	}
+	//fprintf(stderr, "maxcwnd_: \t\t%10d\n", maxcwnd_);
+
+	if(chng == 1)
+	{
+		print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
+	}
 
 	return;
 }
 
-void TcpAgent::slowdown(int how)
+void
+TcpAgent::slowdown(int how)
 {
-   double decrease;  /* added for highspeed - sylvia */
-   double win, halfwin, decreasewin;
-   int slowstart = 0;
-   ++ncwndcuts_;
-
-   if (!(how & TCP_IDLE) && !(how & NO_OUTSTANDING_DATA))
-   {
-   	++ncwndcuts1_; 
-   }
-
-   // we are in slowstart for sure if cwnd < ssthresh
-   if (cwnd_ < ssthresh_) 
-   	slowstart = 1;
-
-   if (precision_reduce_) 
-   {
-      halfwin = windowd() / 2;
-
-      if (wnd_option_ == 6) 
-      {         
-         /* binomial controls */
-         decreasewin = windowd() 
-		- (1.0-decrease_num_)*pow(windowd(),l_parameter_);
-      } 
-      else if (wnd_option_ == 8 && (cwnd_ > low_window_)) 
-      {
-         /* experimental highspeed TCP */
-	 decrease = decrease_param();
-
-	 //if (decrease < 0.1) 
-	 //	decrease = 0.1;
-
-	 decrease_num_ = decrease;
-         decreasewin = windowd() - (decrease * windowd());
-      } 
-      else 
-      {
-	 decreasewin = decrease_num_ * windowd();
-      }
-      win = windowd();
-   } 
-   else  
-   {
-      int temp;
-
-      temp = (int)(window() / 2);
-      halfwin = (double) temp;
-
-      if (wnd_option_ == 6) 
-      {
-         /* binomial controls */
-         temp = (int)(window() 
-		- (1.0-decrease_num_)*pow(window(),l_parameter_));
-      } 
-      else if ((wnd_option_ == 8) && (cwnd_ > low_window_)) 
-      {
-         /* experimental highspeed TCP */
-	 decrease = decrease_param();
-	 //if (decrease < 0.1)
-         //       decrease = 0.1;		
-	 decrease_num_ = decrease;
-         temp = (int)(windowd() - (decrease * windowd()));
-      } 
-      else 
-      {
- 	 temp = (int)(decrease_num_ * window());
-      }
-
-
-      decreasewin = (double) temp;
-      win = (double) window();
-   }
-
-   // **********************************************************
-   // After the above:
-   //   halfwin = cwnd_ / 2 (precise or approximate) 
-   // **********************************************************
-
-   // --------------------------------------------------------
-   // Methods for closing Slow Start Threshold
-   // --------------------------------------------------------
-   if (how & CLOSE_SSTHRESH_HALF)
+	double decrease;  /* added for highspeed - sylvia */
+	double win, halfwin, decreasewin;
+	int slowstart = 0;
+	++ncwndcuts_;
+	if (!(how & TCP_IDLE) && !(how & NO_OUTSTANDING_DATA)){
+		++ncwndcuts1_; 
+	}
+	// we are in slowstart for sure if cwnd < ssthresh
+	if (cwnd_ < ssthresh_) 
+		slowstart = 1;
+        if (precision_reduce_) {
+		halfwin = windowd() / 2;
+                if (wnd_option_ == 6) {         
+                        /* binomial controls */
+                        decreasewin = windowd() - (1.0-decrease_num_)*pow(windowd(),l_parameter_);
+                } else if (wnd_option_ == 8 && (cwnd_ > low_window_)) { 
+                        /* experimental highspeed TCP */
+			decrease = decrease_param();
+			//if (decrease < 0.1) 
+			//	decrease = 0.1;
+			decrease_num_ = decrease;
+                        decreasewin = windowd() - (decrease * windowd());
+                } else {
+	 		decreasewin = decrease_num_ * windowd();
+		}
+		win = windowd();
+	} else  {
+		int temp;
+		temp = (int)(window() / 2);
+		halfwin = (double) temp;
+                if (wnd_option_ == 6) {
+                        /* binomial controls */
+                        temp = (int)(window() - (1.0-decrease_num_)*pow(window(),l_parameter_));
+                } else if ((wnd_option_ == 8) && (cwnd_ > low_window_)) { 
+                        /* experimental highspeed TCP */
+			decrease = decrease_param();
+			//if (decrease < 0.1)
+                        //       decrease = 0.1;		
+			decrease_num_ = decrease;
+                        temp = (int)(windowd() - (decrease * windowd()));
+                } else {
+ 			temp = (int)(decrease_num_ * window());
+		}
+		decreasewin = (double) temp;
+		win = (double) window();
+	}
+	if (how & CLOSE_SSTHRESH_HALF)
 		// For the first decrease, decrease by half
 		// even for non-standard values of decrease_num_.
-      if (first_decrease_ == 1 || slowstart ||
-	   last_cwnd_action_ == CWND_ACTION_TIMEOUT) 
-      {
-	  // Do we really want halfwin instead of decreasewin
-	  // after a timeout?
-	  ssthresh_ = (int) halfwin;
-      } 
-      else 
-      {
-	  ssthresh_ = (int) decreasewin;
-      }
-   else if (how & THREE_QUARTER_SSTHRESH)
-     if (ssthresh_ < 3*cwnd_/4)
-	 ssthresh_  = (int)(3*cwnd_/4);
-
-
-   // --------------------------------------------------------
-   // Methods for closing Congestion Window (CWND)
-   // --------------------------------------------------------
-   if (how & CLOSE_CWND_HALF)
+		if (first_decrease_ == 1 || slowstart ||
+			last_cwnd_action_ == CWND_ACTION_TIMEOUT) {
+			// Do we really want halfwin instead of decreasewin
+		// after a timeout?
+			ssthresh_ = (int) halfwin;
+		} else {
+			ssthresh_ = (int) decreasewin;
+		}
+        else if (how & THREE_QUARTER_SSTHRESH)
+		if (ssthresh_ < 3*cwnd_/4)
+			ssthresh_  = (int)(3*cwnd_/4);
+	int omit_cwnd = 0;//for cwnd trace
+	if (how & CLOSE_CWND_HALF)
 		// For the first decrease, decrease by half
 		// even for non-standard values of decrease_num_.
-      if (first_decrease_ == 1 || slowstart || decrease_num_ == 0.5) 
-      {
-	 cwnd_ = halfwin;
-      } 
-      else 
-         cwnd_ = decreasewin;
-   else if (how & CWND_HALF_WITH_MIN) 
-   {
-	// We have not thought about how non-standard TCPs, with
-	// non-standard values of decrease_num_, should respond
-	// after quiescent periods.
+		if (first_decrease_ == 1 || slowstart || decrease_num_ == 0.5) {
+			t_cwnd = cwnd_;
+			cwnd_ = halfwin;
+			cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+		} 
+		else 
+		{
+			t_cwnd = cwnd_;
+			cwnd_ = decreasewin;
+			cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+		}
+        else if (how & CWND_HALF_WITH_MIN) {
+		// We have not thought about how non-standard TCPs, with
+		// non-standard values of decrease_num_, should respond
+		// after quiescent periods.
+		t_cwnd = cwnd_;
+                cwnd_ = decreasewin;
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+                if (cwnd_ < 1)
+                        cwnd_ = 1;
+	}
+	else if (how & CLOSE_CWND_RESTART) 
+	{
+		t_cwnd = cwnd_;
+		cwnd_ = int(wnd_restart_);
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+	}
+	else if (how & CLOSE_CWND_INIT)
+	{
+		t_cwnd = cwnd_;
+		cwnd_ = int(wnd_init_);
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+	}
+	else if (how & CLOSE_CWND_ONE)
+	{
+		t_cwnd = cwnd_;
+		cwnd_ = 1;
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+	}
+	else if (how & CLOSE_CWND_HALF_WAY) {
+		// cwnd_ = win - (win - W_used)/2 ;
+		t_cwnd = cwnd_;
+		cwnd_ = W_used + decrease_num_ * (win - W_used);
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+                if (cwnd_ < 1)
+                        cwnd_ = 1;
+	}
+	else omit_cwnd = 1;
+	
+	if(omit_cwnd == 0)
+		print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
 
-      cwnd_ = decreasewin;
+	if (ssthresh_ < 2)
+		ssthresh_ = 2;
+	if (how & (CLOSE_CWND_HALF|CLOSE_CWND_RESTART|CLOSE_CWND_INIT|CLOSE_CWND_ONE))
+		cong_action_ = TRUE;
 
-      if (cwnd_ < 1)
-         cwnd_ = 1;
-   }
-   else if (how & CLOSE_CWND_RESTART) 
-      cwnd_ = int(wnd_restart_);	// wnd_restart_ == 1
-   else if (how & CLOSE_CWND_INIT)
-      cwnd_ = int(wnd_init_);		// wnd_init_ is settable
-					// bound to Tcl var "windowInit_"
-   else if (how & CLOSE_CWND_ONE)
-      cwnd_ = 1;
-   else if (how & CLOSE_CWND_HALF_WAY) 
-   {
-      // cwnd_ = win - (win - W_used)/2 ;
-      cwnd_ = W_used + decrease_num_ * (win - W_used);
-
-      if (cwnd_ < 1)
-         cwnd_ = 1;
-   }
-
-   // Fix ssthresh_ if adjustment took it down too low
-   if (ssthresh_ < 2)
-       ssthresh_ = 2;
-
-   if (how & 
-        (CLOSE_CWND_HALF|CLOSE_CWND_RESTART|CLOSE_CWND_INIT|CLOSE_CWND_ONE))
-      cong_action_ = TRUE;
-
-   fcnt_ = count_ = 0;
-
-   // Not the first decrease anymore...
-   if (first_decrease_ == 1)
-      first_decrease_ = 0;
-
-   // for event tracing slow start
-
-   if (cwnd_ == 1 || slowstart) 
+	fcnt_ = count_ = 0;
+	if (first_decrease_ == 1)
+		first_decrease_ = 0;
+	// for event tracing slow start
+	if (cwnd_ == 1 || slowstart) 
 		// Not sure if this is best way to capture slow_start
 		// This is probably tracing a superset of slowdowns of
 		// which all may not be slow_start's --Padma, 07/'01.
-     trace_event("SLOW_START");
+		trace_event("SLOW_START");
+	
+	//num_timeout += 1.0;//extra
+	
 }
 
 /*
@@ -1452,6 +1709,8 @@ void TcpAgent::newack(Packet* pkt)
 	 */
 	if (!timerfix_) newtimer(pkt);
 	dupacks_ = 0;
+	//num_dupack = 0;
+	//num_timeout = 0;
 	last_ack_ = tcph->seqno();
 	prev_highest_ack_ = highest_ack_ ;
 	highest_ack_ = last_ack_;
@@ -1499,6 +1758,10 @@ void TcpAgent::newack(Packet* pkt)
 	/* update average window */
 	awnd_ *= 1.0 - wnd_th_;
 	awnd_ += wnd_th_ * cwnd_;
+
+	num_dupack = 0;
+	num_timeout = 0;
+
 }
 
 
@@ -1513,6 +1776,7 @@ void TcpAgent::newack(Packet* pkt)
  */
 void TcpAgent::ecn(int seqno)
 {
+	//if(0)//extra
 	if (seqno > recover_ || 
 	      last_cwnd_action_ == CWND_ACTION_TIMEOUT) {
 		recover_ =  maxseq_;
@@ -1522,7 +1786,7 @@ void TcpAgent::ecn(int seqno)
 				rtt_backoff();
 			else ecn_backoff_ = 1;
 		} else ecn_backoff_ = 0;
-		slowdown(CLOSE_CWND_HALF|CLOSE_SSTHRESH_HALF);
+		slowdown(CLOSE_CWND_HALF|CLOSE_SSTHRESH_HALF);//commented by myself
 		++necnresponses_ ;
 		// added by sylvia to count number of ecn responses 
 	}
@@ -1682,6 +1946,7 @@ TcpAgent::send_one()
 void
 TcpAgent::dupack_action()
 {
+	num_dupack+=1.0;//extra
 	int recovered = (highest_ack_ > recover_);
 	if (recovered || (!bug_fix_ && !ecn_) || 
 		(bugfix_ss_ && highest_ack_ == 0)) {
@@ -1716,6 +1981,7 @@ tahoe_action:
 		slowdown(CLOSE_SSTHRESH_HALF|CLOSE_CWND_ONE);
 	}
 	reset_rtx_timer(0,0);
+
 	return;
 }
 
@@ -1730,9 +1996,17 @@ void TcpAgent::endQuickStart()
         qs_window_ = maxseq_;
 	int new_cwnd = maxseq_ - last_ack_;
 	if (new_cwnd > 1 && new_cwnd < cwnd_) {
+		t_cwnd = cwnd_;
 	 	cwnd_ = new_cwnd;
-		if (cwnd_ < initial_window()) 
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+
+		if (cwnd_ < initial_window() && itcp != 1) //????? new cond added
+		{
+			//t_cwnd = cwnd_;
 			cwnd_ = initial_window();
+			//cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+		}
+		print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
 	}
 }
 
@@ -1756,8 +2030,10 @@ void TcpAgent::processQuickStart(Packet *pkt)
 		  double num1 = hdr_qs::rate_to_Bps(qsh->rate());
 		  double time = now - tcph->ts_echo();
 		  int size = size_ + headersize();
-		  printf("Quick Start approved, rate: %g Bps, window %d rtt: %4.2f pktsize: %d\n", 
-		     num1, app_rate, time, size);
+		  printf("Quick Start request, rate: %g Bps, encoded rate: %d\n", 
+		     num1, qsh->rate());
+		  printf("Quick Start request, window %d rtt: %4.2f pktsize: %d\n",
+		     app_rate, time, size);
 		}
                 if (app_rate > initial_window()) {
 			qs_cwnd_ = app_rate;
@@ -1785,12 +2061,19 @@ void TcpAgent::recv_frto_helper(Packet *pkt)
 		 * timeout was valid. Go to slow start retransmissions.
 		 */
 		t_seqno_ = highest_ack_ + 1;
+		t_cwnd = cwnd_;
 		cwnd_ = frto_;
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
 		frto_ = 0;
 
 		// Must zero dupacks (in order to trigger send_much at recv)
 		// dupacks is increased in recv after exiting this function
 		dupacks_ = -1;
+		num_dupack = -1;
+
+		num_timeout = 0;
+
+		print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
 	}
 }
 
@@ -1809,20 +2092,32 @@ void TcpAgent::spurious_timeout()
 		 * Full revert of congestion window
 		 * (FlightSize before last acknowledgment)
 		 */
+		t_cwnd = cwnd_;
 		cwnd_ = t_seqno_ - prev_highest_ack_;
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
 		break;
  
 	case 2:
 		/*
 		 * cwnd = reduced ssthresh (approx. half of the earlier pipe)
 		 */
-		cwnd_ = ssthresh_; break;
+		t_cwnd = cwnd_;
+		cwnd_ = ssthresh_; 
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+		break;
 	case 3:
 		/*
 		 * slow start, but without retransmissions
 		 */
-		cwnd_ = 1; break;
+		t_cwnd = cwnd_;
+		cwnd_ = 1; 
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+		break;
 	}
+
+	print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
+
+	num_timeout++;//???????
 
 	/*
 	 * Revert ssthresh to size before retransmission timeout
@@ -1831,14 +2126,29 @@ void TcpAgent::spurious_timeout()
 
 	/* If timeout was spurious, bugfix is not needed */
 	recover_ = highest_ack_ - 1;
+
+
+	//Q-Learning rtt update
+//	fprintf(stderr, "step2\n");
+	int t_cur_state = Q_FAILURE;
+	q_rtt[prev_state] += (alpha[t_cur_state] * ((rtt_timeout()/beta) - q_rtt[prev_state] + q_gamma[t_cur_state] * q_rtt[t_cur_state]));
+	q_rtt[prev_state] = (q_rtt[prev_state] < q_threshold ? q_threshold : q_rtt[prev_state]);
+	q_rtt[prev_state] = (q_rtt[prev_state] > q_max ? q_max : q_rtt[prev_state]);
+	cur_state = t_cur_state;
+	prev_state = cur_state;
+
+	if(trace_th == 1)
+	{
+		log_threshold((double)((t_srtt_ >> T_SRTT_BITS)  * tcp_tick_), (double)((t_rttvar_ >> T_RTTVAR_BITS)  * tcp_tick_), q_rtt[Q_SUCCESS], q_rtt[Q_FAILURE], rtt_timeout(), cur_state);
+	}
+
 }
 
 
 /*
  * Loss occurred in Quick-Start window.
- * If Quick-Start is enabled, packet loss in the QS phase should
- * trigger slow start instead of the regular fast retransmit,
- * see [draft-amit-quick-start-03.txt] (to appear).
+ * If Quick-Start is enabled, packet loss in the QS phase, during slow-start,
+ * should trigger slow start instead of the regular fast retransmit.
  * We use variable tcp_qs_recovery_ to toggle this behaviour on and off.
  * If tcp_qs_recovery_ is true, initiate slow start to probe for
  * a correct window size.
@@ -1899,13 +2209,18 @@ void TcpAgent::recv(Packet *pkt, Handler*)
 	if (tcph->seqno() > last_ack_) {
 		recv_newack_helper(pkt);
 		if (last_ack_ == 0 && delay_growth_) { 
+			t_cwnd = cwnd_;
 			cwnd_ = initial_window();
+			cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+
+			print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
 		}
 	} else if (tcph->seqno() == last_ack_) {
                 if (hdr_flags::access(pkt)->eln_ && eln_) {
                         tcp_eln(pkt);
                         return;
                 }
+		num_dupack ++;
 		if (++dupacks_ == numdupacks_ && !noFastRetrans_) {
 			dupack_action();
 		} else if (dupacks_ < numdupacks_ && singledup_ ) {
@@ -1941,22 +2256,48 @@ void TcpAgent::timeout_nonrtx(int tno)
 	 	*/
 		send_much(1, TCP_REASON_TIMEOUT, maxburst_);
 	}
+
+
+	//Q-Learning rtt update
+//	fprintf(stderr, "step3\n");
+	int t_cur_state = Q_FAILURE;
+	q_rtt[prev_state] += (alpha[t_cur_state] * ((rtt_timeout()/beta) - q_rtt[prev_state] + q_gamma[t_cur_state] * q_rtt[t_cur_state]));
+	q_rtt[prev_state] = (q_rtt[prev_state] < q_threshold ? q_threshold : q_rtt[prev_state]);
+	q_rtt[prev_state] = (q_rtt[prev_state] > q_max ? q_max : q_rtt[prev_state]);
+	cur_state = t_cur_state;
+	prev_state = cur_state;
+
+	if(trace_th == 1)
+	{
+		log_threshold((double)((t_srtt_ >> T_SRTT_BITS)  * tcp_tick_), (double)((t_rttvar_ >> T_RTTVAR_BITS)  * tcp_tick_), q_rtt[Q_SUCCESS], q_rtt[Q_FAILURE], rtt_timeout(), cur_state);
+	}
+
 }
 	
 void TcpAgent::timeout(int tno)
 {
+//	fprintf(stderr, "TIMEOUT\n");
 	/* retransmit timer */
 	if (tno == TCP_TIMER_RTX) {
 
 		// There has been a timeout - will trace this event
 		trace_event("TIMEOUT");
 
+
 		frto_ = 0;
 		// Set pipe_prev as per Eifel Response
 		pipe_prev_ = (window() > ssthresh_) ?
 			window() : (int)ssthresh_;
 
-	        if (cwnd_ < 1) cwnd_ = 1;
+	        if (cwnd_ < 1) 
+		{
+			//t_cwnd = cwnd_;
+			cwnd_ = 1;
+			//cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
+
+			print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
+		}
+
 		if (qs_approved_ == 1) qs_approved_ = 0;
 		if (highest_ack_ == maxseq_ && !slow_start_restart_) {
 			/*
@@ -2006,6 +2347,11 @@ void TcpAgent::timeout(int tno)
 				if (frto_enabled_ || sfrto_enabled_) {
 					frto_ = 1;
 				}
+				if(trace_t_out == 1)
+				{
+					fprintf(t_out_fp, "TIMEOUT: %f %d\n", rtt_timeout(), tno);
+					fflush(t_out_fp);
+				}
 			}
 		}
 		/* if there is no outstanding data, don't back off rtx timer */
@@ -2021,6 +2367,25 @@ void TcpAgent::timeout(int tno)
 	else {
 		timeout_nonrtx(tno);
 	}
+
+	num_timeout++;
+
+	//Q-Learning rtt update
+//	fprintf(stderr, "step4\n");
+	int t_cur_state = Q_FAILURE;
+	q_rtt[prev_state] += (alpha[t_cur_state] * ((rtt_timeout()/beta) - q_rtt[prev_state] + q_gamma[t_cur_state] * q_rtt[t_cur_state]));
+	q_rtt[prev_state] = (q_rtt[prev_state] < q_threshold ? q_threshold : q_rtt[prev_state]);
+	q_rtt[prev_state] = (q_rtt[prev_state] > q_max ? q_max : q_rtt[prev_state]);
+	cur_state = t_cur_state;
+	prev_state = cur_state;
+
+//	trace_th = 1;
+	if(trace_th == 1)
+	{
+		log_threshold((double)((t_srtt_ >> T_SRTT_BITS)  * tcp_tick_), (double)((t_rttvar_ >> T_RTTVAR_BITS)  * tcp_tick_), q_rtt[Q_SUCCESS], q_rtt[Q_FAILURE], rtt_timeout(), cur_state);
+	}
+
+
 }
 
 /* 
@@ -2034,7 +2399,8 @@ void TcpAgent::tcp_eln(Packet *pkt)
         hdr_tcp *tcph = hdr_tcp::access(pkt);
         int ack = tcph->seqno();
 
-        if (++dupacks_ == eln_rxmit_thresh_ && ack > eln_last_rxmit_) {
+	num_dupack++;        
+	if (++dupacks_ == eln_rxmit_thresh_ && ack > eln_last_rxmit_) {
                 /* Retransmit this packet */
                 output(last_ack_ + 1, TCP_REASON_DUPACK);
                 eln_last_rxmit_ = last_ack_+1;
@@ -2107,13 +2473,17 @@ void TcpAgent::closecwnd(int how)
 		ssthresh_ = int( window() / 2 );
 		if (ssthresh_ < 2)
 			ssthresh_ = 2;
+		t_cwnd = cwnd_;
 		cwnd_ = int(wnd_restart_);
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
 		break;
 
 	case 1:
 		/* Reno dup acks, or after a recent congestion indication. */
 		// cwnd_ = window()/2;
+		t_cwnd = cwnd_;
 		cwnd_ = decrease_num_ * window();
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
 		ssthresh_ = int(cwnd_);
 		if (ssthresh_ < 2)
 			ssthresh_ = 2;		
@@ -2122,24 +2492,33 @@ void TcpAgent::closecwnd(int how)
 	case 2:
 		/* Tahoe dup acks  		
 		 * after a recent congestion indication */
+		t_cwnd = cwnd_;
 		cwnd_ = wnd_init_;
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
 		break;
 
 	case 3:
 		/* Retransmit timeout, but no outstanding data. */ 
+		t_cwnd = cwnd_;
 		cwnd_ = int(wnd_init_);
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
 		break;
 	case 4:
 		/* Tahoe dup acks */
 		ssthresh_ = int( window() / 2 );
 		if (ssthresh_ < 2)
 			ssthresh_ = 2;
+		t_cwnd = cwnd_;
 		cwnd_ = 1;
+		cwnd_ = itcp_cwnd(t_cwnd, num_timeout, num_dupack, cwnd_);
 		break;
 
 	default:
 		abort();
 	}
+
+	print_cwnd(trace_cwnd, fp_cwnd, iteration_cwnd++, (float)cwnd_);
+
 	fcnt_ = 0.;
 	count_ = 0;
 }
@@ -2185,6 +2564,8 @@ void TcpAgent::process_qoption_after_send ()
 	} else {
 		rtt_counting();
 	}
+
+	num_timeout += 1.0;//extra
 }
 
 /*
@@ -2250,6 +2631,8 @@ TcpAgent::rtt_counting()
 		W_timed = t_seqno_  ;
 		F_counting = 1 ;
 	}
+
+	num_timeout += 1.0;//extra
 }
 
 void TcpAgent::process_qoption_after_ack (int seqno)
@@ -2296,3 +2679,422 @@ void TcpAgent::trace_event(char *eventtype)
 			);
 	et_->trace();
 }
+
+void TcpAgent::trace_threshold(double j_rtt, double j_rtt_var, double q_s, double q_f)
+{
+	fprintf(fp, "Threshold (Jacobson_RTT, Jacobson_RTT_VAR, Q_success, Q_failure): %3.5f %3.5f %3.5f %3.5f\n", j_rtt, j_rtt_var, q_s, q_f);
+	fflush(fp);
+
+}
+
+void log_threshold(double j_rtt, double j_rtt_var, double q_s, double q_f, double t_out, int state)
+{
+	fprintf(fp, "Threshold (J_RTT, J_RTT_VAR, Q_suc, Q_fail, Timeout): %3.5f %3.5f %3.5f %3.5f %3.5f %d ", j_rtt, j_rtt_var, q_s, q_f, t_out, state);
+	if(state)
+		fprintf(fp, "SUCCESS");
+	else
+		fprintf(fp, "FAILURE");
+	fprintf(fp, "\n");
+	fflush(fp);
+
+}
+
+/*
+void log_threshold(int j_rtt, int r_bits, int j_rtt_var, int v_bits, int j_tick, double q_s, double q_f, double t_out, int state)
+{
+	fprintf(fp, "Threshold (J_RTT, J_RTT_VAR, Q_suc, Q_fail, Timeout): %3.5f %3.5f %3.5f %3.5f %3.5f %d ", (double)((j_rtt >> r_bits)  * j_tick), (double)((j_rtt_var >> v_bits)  * j_tick), q_s, q_f, t_out, state);
+	if(state)
+		fprintf(fp, "SUCCESS");
+	else
+		fprintf(fp, "FAILURE");
+	fprintf(fp, "\n");
+	fflush(fp);
+
+}
+*/
+
+void open_cwnd(int flag, FILE** fp, char* name)
+{
+	if(flag==1)
+	{
+		if((*fp=fopen(name, "wt")) == NULL)
+		{
+			fprintf(stderr, "ERROR: CANNOT OPEN TRACE FILE.");
+		}
+	}
+}
+
+void close_cwnd(int flag, FILE* fp)
+{
+	if(flag==1)
+	{
+		if((fclose(fp)) == EOF)
+		{
+			fprintf(stderr, "ERROR: CANNOT CLOSE TRACE FILE.");
+		}
+	}
+}
+
+void print_cwnd(int flag, FILE* fp, float iteration, float cwnd)
+{
+	if(flag==1)
+	{
+		if((fprintf(fp, "%5.0f \t %5.0f\n", iteration, cwnd)) < 0)
+		{
+			fprintf(stderr, "ERROR: CANNOT WRITE TRACE FILE.");
+		}
+		else
+		{
+			fflush(fp);
+		}
+	}
+}
+
+//		iTCP codes
+void init_itcp()
+{
+	itcp=0;// 1 to activate; 0 to deactivate
+	wci=wcd=wcs=wcc=wcch=1.0;
+	wti=-3.0; wtd=-4.0; wts=-2.0;
+	wai=-1.5; wad=-2.0; was=-1.0;
+	
+	wid=wdd=wsd=1.0;
+	wic=wdc=1.0;
+	wsc=0.0;
+
+	wdch=1.0;
+
+	wchc=1.0;
+
+	base_of_log=2.0;
+
+	f_i_max=4.0; f_d_max=4.0; f_s_max=4.0;
+
+	base_of_expo=2.0;
+
+	prob_rand_decision=0.3;
+	//prob_rand_decision=03;
+
+	f_i_th = 64; f_d_th = -64;
+
+	inc_precesion = 2.0;
+	//inc_precesion = 1.0;
+
+
+	max_itcp_cwnd = 128.0;
+	//max_itcp_cwnd = 32.0;
+}
+
+//	MABCC code
+void init_mabcc()
+{
+	mabcc=0;//1 to activate
+	new_sent_mabcc=0;
+	cur_rtt_mabcc = 1.0;
+	old_rtt_mabcc = 100000.0;
+	cur_cwnd_mabcc = 1;
+	max_cwnd_mabcc = 128;
+	thr_inc_mabcc = max_cwnd_mabcc / 2;
+	step_inc_mabcc = 30.0;//25.0;
+	cur_inc_mabcc = 0.0;
+	additive_inc_mabcc = 1.0;
+	cur_dec_mabcc = 0.0;
+	additive_dec_mabcc = 1.0;
+	num_suc_loss_mabcc = 0.0;
+	num_rtt_inc_mabcc = 0.0;
+}
+
+
+
+double linear(double x)
+{
+	double y = ((x>=0)?x:0);
+	return y;
+}
+
+double log_base(double x)
+{
+	if(x<=1)
+		return 1;
+	double y = 1+(log(x)/log(base_of_log));
+	return y;
+}
+
+double negative_linear(double x)
+{
+	double y = ((x<=0)?x:0);
+	return y;
+}
+
+double expo(double x)
+{
+	double y = pow(base_of_expo, -x);
+	return y;
+}
+
+double f_inc(double x)
+{
+	double y = log_base(x);
+	y = (y<=f_i_max)?y:f_i_max;
+	return y;
+}
+
+double f_dec(double x)
+{
+	double y = negative_linear(x);
+	y = (y<=f_d_max)?y:f_d_max;
+	return y;
+}
+
+double f_same(double x)
+{
+	double tx = (x>0)?x:-x;
+	double y = expo(tx);
+	y *= f_s_max;
+	return y;
+}
+
+double itcp_nn(double cwnd, double t_out, double dupack)
+{
+	//HIDDEN LAYER 1
+	double scale = (cwnd/6.0)>1.0?(cwnd/6.0):1.0;
+
+	double i_in = cwnd*wci + t_out*wti*scale + dupack*wai*scale;
+	double i_out = f_inc(i_in);
+
+	double d_in = cwnd*wcd + t_out*wtd*scale + dupack*wad*scale;
+	double d_out = f_dec(d_in);
+
+	double s_in = cwnd*wcs + t_out*wts*scale + dupack*was*scale;
+	double s_out = f_same(s_in);
+
+
+	//HIDDEN LAYER 2
+	double decision_out;
+	if( ((i_out*wid)>=(d_out*wdd)) && ((i_out*wid)>=(s_out*wsd)) )
+	{
+		decision_out = 1.0;
+	}
+	else if( ((s_out*wsd)>(i_out*wid)) && ((s_out*wsd)>=(d_out*wdd)) )
+	{
+		decision_out = 0.0;
+	}
+	else
+	{
+		decision_out = -1.0;
+	}
+
+	Random::seed_heuristically();	
+	double r = (double)(((int)Random::random())%100);
+	r /= 100.0;
+	//fprintf(stderr, "itcp r: %10.2f\n", r);
+	if(r<prob_rand_decision && prob_rand_decision > 0)
+	{
+		decision_out = (double)(((int)Random::random())%3) - 1.0;
+		//fprintf(stderr, "itcp random choice: \t%10.2f\n", decision_out);
+	}
+
+	
+	//HIDDEN LAYER 3
+	double change_out;
+	if(decision_out*wdch == 0.0)	
+	{
+		change_out = 0.0;
+	}
+	else if(decision_out*wdch > 0.0)	
+	{
+		change_out = inc_precesion * i_out * wic;
+		change_out = (change_out>=1)?change_out:1;
+		change_out = (change_out<=f_i_th)?change_out:f_i_th;
+		//fprintf(stderr, "itcp inc: %10.0f\n", change_out);
+	}
+	else
+	{
+		change_out = (cwnd * wcc * wdc * d_out / f_d_max);
+		change_out = (change_out<0)?change_out:((-1)*change_out);
+		change_out = (change_out>=f_d_th)?change_out:f_d_th;
+		//fprintf(stderr, "itcp dec: %10.0f\n", change_out);
+	}
+
+	
+	//OUTPUT LAYER
+	double final_cwnd = cwnd*wcch + change_out*wchc;
+	final_cwnd = (final_cwnd>=1)?final_cwnd:1;
+
+	return final_cwnd;
+}
+
+double itcp_cwnd(double cwnd, double t_out, double dupack, double cwnd_normal)
+{
+		//fprintf(stderr, "itcp: timeout:%10.0f\tdupack:%10.0f\n", t_out, dupack);
+	if(itcp == 1)
+	{
+		//fprintf(stderr, "itcp: timeout:%10.0f\tdupack:%10.0f\n", t_out, dupack);
+		double res = itcp_nn(cwnd, t_out, dupack);
+		double t_res = (double)((int)res);
+		res = ((res-t_res)>0)?(t_res+1):t_res;
+		res = (res<=max_itcp_cwnd)? res:max_itcp_cwnd;
+		//fprintf(stderr, "itcp: %10.0f\n", res);
+		return res;
+	}
+	if(mabcc == 1)
+	{
+		return mabcc_cwnd(cwnd, t_out, dupack, cwnd_normal);
+	}
+	else
+	{
+		//fprintf(stderr, "OLD: %10.0f\n", cwnd_normal);
+		return cwnd_normal;
+	}
+}
+
+//////////////////////////////////////////////////////
+
+double floor(double x)
+{
+	double t = (double)((int)x);
+	return t;
+}
+
+double ceil(double x)
+{
+	double t = (double)((int)x);
+	t = (t<x)?(t+1):t;
+	return t;
+}
+
+//	MABCC code
+//double cur_rtt_mabcc, old_rtt_mabcc, cur_cwnd_mabcc, max_cwnd_mabcc, step_inc_mabcc, cur_inc_mabcc, additive_inc_mabcc, cur_dec_mabcc, additive_dec_mabcc, num_suc_loss_mabcc, num_rtt_inc_mabcc;
+//void init_mabcc(void);
+
+double mabcc_cwnd(double cwnd, double t_out, double dupack, double cwnd_normal)//only middle two parameters are used
+{
+	if(new_sent_mabcc == 0)
+		return cur_cwnd_mabcc;
+	new_sent_mabcc=0;
+	if(t_out>0.0)
+	{
+		thr_inc_mabcc = cur_cwnd_mabcc / 2.0;
+
+		num_suc_loss_mabcc += 1.0;
+		cur_inc_mabcc = num_rtt_inc_mabcc = 0.0;
+		old_rtt_mabcc = 10000.0;
+
+		cur_dec_mabcc = 0.0;
+		//if(2.0 <= num_suc_loss_mabcc && num_suc_loss_mabcc <= 3.0)
+		if(1.0 <= num_suc_loss_mabcc && num_suc_loss_mabcc <= 2.0)
+			cur_dec_mabcc = 1.0;//0.5;//0.25;
+		//else if(4.0 <= num_suc_loss_mabcc && num_suc_loss_mabcc <= 5.0)
+		else if(3.0 <= num_suc_loss_mabcc && num_suc_loss_mabcc <= 4.0)
+			cur_dec_mabcc = 2.0;//1.0;//0.5;
+		//else if(6.0 <= num_suc_loss_mabcc && num_suc_loss_mabcc <= 7.0)
+		else if(5.0 <= num_suc_loss_mabcc && num_suc_loss_mabcc <= 6.0)
+			cur_dec_mabcc = 3.0;//1.5;//0.75;
+		//else if(8.0 <= num_suc_loss_mabcc)
+		else if(7.0 <= num_suc_loss_mabcc)
+			cur_dec_mabcc = 4.0;//2.0;//1.0;
+
+		double c = floor(cur_cwnd_mabcc / (1+cur_dec_mabcc));
+		cur_cwnd_mabcc = (c>1)?c:1;
+	}
+
+	else if(dupack>0.0)
+	{
+		cur_cwnd_mabcc -= (additive_dec_mabcc * dupack);
+
+			if(2.0 <= dupack && dupack <= 3.0)
+				cur_dec_mabcc = 0.75;//0.5;//0.75;//0.5;//0.25;//0.5;//0.25;//0.5;//1.0;//0.5;//0.25;
+			else if(4.0 <= dupack && dupack <= 5.0)
+				cur_dec_mabcc = 1.0;//1.0;//1.0;//0.5;//1.0;//0.5;//1.0;//2.0;//1.0;//0.5;
+			else if(6.0 <= dupack && dupack <= 7.0)
+				cur_dec_mabcc = 1.25;//1.5;//1.25;//1.5;//0.75;//1.5;//0.75;//1.5;//3.0;//1.5;//0.75;
+			else if(8.0 <= dupack)
+				cur_dec_mabcc = 1.5;//2.0;//1.5;//2.0;//1.0;//2.0;//1.0;//2.0;//4.0;//2.0;//1.0;
+			double c = floor(cur_cwnd_mabcc / (1+cur_dec_mabcc));
+
+			if(dupack == 1.0)
+				cur_cwnd_mabcc -= (additive_dec_mabcc);
+			else
+				cur_cwnd_mabcc = (c>1)?c:1;
+
+
+		cur_inc_mabcc -= (2/step_inc_mabcc);
+		cur_inc_mabcc = (cur_inc_mabcc<0.0)?0.0:cur_inc_mabcc;
+
+			//double c = floor(cur_cwnd_mabcc * (1-0.5));
+			//cur_cwnd_mabcc = (c>1)?c:1;
+	}
+
+	else if(old_rtt_mabcc != cur_rtt_mabcc)
+	{
+		//fprintf(stderr, "%10.30f %10.30f\n", old_rtt_mabcc, cur_rtt_mabcc);
+		if(old_rtt_mabcc > cur_rtt_mabcc)
+		{
+			if(cur_cwnd_mabcc >= thr_inc_mabcc)
+			{
+				cur_cwnd_mabcc += additive_inc_mabcc;
+				cur_inc_mabcc = 0;//(1/step_inc_mabcc);
+			}
+			else
+			{
+				cur_inc_mabcc += (1/step_inc_mabcc);
+				cur_inc_mabcc = (cur_inc_mabcc>1)?1:cur_inc_mabcc;
+				//double c = ceil(cur_cwnd_mabcc * (1+cur_inc_mabcc));
+				double c = ceil(cur_cwnd_mabcc * (1+cur_inc_mabcc));
+				cur_cwnd_mabcc = (c>max_cwnd_mabcc)?max_cwnd_mabcc:c; 
+			}
+
+			num_rtt_inc_mabcc = 0.0;
+		}
+		else if(old_rtt_mabcc < cur_rtt_mabcc)
+		{
+			num_rtt_inc_mabcc += 1.0;
+			if(num_rtt_inc_mabcc > 1.0)
+			{
+				//cur_cwnd_mabcc -= (additive_dec_mabcc);
+			}
+			cur_inc_mabcc -= (1/step_inc_mabcc);
+			cur_inc_mabcc = (cur_inc_mabcc<0.0)?0.0:cur_inc_mabcc;
+
+
+
+			
+			cur_dec_mabcc = 0.0;
+			if(2.0 <= num_rtt_inc_mabcc && num_rtt_inc_mabcc <= 3.0)
+			//if(1.0 <= num_rtt_inc_mabcc && num_rtt_inc_mabcc <= 2.0)
+				cur_dec_mabcc = 0.5;//0.25;//0.5;//0.25;//0.5;//1.0;//0.5;//0.25;
+			else if(4.0 <= num_rtt_inc_mabcc && num_rtt_inc_mabcc <= 5.0)
+			//else if(3.0 <= num_rtt_inc_mabcc && num_rtt_inc_mabcc <= 4.0)
+				cur_dec_mabcc = 1.0;//0.5;//1.0;//0.5;//1.0;//2.0;//1.0;//0.5;
+			else if(6.0 <= num_rtt_inc_mabcc && num_rtt_inc_mabcc <= 7.0)
+			//else if(5.0 <= num_rtt_inc_mabcc && num_rtt_inc_mabcc <= 6.0)
+				cur_dec_mabcc = 1.5;//0.75;//1.5;//0.75;//1.5;//3.0;//1.5;//0.75;
+			else if(8.0 <= num_rtt_inc_mabcc)
+			//else if(7.0 <= num_rtt_inc_mabcc)
+				cur_dec_mabcc = 2.0;//1.0;//2.0;//1.0;//2.0;//4.0;//2.0;//1.0;
+			//cur_dec_mabcc = 1.0;
+			double c = floor(cur_cwnd_mabcc / (1+cur_dec_mabcc));
+
+			if(num_rtt_inc_mabcc == 1.0)
+				cur_cwnd_mabcc -= (additive_dec_mabcc);
+			else
+				cur_cwnd_mabcc = (c>1)?c:1;
+			
+		}
+
+
+		old_rtt_mabcc = cur_rtt_mabcc;
+		num_suc_loss_mabcc = 0.0;
+	}
+
+	//if((rand()%100) < 2)
+		//cur_cwnd_mabcc = rand()%128;
+
+	cur_cwnd_mabcc = (cur_cwnd_mabcc<1)?1:cur_cwnd_mabcc;
+	cur_cwnd_mabcc = (cur_cwnd_mabcc>max_cwnd_mabcc)?max_cwnd_mabcc:cur_cwnd_mabcc;
+
+	//fprintf(stderr, "%10.30f %10.30f\n", cur_cwnd_mabcc, cwnd_normal);
+	return cur_cwnd_mabcc;
+	//return cur_cwnd_mabcc;
+}
+

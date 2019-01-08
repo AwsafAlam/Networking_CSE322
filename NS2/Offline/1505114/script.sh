@@ -241,7 +241,7 @@ fi
 	# uniq "conges_data.txt" "conges_data_$i$under$r.$vari.out" # Plotting forlast iteration only
   
 	enr_nj=$(echo "scale=2; $energy_efficiency*1000.0" | bc)
-	total_retransmit=$(echo "scale=3; $total_retransmit/100.0" | bc)
+	# total_retransmit=$(echo "scale=3; $total_retransmit/100.0" | bc)
 
 	dir=""
 	under="_"
@@ -300,9 +300,9 @@ fi
 
 	echo -ne "$thr " >> $output_file
 	echo -ne "$del " >> $output_file
-	echo -ne "$s_packet " >> $output_file
-	echo -ne "$r_packet " >> $output_file
-	echo -ne "$d_packet " >> $output_file
+	# echo -ne "$s_packet " >> $output_file
+	# echo -ne "$r_packet " >> $output_file
+	# echo -ne "$d_packet " >> $output_file
 	echo -ne "$del_ratio " >> $output_file
 	echo -ne "$dr_ratio " >> $output_file
 	echo -ne "$time " >> $output_file
