@@ -101,32 +101,40 @@ dr_ratio=0.0;time=0.0;t_energy=0.0;energy_bit=0.0;energy_byte=0.0;energy_packet=
 
 i=0
 
+
 if [ $p -eq 1 ]; then
+metric=Number of Nodes
 echo "------------- VARIAION IN NODE NUMBER -----------------";
 row=$(($r*2))
 vari=$(($row*$row))
 elif [ $p -eq 2 ]; then
 echo "------------- VARIAION IN FLOW -----------------";
+metric=Number of Flows
 flow_no=$(($r*2))
 vari=$flow_no
 elif [ $p -eq 3 ]; then
 echo "------------- VARIAION IN PACKET PER SEC -----------------";
+metric=Packets per second
 pckt_per_sec=$(($r*100))
 vari=$pckt_per_sec
 elif [ $p -eq 4 ]; then
 echo "------------- VARIAION IN SPEED -----------------";
+metric=Speed
 speed=$(($r*5))
 vari=$speed
 elif [ $p -eq 5 ]; then
 echo "------------- VARIAION IN Packet Size -----------------";
+metric=Packet Size
 pckt_size=$(($r*12))
 vari=$pckt_size
 elif [ $p -eq 6 ]; then
 echo "------------- VARIAION IN Grid/Hop distance -----------------";
+metric=Grid Dimension
 dist=$((10 + $dist))
 vari=$dist
 elif [ $p -eq 7 ]; then
 echo "------------- VARIAION IN Queue length -----------------";
+metric=Queue length
 qlen=$(($r*10))
 vari=$qlen
 fi
@@ -238,7 +246,7 @@ fi
 	i=$(($i+1))
 	l=0
 	done
-	# uniq "conges_data.txt" "conges_data_$i$under$r.$vari.out" # Plotting forlast iteration only
+	# uniq "conges_data.txt" "conges_data_$i$under$r.$vari.out" # Plotting for last iteration only
   
 	enr_nj=$(echo "scale=2; $energy_efficiency*1000.0" | bc)
 	# total_retransmit=$(echo "scale=3; $total_retransmit/100.0" | bc)
@@ -249,36 +257,10 @@ fi
 	output_file2="$dir$output_file_format$under.out"
 	output_file="data_$p.out"
 
-	if [ $p -eq 1 ]; then
-		echo -ne "$(($row*$row)) " >> $output_file
-		echo -ne "$(($row*$row)) " >> $output_file2
+	# echo "------------- VARIAION IN $metric -----------------";
+	echo -ne "$vari " >> $output_file
+	echo -ne "$vari " >> $output_file2
 
-	elif [ $p -eq 2 ]; then
-	# echo "------------- VARIAION IN FLOW -----------------";
-	echo -ne "$flow_no " >> $output_file
-	echo -ne "$flow_no " >> $output_file2
-
-	elif [ $p -eq 3 ]; then
-	# echo "------------- VARIAION IN PACKET PER SEC -----------------";
-	echo -ne "$pckt_per_sec " >> $output_file
-	echo -ne "$pckt_per_sec " >> $output_file2
-
-	elif [ $p -eq 4 ]; then
-	echo -ne "$speed " >> $output_file
-	echo -ne "$speed " >> $output_file2
-
-	elif [ $p -eq 5 ]; then
-	echo -ne "$pckt_size " >> $output_file
-	echo -ne "$pckt_size " >> $output_file2
-
-	elif [ $p -eq 6 ]; then
-	echo -ne "$dist " >> $output_file
-	echo -ne "$dist " >> $output_file2
-	
-	elif [ $p -eq 7 ]; then
-	echo -ne "$qlen " >> $output_file
-	echo -ne "$qlen " >> $output_file2
-	fi
 
 	echo -ne "Throughput:          $thr " >> $output_file2
 	echo -ne "AverageDelay:         $del " >> $output_file2
@@ -307,8 +289,8 @@ fi
 	echo -ne "$dr_ratio " >> $output_file
 	echo -ne "$time " >> $output_file
 	echo -ne "$t_energy " >> $output_file
-	echo -ne "$energy_bit " >> $output_file
-	echo -ne "$energy_byte " >> $output_file
+	# echo -ne "$energy_bit " >> $output_file
+	# echo -ne "$energy_byte " >> $output_file
 	echo -ne "$energy_packet " >> $output_file
 	echo -ne "$total_retransmit " >> $output_file
 	echo -ne "$enr_nj " >> $output_file
@@ -320,57 +302,38 @@ done
 
 echo " Generating graphs ... for $p"
 
-if [ $p -eq 1 ]; then
-echo "set title \"$tcl Comparing metrics with variation in number of nodes\"" >> plot.plt
-echo "set xlabel \"Number of Nodes\"" >> plot.plt
-elif [ $p -eq 2 ]; then
-echo "set title \"$tcl Comparing metrics with variation in flow\"" >> plot.plt
-echo "set xlabel \"Number of Flows\"" >> plot.plt
-elif [ $p -eq 3 ]; then
-echo "set title \"$tcl Comparing metrics with variation in Packets per second\"" >> plot.plt
-echo "set xlabel \"Packets per second\"" >> plot.plt
-elif [ $p -eq 4 ]; then
-echo "set title \"$tcl Comparing metrics with variation in speed\"" >> plot.plt
-echo "set xlabel \"Speed\"" >> plot.plt
-elif [ $p -eq 5 ]; then
-echo "set title \"$tcl Comparing metrics with variation in Packet Size\"" >> plot.plt
-echo "set xlabel \"Packet Size\"" >> plot.plt
-elif [ $p -eq 6 ]; then
-echo "set title \"$tcl Comparing metrics with variation in Grid Dimension\"" >> plot.plt
-echo "set xlabel \"Grid Dimension\"" >> plot.plt
-elif [ $p -eq 7 ]; then
-echo "set title \"$tcl Comparing metrics with variation in Queue length\"" >> plot.plt
-echo "set xlabel \"Queue length\"" >> plot.plt
-fi
+echo "set title \"$tcl Comparing metrics with variation in $metric\"" >> plot.plt
+echo "set xlabel \"$metric\"" >> plot.plt
+
 
 echo "set ylabel \"Throughput\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:2 title 'Throughput' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Sent Packets\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:3 title 'Avg delay' with linespoints lw 2" >> plot.plt
-echo "set ylabel \"Sent Packets\"" >> plot.plt
-echo "plot \"data_$p.out\" using 1:4 title 'Sent Packets' with linespoints lw 2" >> plot.plt
-echo "set ylabel \"Received Packets\"" >> plot.plt
-echo "plot \"data_$p.out\" using 1:5 title 'Received Packets' with linespoints lw 2" >> plot.plt
-echo "set ylabel \"Dropped packets\"" >> plot.plt
-echo "plot \"data_$p.out\" using 1:6 title 'Dropped packets' with linespoints lw 2" >> plot.plt
+# echo "set ylabel \"Sent Packets\"" >> plot.plt
+# echo "plot \"data_$p.out\" using 1:4 title 'Sent Packets' with linespoints lw 2" >> plot.plt
+# echo "set ylabel \"Received Packets\"" >> plot.plt
+# echo "plot \"data_$p.out\" using 1:5 title 'Received Packets' with linespoints lw 2" >> plot.plt
+# echo "set ylabel \"Dropped packets\"" >> plot.plt
+# echo "plot \"data_$p.out\" using 1:6 title 'Dropped packets' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Packet delivery Ratio\"" >> plot.plt
-echo "plot \"data_$p.out\" using 1:7 title 'Packet delivery Ratio' with linespoints lw 2" >> plot.plt
+echo "plot \"data_$p.out\" using 1:4 title 'Packet delivery Ratio' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Packet Drop Ratio\"" >> plot.plt
-echo "plot \"data_$p.out\" using 1:8 title 'Packet Drop Ratio' with linespoints lw 2" >> plot.plt
+echo "plot \"data_$p.out\" using 1:5 title 'Packet Drop Ratio' with linespoints lw 2" >> plot.plt
 
 echo "set title \"$tcl Comparing Energy variation\"" >> plot.plt
 echo "set ylabel \"Total Energy\"" >> plot.plt
-echo "plot \"data_$p.out\" using 1:10 title 'Total Energy' with linespoints lw 2" >> plot.plt 
-echo "set ylabel \"Energy Per bit\"" >> plot.plt
-echo "plot \"data_$p.out\" using 1:11 title 'Energy Per bit' with linespoints lw 2" >> plot.plt
-echo "set ylabel \"Energy Per Byte\"" >> plot.plt
-echo "plot \"data_$p.out\" using 1:12 title 'Energy Per Byte' with linespoints lw 2" >> plot.plt
+echo "plot \"data_$p.out\" using 1:7 title 'Total Energy' with linespoints lw 2" >> plot.plt 
+# echo "set ylabel \"Energy Per bit\"" >> plot.plt
+# echo "plot \"data_$p.out\" using 1:11 title 'Energy Per bit' with linespoints lw 2" >> plot.plt
+# echo "set ylabel \"Energy Per Byte\"" >> plot.plt
+# echo "plot \"data_$p.out\" using 1:12 title 'Energy Per Byte' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Energy Per Packet\"" >> plot.plt
-echo "plot \"data_$p.out\" using 1:13 title 'Energy Per Packet' with linespoints lw 2" >> plot.plt
+echo "plot \"data_$p.out\" using 1:8 title 'Energy Per Packet' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Total retransmit\"" >> plot.plt
-echo "plot \"data_$p.out\" using 1:14 title 'Total retransmit' with linespoints lw 2" >> plot.plt
+echo "plot \"data_$p.out\" using 1:9 title 'Total retransmit' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Efficiency\"" >> plot.plt
-echo "plot \"data_$p.out\" using 1:15 title 'Efficiency' with linespoints lw 2" >> plot.plt
+echo "plot \"data_$p.out\" using 1:10 title 'Efficiency' with linespoints lw 2" >> plot.plt
 
 echo "set title \"$tcl Comparing variation in congestion window size with time\"" >> plot.plt
 echo "set xlabel \"Time\"" >> plot.plt
@@ -381,7 +344,7 @@ find -iname "conges_data_*.out"| cut -c 3- | while read plt_flie
 do
 tmp=`echo "$plt_flie" | cut -d "." -f2`
 # echo $tmp
-echo -ne "\"$plt_flie\" using 1:2  with lines title \"$tmp\", " >> plot.plt
+echo -ne "\"$plt_flie\" using 1:2  with lines title \"$tmp $metric\", " >> plot.plt
 
 done
 echo "" >> plot.plt
