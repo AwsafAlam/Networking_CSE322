@@ -81,7 +81,7 @@ set val(mac) Mac/802_11 ;# MAC type
 set val(ifq) Queue/DropTail/PriQueue ;# interface queue type
 set val(ll) LL ;# link layer type
 set val(ant) Antenna/OmniAntenna ;# antenna model
-set val(ifqlen) [lindex $argv 7];# 50  max packet in ifq
+set val(ifqlen) 50 ;# max packet in ifq
 set val(rp) AODV ; #[lindex $argv 4] ;# routing protocol
 
 Mac/802_11 set syncFlag_ 1

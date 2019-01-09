@@ -66,7 +66,7 @@ set val(mac) Mac/802_15_4 ;# MAC type
 set val(ifq) Queue/DropTail/PriQueue ;# interface queue type
 set val(ll) LL ;# link layer type
 set val(ant) Antenna/OmniAntenna ;# antenna model
-set val(ifqlen) [lindex $argv 7];# 100  max packet in ifq
+set val(ifqlen) 50 ;#   max packet in ifq
 set val(rp) AODV ;# routing protocol
 set val(energymodel) EnergyModel;
 set val(initialenergy) 100;

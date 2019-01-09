@@ -31,8 +31,7 @@ printf "Choose Variation \n-------------------\n\
 3. Number of packets per second\n\
 4. Speed of the mobile nodes\n\
 5. Packet Size\n\
-6. Grid/Hop distance\n\
-7. Queue length\n--------------\n"
+6. Grid/Hop distance\n--------------\n"
 read p
 
 
@@ -90,7 +89,7 @@ cd $rootDir
 # ============== Graph init
 echo "set   autoscale" >> plot.plt
 echo "set terminal pdf" >> plot.plt
-echo "set output \"$tcl.$p.pdf\"" >> plot.plt
+echo "set output \"$tcl.$p.$mod.pdf\"" >> plot.plt
 
 
 for((r=1;r<=$datapoints;r++));
@@ -160,7 +159,7 @@ fi
 	echo "Flow : $flow_no"
 	echo "Speed: $speed"
 
-	$ns_ver $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec $qlen #$routing $time_sim
+	$ns_ver $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec #$qlen #$routing $time_sim
 	# cd ~/Desktop/Networking_CSE322/NS2/Offline/1505114
 
 	# ns $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec $qlen #$routing $time_sim
@@ -370,6 +369,6 @@ rm *.out
 rm *.tr
 rm plot.plt
 rm *.txt
-mv "$tcl.$p.pdf" ~/Desktop/Networking_CSE322/NS2/Offline/1505114
+mv "$tcl.$p.$mod.pdf" ~/Desktop/Networking_CSE322/NS2/Offline/1505114
 cd ~/Desktop/Networking_CSE322/NS2/Offline/1505114
-evince "$tcl.$p.pdf"
+evince "$tcl.$p.$mod.pdf"
