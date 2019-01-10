@@ -32,7 +32,7 @@
 #
 
 #check input parameters
-if {$argc != 4} {
+if {$argc != 3} {
     puts ""
     puts "Wrong Number of Arguments! No arguments in this topology"
     puts "Syntax: ns test-be.tcl seed diuc dl/ul distance"
@@ -47,8 +47,8 @@ set nb_mn 1
 
 set seed [lindex $argv 0]		;# seed
 set diuc [lindex $argv 1]
-set direction [lindex $argv 2]
-set distance [lindex $argv 3]
+set direction dl
+set distance [lindex $argv 2]
 
 
 global defaultRNG

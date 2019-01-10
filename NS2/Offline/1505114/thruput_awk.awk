@@ -81,22 +81,11 @@ BEGIN {
 			# rTotalDelay += rReceivedTime[ idPacket] - rSentTime[ idPacket ];
 			rTotalDelay += rDelay[idPacket]; 
 
-#			printf("%15.5f   %15.5f\n", rDelay[idPacket], rReceivedTime[ idPacket] - rSentTime[ idPacket ]);
+			# printf("%15.5f   %15.5f\n", rDelay[idPacket], rReceivedTime[ idPacket] - rSentTime[ idPacket ]);
 		}
      }
    
-     # Update total received packets' size and store packets arrival rTime
-     # if (strAgt == "AGT" && strEvent == "r" && pkt_size > 512) {
-     # #   printf("rTime %.2f\n",rTime);
-     #      if (rTime > rEndTime) {
-     #         rEndTime = rTime
-     #      }
-     #      # Rip off the header
-     #      hdr_size = pkt_size % 512
-     #      pkt_size -= hdr_size
-     #      # Store received packet's size
-     #      nReceivedBytes += pkt_size
-     # }
+     
     if( strEvent == "D"   &&   strType == "cbr" )
 	{
 		if(rTime>rEndTime) rEndTime=rTime;
@@ -117,7 +106,7 @@ BEGIN {
 	# rPacketDeliveryRatio = nReceivedPackets / nSentPackets * 100 ;
 
      if ( nReceivedPackets != 0 ) {
-		# rAverageDelay = rTotalDelay / nReceivedPackets ;
+		rAverageDelay = rTotalDelay / nReceivedPackets ;
 		# avg_energy_per_packet = total_energy_consumption / nReceivedPackets ;
 	}
 
@@ -128,7 +117,7 @@ BEGIN {
      printf( "PacketDeliveryRatio: %10.2f\n",rPacketDeliveryRatio);
      printf( "Throughput: %15.2f\n",rThroughput);
 	
-       printf(" StartTime=%.2f\tStopTime=%.2f\trec=%d\n",rStartTime,rEndTime,nReceivedBytes)
+       printf("Delay= %.2f\n StartTime=%.2f\tStopTime=%.2f\trec=%d\n",(rTotalDelay / nReceivedPackets),rStartTime,rEndTime,nReceivedBytes)
 
        printf("Average Throughput[kbps] = %.2f\t\t StartTime=%.2f\tStopTime=%.2f\n",(nReceivedBytes/(rEndTime-rStartTime))*(8/1000),rStartTime,rEndTime)
   }
