@@ -27,15 +27,15 @@ set tr trace.tr
 set topo_file topo_tcp_wired.txt
 
 
-set ns_ [new Simulator]
+set ns [new Simulator]
 
 
-$ns_ rtproto DV
+$ns rtproto DV
 set tracefd [open $tr w]
-$ns_ trace-all $tracefd
+$ns trace-all $tracefd
 
 # set namtrace [open $nm w]
-#$ns_ namtrace-all $namtrace
+#$ns namtrace-all $namtrace
 
 set topofile [open $topo_file "w"]
 set conges_data [open conges_data.txt w]
@@ -50,7 +50,7 @@ create-god [expr $num_row * $num_col ]
 
 puts "start node creation"
 for {set i 0} {$i < [expr $num_row*$num_col]} {incr i} {
-	set node_($i) [$ns_ node]
+	set node_($i) [$ns node]
 #	$node_($i) random-motion 0
 }
 
@@ -98,10 +98,10 @@ for {set i 0} {$count < [expr $num_row]} {set i [expr $i+$num_col]} {
 	for {set j $i} {$count1 < [expr $num_col-1]} {incr j} {
 		set next1 [expr $j+1]
 		#puts "connection $j $next1"
-		$ns_ duplex-link $node_($j) $node_($next1) 2Mb 10ms DropTail
-		$ns_ duplex-link-op $node_($j) $node_($next1) orient right
-		$ns_ queue-limit $node_($j) $node_($next1) 1000
-		#$ns_ duplex-link-op $node_($j) $node_($next1) queuePos 0.5
+		$ns duplex-link $node_($j) $node_($next1) 2Mb 10ms DropTail
+		$ns duplex-link-op $node_($j) $node_($next1) orient right
+		$ns queue-limit $node_($j) $node_($next1) 1000
+		#$ns duplex-link-op $node_($j) $node_($next1) queuePos 0.5
 		incr count1
 	}
 	incr count
@@ -113,10 +113,10 @@ for {set i 0} {$i < $num_col} {incr i} {
 	for {set j $i} {$count < [expr $num_row-1]} {set j [expr $j+$num_col]} {
 		set next [expr $j+$num_col]
 		#puts "connection $j $next"
-		$ns_ duplex-link $node_($j) $node_($next) 2Mb 10ms DropTail
-		$ns_ duplex-link-op $node_($j) $node_($next) orient up
-		$ns_ queue-limit $node_($j) $node_($next) 1000
-		#$ns_ duplex-link-op $node_($j) $node_($next) queuePos 0.5
+		$ns duplex-link $node_($j) $node_($next) 2Mb 10ms DropTail
+		$ns duplex-link-op $node_($j) $node_($next) orient up
+		$ns queue-limit $node_($j) $node_($next) 1000
+		#$ns duplex-link-op $node_($j) $node_($next) queuePos 0.5
 		incr count
 	}
 }
@@ -125,9 +125,9 @@ for {set i 0} {$i < $num_col} {incr i} {
 
 #		set next [expr ($i+1)%$num_node]
 		#puts "connection $i $next"
-#		$ns_ duplex-link $node_($i) $node_($next) 2Mb 10ms DropTail
-#		$ns_ duplex-link-op $node_($i) $node_($next) orient right
-#		$ns_ queue-limit $node_($i) $node_($next) 50
+#		$ns duplex-link $node_($i) $node_($next) 2Mb 10ms DropTail
+#		$ns duplex-link-op $node_($i) $node_($next) orient right
+#		$ns queue-limit $node_($i) $node_($next) 50
 
 #}
 
@@ -148,14 +148,15 @@ for {set i 0} {$i < $num_random_flow } {incr i} {
 	while {$null_node==$udp_node} {
 		set null_node [expr int($num_node*rand())] ;# dest node
 	}
-	$ns_ attach-agent $node_($udp_node) $udp_($i)
-  	$ns_ attach-agent $node_($null_node) $null_($i)
+	$ns attach-agent $node_($udp_node) $udp_($i)
+  	$ns attach-agent $node_($null_node) $null_($i)
 	puts -nonewline $topofile "RANDOM:  Src: $udp_node Dest: $null_node\n"
 
 }
 
 for {set i 0} {$i < $num_random_flow} {incr i} {
-	$ns_ connect $udp_($i) $null_($i)
+	$ns connect $udp_($i) $null_($i)
+	$ns  at  0.0  "plotWindow $udp_($i)  $conges_data"
 }
 
 for {set i 0} {$i < $num_random_flow} {incr i} {
@@ -167,31 +168,43 @@ for {set i 0} {$i < $num_random_flow} {incr i} {
 }
 
 for {set i 0} {$i < $num_random_flow} {incr i} {
-	$ns_ at [expr $start_time] "$cbr_($i) start"
+	$ns at [expr $start_time] "$cbr_($i) start"
 
 }
 
 puts "flow creation complete"
 ##########################################################################END OF FLOW GENERATION
+#======= Congestion Window size ============
+proc plotWindow {tcpSource outfile} {
+     global ns
+
+     set now [$ns now]
+     set cwnd [$tcpSource set cwnd_]
+
+  	###Print TIME CWND   for  gnuplot to plot progressing on CWND
+     puts  $outfile  "$now $cwnd"
+
+     $ns at [expr $now+0.7] "plotWindow $tcpSource  $outfile"
+  }
 
 # Tell nodes when the simulation ends
 #
-#for {set i 0} {$i < [expr $num_row*$num_col] } {incr i} {
- #   $ns_ at [expr $start_time+$time_duration] "$node_($i) reset";
-#}
-$ns_ at [expr $start_time+$time_duration +$extra_time] "finish"
-# $ns_ at [expr $start_time+$time_duration +$extra_time] "$ns_ nam-end-wireless [$ns_ now]; puts \"NS Exiting...\"; $ns_ halt"
-$ns_ at [expr $start_time+$time_duration +$extra_time] "puts \"NS Exiting...\"; $ns_ halt"
+for {set i 0} {$i < [expr $num_row*$num_col] } {incr i} {
+   $ns at [expr $start_time+$time_duration] "$node_($i) reset";
+}
+$ns at [expr $start_time+$time_duration +$extra_time] "finish"
+# $ns at [expr $start_time+$time_duration +$extra_time] "$ns nam-end-wireless [$ns now]; puts \"NS Exiting...\"; $ns halt"
+$ns at [expr $start_time+$time_duration +$extra_time] "puts \"NS Exiting...\"; $ns halt"
 
-$ns_ at [expr $start_time+$time_duration/2] "puts \"half of the simulation is finished\""
-$ns_ at [expr $start_time+$time_duration] "puts \"end of simulation duration\""
+$ns at [expr $start_time+$time_duration/2] "puts \"half of the simulation is finished\""
+$ns at [expr $start_time+$time_duration] "puts \"end of simulation duration\""
 
 proc finish {} {
 	puts "finishing"
-	global ns_ tracefd topofile
-	# global ns_ tracefd namtrace topofile nm
-	#global ns_ topofile
-	$ns_ flush-trace
+	global ns tracefd topofile
+	# global ns tracefd namtrace topofile nm
+	#global ns topofile
+	$ns flush-trace
 	close $tracefd
 	# close $namtrace
 	close $topofile
@@ -199,25 +212,10 @@ proc finish {} {
         #exec nam $nm &
         exit 0
 }
-
-#proc plotWindow {tcpSource outfile} {
- #  global ns_
-
-  # set now [$ns_ now]
-   #set cwnd [$tcpSource set cwnd_]
-
-###Print TIME CWND   for  gnuplot to plot progressing on CWND   
-  # puts  $outfile  "$now $cwnd"
-
-   #$ns_ at [expr $now+0.1] "plotWindow $tcpSource  $outfile"
-#}
-
-#set outfile [open  "WinFileOrigin"  w]
-
-
-#$ns_  at  0.0  "plotWindow $udp_(0)  $outfile"
-
+for {set i 0} {$i < [expr $num_row*$num_col]  } { incr i} {
+	$ns initial_node_pos $node_($i) 4
+}
 
 puts "Starting Simulation..."
-$ns_ run
-#$ns_ nam-end-wireless [$ns_ now]
+$ns run
+#$ns nam-end-wireless [$ns now]

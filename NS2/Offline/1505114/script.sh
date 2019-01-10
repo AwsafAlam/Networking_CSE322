@@ -366,10 +366,10 @@ echo "Graph generation complete ..."
 
 rm $tcl
 rm $awk_file
-# rm *.out
+rm *.out
 rm *.tr
-# rm plot.plt
-# rm *.txt
+rm plot.plt
+rm *.txt
 mv "$tcl.$p.$mod.pdf" ~/Desktop/Networking_CSE322/NS2/Offline/1505114
 cd ~/Desktop/Networking_CSE322/NS2/Offline/1505114
 evince "$tcl.$p.$mod.pdf"

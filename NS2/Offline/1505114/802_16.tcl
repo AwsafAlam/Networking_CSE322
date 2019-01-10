@@ -43,9 +43,9 @@ set packet_size 1500			;# packet size in bytes at CBR applications
 set output_dir ~/Desktop/Networking_CSE322/NS2/Offline/1505114
 set gap_size 0.05 				;#compute gap size between packets
 puts "gap size=$gap_size"
-set traffic_start 25
-set traffic_stop  75
-set simulation_stop 85
+set traffic_start 10
+set traffic_stop  40
+set simulation_stop 50
 
 #define debug values
 Mac/802_16 set debug_           1

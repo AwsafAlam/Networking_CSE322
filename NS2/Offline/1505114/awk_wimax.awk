@@ -110,14 +110,17 @@ BEGIN {
 		# avg_energy_per_packet = total_energy_consumption / nReceivedPackets ;
 	}
 
-     printf( "AverageDelay: %15.5f\n",rAverageDelay);
-     printf( "SentPackets: %15.2f\n",nSentPackets);
-     printf( "ReceivedPackets: %15.2f\n",nReceivedPackets);
-     printf( "DropPackets: %15.2f\n",nDropPackets);
-     printf( "PacketDeliveryRatio: %10.2f\n",rPacketDeliveryRatio);
-     printf( "Throughput: %15.2f\n",rThroughput);
+	printf( "%15.2f\n%15.5f\n%15.2f\n%15.2f\n", rThroughput, rAverageDelay, nReceivedPackets);
+	# printf( "%15.2f\n%10.2f\n%10.2f\n%10.5f\n", nDropPackets, rPacketDeliveryRatio, rPacketDropRatio,rTime);
 	
-       printf("Delay= %.2f\n StartTime=%.2f\tStopTime=%.2f\trec=%d\n",(rTotalDelay / nReceivedPackets),rStartTime,rEndTime,nReceivedBytes)
+    #  printf( "AverageDelay: %15.5f\n",rAverageDelay);
+    #  printf( "SentPackets: %15.2f\n",nSentPackets);
+    #  printf( "ReceivedPackets: %15.2f\n",nReceivedPackets);
+    #  printf( "DropPackets: %15.2f\n",nDropPackets);
+    #  printf( "PacketDeliveryRatio: %10.2f\n",rPacketDeliveryRatio);
+    #  printf( "Throughput: %15.2f\n",rThroughput);
+	
+    #    printf("Delay= %.2f\n StartTime=%.2f\tStopTime=%.2f\trec=%d\n",(rTotalDelay / nReceivedPackets),rStartTime,rEndTime,nReceivedBytes)
 
-       printf("Average Throughput[kbps] = %.2f\t\t StartTime=%.2f\tStopTime=%.2f\n",(nReceivedBytes/(rEndTime-rStartTime))*(8/1000),rStartTime,rEndTime)
+    #    printf("Average Throughput[kbps] = %.2f\t\t StartTime=%.2f\tStopTime=%.2f\n",(nReceivedBytes/(rEndTime-rStartTime))*(8/1000),rStartTime,rEndTime)
   }
