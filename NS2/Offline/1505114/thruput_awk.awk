@@ -5,7 +5,7 @@ BEGIN {
   }
    
 {
-    strEvent = $1;      idPacket = 
+    strEvent = $1;      #idPacket = 
     rTime = $3
     node = $9
     pkt_size = $37
@@ -23,18 +23,22 @@ BEGIN {
 	# num_retransmit = $30;
 	
 	
-    # Store start time
-    # if (level == "AGT" && event == "s" && pkt_size > 512) {
-    if (level == "AGT" && strType == "cbr" ) {
-        if (time < startTime) {
-             startTime = time
+    # Store start rTime
+#     if (strAgt == "AGT" && strEvent == "s" && pkt_size > 512) {
+    if (strAgt == "AGT" && strType == "cbr" ) {
+        if (rTime < startTime) {
+             startTime = rTime
         }
+        if (rTime > stopTime) {
+             stopTime = rTime
+             }
     }
    
-  # Update total received packets' size and store packets arrival time
-  if (level == "AGT" && event == "r" && pkt_size > 512) {
-       if (time > stopTime) {
-             stopTime = time
+  # Update total received packets' size and store packets arrival rTime
+  if (strAgt == "AGT" && strEvent == "r" && pkt_size > 512) {
+     #   printf("rTime %.2f\n",rTime);
+       if (rTime > stopTime) {
+             stopTime = rTime
              }
        # Rip off the header
        hdr_size = pkt_size % 512
@@ -47,5 +51,7 @@ BEGIN {
   }
    
   END {
+       printf(" StartTime=%.2f\tStopTime=%.2f\n",startTime,stopTime)
+
        printf("Average Throughput[kbps] = %.2f\t\t StartTime=%.2f\tStopTime=%.2f\n",(recvdSize/(stopTime-startTime))*(8/1000),startTime,stopTime)
   }
