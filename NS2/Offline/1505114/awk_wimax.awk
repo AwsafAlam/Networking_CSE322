@@ -110,7 +110,7 @@ BEGIN {
 		# avg_energy_per_packet = total_energy_consumption / nReceivedPackets ;
 	}
 
-	printf( "%15.2f\n%15.5f\n%15.2f\n%15.2f\n", rThroughput, rAverageDelay, nReceivedPackets);
+	printf( "%15.2f\n%15.5f\n%15.2f\n", rThroughput, rAverageDelay, nReceivedPackets);
 	# printf( "%15.2f\n%10.2f\n%10.2f\n%10.5f\n", nDropPackets, rPacketDeliveryRatio, rPacketDropRatio,rTime);
 	
     #  printf( "AverageDelay: %15.5f\n",rAverageDelay);

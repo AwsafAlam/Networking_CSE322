@@ -10,10 +10,7 @@
 # }
 # $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec
 # set global variables
-#set nb_mn [lindex $argv 0]				;# max number of mobile node
-set num_row [lindex $argv 0] ;#number of row
-set num_col [lindex $argv 0] ;#number of column
-set nb_mn [expr $num_col*$num_row]
+set nb_mn [lindex $argv 0]
 
 set grid [lindex $argv 1]
 set num_random_flow [lindex $argv 2]
@@ -91,7 +88,7 @@ set opt(y)	y_dim   ;# Y dimension of the topography
 
 #defines function for flushing and closing files
 proc finish {} {
-    global ns tf output_dir nb_mn
+    global ns tf nb_mn
     $ns flush-trace
     close $tf
     exit 0
@@ -107,8 +104,8 @@ $topo load_flatgrid $opt(x) $opt(y)
 #puts "Topology created"
 
 #open file for trace
-#set tf [open $output_dir/out_be.res w]
-set tf [open $output_dir/out_mod_$diuc.tr w]
+set tf [open trace.tr w]
+set conges_data [open conges_data.txt w]
 
 $ns trace-all $tf
 #puts "Output file configured"

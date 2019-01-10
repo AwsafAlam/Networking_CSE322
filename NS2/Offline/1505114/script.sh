@@ -2,7 +2,7 @@
 # ./cleanup.sh
 clear
 output_file_format="wireless_mobile"
-iteration_float=2.0
+iteration_float=1.0
 iteration=$(printf %.0f $iteration_float);
 
 rootDir=~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
@@ -47,7 +47,7 @@ row=5
 flow_no=5
 speed=25
 qlen=50
-datapoints=5
+datapoints=3
 
 # === Simulation file
 if [ $option -eq 1 ] 
@@ -64,7 +64,7 @@ elif [ $option -eq 3 ]; then
 # ./ns test-be-mod.tcl 1 2 ul 300
 # cd ~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
 # Execute awk for wimax
-rootDir=~/Documents/ns_wm/ns-allinone-2.35/ns-2.35/
+rootDir=~/Documents/ns_wimax/ns-allinone-2.35/ns-2.35/
 tcl=802_16.tcl
 awk_file=awk_wimax.awk
 dist=$dist_11
@@ -108,7 +108,7 @@ i=0
 if [ $p -eq 1 ]; then
 echo "------------- VARIAION IN NODE NUMBER -----------------";
 metric="Number of Nodes"
-row=$(($r*2))
+row=$(($r))
 vari=$(($row*$row))
 elif [ $p -eq 2 ]; then
 echo "------------- VARIAION IN FLOW -----------------";
@@ -135,11 +135,6 @@ echo "------------- VARIAION IN Grid/Hop distance -----------------";
 metric="Grid Dimension"
 dist=$((10 + $dist))
 vari=$dist
-elif [ $p -eq 7 ]; then
-echo "------------- VARIAION IN Queue length -----------------";
-metric="Queue length"
-qlen=$(($r*10))
-vari=$qlen
 fi
 
 	while [ $i -lt $iteration ]
@@ -369,7 +364,7 @@ rm $awk_file
 rm *.out
 rm *.tr
 rm plot.plt
-rm *.txt
+# rm *.txt
 mv "$tcl.$p.$mod.pdf" ~/Desktop/Networking_CSE322/NS2/Offline/1505114
 cd ~/Desktop/Networking_CSE322/NS2/Offline/1505114
 evince "$tcl.$p.$mod.pdf"
