@@ -1,7 +1,0 @@
-0 x: 24 y: 13 
-1 x: 13 y: 29 
-2 x: 15 y: 6 
-3 x: 1 y: 16 
-PARALLEL: Src: 0 Dest: 2
-CROSS: Src: 0 Dest: 1
-RANDOM:  Src: 1 Dest: 3

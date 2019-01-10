@@ -1,54 +1,39 @@
 # Test for 802.16 scheduler.
-# @author Xingting
-# @date 04/01/2009
-# Test file for wimax
-# Scenario: Communication between MN and Sink Node with MN attached to BS.
-#          In UL scenarios: 
-#              Using [grep ^r out_mod_X.res | grep -c "1 0"] to get the number of packet received. 
-#              Using [grep ^+ out.res | grep -c AGT] to get the number of packet sent.
-#          In DL scenarios:
-#              Using [grep ^r out_mod_X.res | grep -c AGT] to get the number of packet received. 
-#              Using [grep ^+ out.res | grep -c "0 1"] to get the number of packet sent.
-#           
-#
-# Topology scenario:
-#
-#
-#	        |-----|          
-#	        | MN0 |                 ; 1.0.1 
-#	        |-----|        
-#
-#
-#		  (^)
-#		   |
-#	    |--------------|
-#           | Base Station | 		; 1.0.0
-#           |--------------|
-#	    	   |
-#	    	   |
-#	     |-----------|
-#            | Sink node | 		; 0.0.0test-be-ul-arq.tcl
-#            |-----------|
-#
 
 #check input parameters
-if {$argc != 3} {
-    puts ""
-    puts "Wrong Number of Arguments! No arguments in this topology"
-    puts "Syntax: ns test-be.tcl seed diuc dl/ul distance"
-    puts ""
-    exit (1)
-}
-
+# if {$argc != 3} {
+#     puts ""
+#     puts "Wrong Number of Arguments! No arguments in this topology"
+#     puts "Syntax: ns test-be.tcl seed diuc dl/ul distance"
+#     puts ""
+#     exit (1)
+# }
+# $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec
 # set global variables
 #set nb_mn [lindex $argv 0]				;# max number of mobile node
-set nb_mn 1
+set num_row [lindex $argv 0] ;#number of row
+set num_col [lindex $argv 0] ;#number of column
+set nb_mn [expr $num_col*$num_row]
 
+set grid [lindex $argv 1]
+set num_random_flow [lindex $argv 2]
+set num_parallel_flow [lindex $argv 2]
+set num_cross_flow [lindex $argv 2]
+set speed_node [lindex $argv 3]
 
-set seed [lindex $argv 0]		;# seed
-set diuc [lindex $argv 1]
+set x_dim [lindex $argv 4] ;# 150
+set y_dim [lindex $argv 4] ;# 150
+
+set cbr_type CBR
+set cbr_size [lindex $argv 5]; #4,8,16,32,64
+set cbr_rate 11.0Mb
+set cbr_pckt_per_sec [lindex $argv 6]
+set cbr_interval [expr 1.0/$cbr_pckt_per_sec] ;# 1 for 1 packets per second and 0.1 for 10 packets per second
+#==============================
+set seed 1 ;#[lindex $argv 0]		;# seed
+set diuc 2 ;#[lindex $argv 1]
 set direction dl
-set distance [lindex $argv 2]
+set distance [lindex $argv 4]
 
 
 global defaultRNG
@@ -58,9 +43,9 @@ set packet_size 1500			;# packet size in bytes at CBR applications
 set output_dir ~/Desktop/Networking_CSE322/NS2/Offline/1505114
 set gap_size 0.05 				;#compute gap size between packets
 puts "gap size=$gap_size"
-set traffic_start 10
-set traffic_stop  20
-set simulation_stop 21
+set traffic_start 25
+set traffic_stop  75
+set simulation_stop 85
 
 #define debug values
 Mac/802_16 set debug_           1
@@ -101,8 +86,8 @@ set opt(ant)            Antenna/OmniAntenna        ;# antenna model
 set opt(ifqlen)         50              	   ;# max packet in ifq
 set opt(adhocRouting)   NOAH                       ;# routing protocol
 
-set opt(x)		11000			   ;# X dimension of the topography
-set opt(y)		11000			   ;# Y dimension of the topography
+set opt(x)	x_dim   ;# X dimension of the topography
+set opt(y)	y_dim   ;# Y dimension of the topography
 
 #defines function for flushing and closing files
 proc finish {} {

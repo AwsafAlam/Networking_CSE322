@@ -66,12 +66,14 @@ elif [ $option -eq 3 ]; then
 # Execute awk for wimax
 rootDir=~/Documents/ns_wm/ns-allinone-2.35/ns-2.35/
 tcl=802_16.tcl
-awk_file=awk_udp.awk
+awk_file=awk_wimax.awk
+dist=$dist_11
 
-# awk_file=awk_wimax.awk
 elif [ $option -eq 4 ]; then
 tcl=wired.tcl
 awk_file=wired.awk
+dist=$dist_11
+
 fi
 
 #Copying latest files
@@ -160,8 +162,7 @@ fi
 	echo "Speed: $speed"
 
 	$ns_ver $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec #$qlen #$routing $time_sim
-	# cd ~/Desktop/Networking_CSE322/NS2/Offline/1505114
-
+	# echo "Executing $ns_ver $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec"
 	# ns $tcl $row $topology $flow_no $speed $dist $pckt_size $pckt_per_sec $qlen #$routing $time_sim
 	echo "SIMULATION COMPLETE. BUILDING STAT......"
 	under="_"
@@ -365,10 +366,10 @@ echo "Graph generation complete ..."
 
 rm $tcl
 rm $awk_file
-rm *.out
+# rm *.out
 rm *.tr
-rm plot.plt
-rm *.txt
+# rm plot.plt
+# rm *.txt
 mv "$tcl.$p.$mod.pdf" ~/Desktop/Networking_CSE322/NS2/Offline/1505114
 cd ~/Desktop/Networking_CSE322/NS2/Offline/1505114
 evince "$tcl.$p.$mod.pdf"
