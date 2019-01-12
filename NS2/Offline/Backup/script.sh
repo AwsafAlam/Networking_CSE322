@@ -2,7 +2,7 @@
 # ./cleanup.sh
 clear
 output_file_format="wireless_mobile"
-iteration_float=10.0
+iteration_float=1.0
 iteration=$(printf %.0f $iteration_float);
 
 rootDir=~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
@@ -47,7 +47,7 @@ row=5
 flow_no=5
 speed=25
 qlen=50
-datapoints=5
+datapoints=3
 
 # === Simulation file
 if [ $option -eq 1 ] 
@@ -106,7 +106,7 @@ l=0;thr=0.0;del=0.0;s_packet=0.0;r_packet=0.0;d_packet=0.0;del_ratio=0.0;failcou
 dr_ratio=0.0;time=0.0;t_energy=0.0;energy_bit=0.0;energy_byte=0.0;energy_packet=0.0;total_retransmit=0.0;energy_efficiency=0.0;
 awkval=0.0;
 
-i=0;
+i=0
 
 if [ $p -eq 1 ]; then
 echo "------------- VARIAION IN NODE NUMBER -----------------";
@@ -139,11 +139,6 @@ metric="Grid Dimension"
 dist=$((10 + $dist))
 vari=$dist
 fi
-
-for((t=0;t<$vari;t++));
-do
-	per_node[$t]=0.0;
-done
 
 	while [ $i -lt $iteration ]
 	do
@@ -226,11 +221,11 @@ done
 	#		echo -ne "energy_efficiency: "
 		else
 			temp=$(($l - 14))
-			per_node[$temp]=$(echo "scale=5; ${per_node[$temp]}+$val/$iteration_float" | bc)
-			# per_node[$temp]=$val
+			awkval=$(echo "scale=5; $awkval+$val/$iteration_float" | bc)
+			per_node[$temp]=$awkval
 		fi
 
-		echo "$val"
+		# echo "$val"
 
 	done < "$output_file_format$under$i$under$r.out"
 

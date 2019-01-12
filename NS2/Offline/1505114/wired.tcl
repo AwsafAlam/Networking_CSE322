@@ -136,6 +136,8 @@ puts "flows: $num_random_flow"
 for {set i 0} {$i <  $num_random_flow} {incr i} {
 	set udp_($i) [new $tcp_src]
 	$udp_($i) set class_ $i
+	# $ns  at  0.0  "plotWindow $udp_($i)  $conges_data"
+	
 	set null_($i) [new $tcp_sink]
 	$udp_($i) set fid_ $i
 }
@@ -185,7 +187,7 @@ proc plotWindow {tcpSource outfile} {
      puts  $outfile  "$now $cwnd"
 
      $ns at [expr $now+0.7] "plotWindow $tcpSource  $outfile"
-  }
+}
 
 # Tell nodes when the simulation ends
 #
