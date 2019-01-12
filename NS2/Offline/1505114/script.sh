@@ -224,13 +224,15 @@ done
 		elif [ "$l" == "14" ]; then
 			energy_efficiency=$(echo "scale=9; $energy_efficiency+$val/$iteration_float" | bc)
 	#		echo -ne "energy_efficiency: "
+		elif [ "$val" == "awsaf" ]; then
+			break;
 		else
 			temp=$(($l - 14))
 			per_node[$temp]=$(echo "scale=5; ${per_node[$temp]}+$val/$iteration_float" | bc)
 			# per_node[$temp]=$val
 		fi
 
-		echo "$val"
+		# echo "$val"
 
 	done < "$output_file_format$under$i$under$r.out"
 

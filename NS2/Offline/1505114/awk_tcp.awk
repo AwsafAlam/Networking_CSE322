@@ -149,6 +149,46 @@ END {
 		# printf( "%15.2f\n", per_node_throughput[i]);
 		printf("%.4f\n",per_node_throughput[i]);
 	}
+	printf("awsaf\n");
+	# Avg Jitter calculation
+
+	# jitter1 = jitter2 = jitter3 = jitter4 = tmp_recv = 0
+	# prev_time = delay = prev_delay = processed = currTime = 0
+	# prev_delay = -1
+	# for (i=0; processed<nReceivedPackets; i++) {
+	# 	if(rReceivedTime[i] != 0) {
+	# 	        tmp_recv++
+	# 		if(prev_time != 0) {
+	# 			delay = rReceivedTime[i] - prev_time
+	# 			e2eDelay = rReceivedTime[i] - rSentTime[i]
+	# 			if(delay < 0) delay = 0
+	# 			if(prev_delay != -1) {
+	# 				jitter1 += abs(e2eDelay - prev_e2eDelay)
+	# 				jitter2 += abs(delay-prev_delay)
+	# 				jitter3 += (abs(e2eDelay-prev_e2eDelay) - jitter3) / 16
+	# 				jitter4 += (abs(delay-prev_delay) - jitter4) / 16
+	# 			}
+	# 			# This 'if' is introduce to obtain clearer
+	# 			# plots from the output of this script
+	# 			if(delay >= tic*10) {
+	# 				printf("  %10g %10s %5d %5d %15g %18g\n", flow,flow_t,src,dst,(prev_time+1.0),0)
+	# 				printf("  %10g %10s %5d %5d %15g %18g\n", flow,flow_t,src,dst,(rReceivedTime[i]-1.0),0)
+	# 			}
+	# 			currTime += delay
+	# 			if (currTime >= tic) {
+	# 				printf("  %10g %10s %5d %5d %15g %16g %16g %16g %16g\n", flow,flow_t,src,dst,rReceivedTime[i],jitter1*1000/tmp_recv, \
+	# 					jitter2*1000/tmp_recv,jitter3*1000,jitter4*1000)
+	# 				jitter1 = jitter2 = jitter3 = jitter4 = 0
+	# 				currTime = 0
+	# 				tmp_recv = 0
+	# 			}
+	# 			prev_delay = delay
+	# 			prev_e2eDelay = e2eDelay
+	# 		}
+	# 		prev_time = rReceivedTime[i]
+	# 		processed++
+	# 	}
+	# }
 
 	# Printing individually
 	# printf( "Time: %15.5f\n",rTime);
@@ -168,4 +208,9 @@ END {
     # printf( "total_retransmit: %15.5f\n",total_retransmit);
     # printf( "Energy Efficeincy: %15.9f\n",rEnergyEfficeincy);
     
+}
+
+function abs(value) {
+	if (value < 0) value = 0-value
+	return value
 }
