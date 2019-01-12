@@ -10,7 +10,7 @@
 
 #  In NS2 new trace format, there can be 52 columns. Each column satisfy some parameteers. See documenttion for more
 BEGIN {
-	max_node = 2000;
+	max_node = 200;
 	nSentPackets = 0.0 ;		
 	nReceivedPackets = 0.0 ;
 	rTotalDelay = 0.0 ;
@@ -38,6 +38,9 @@ BEGIN {
 	total_retransmit = 0;
 	for (i=0; i<max_pckt; i++) {
 		retransmit[i] = 0;		
+	}
+	for(i = 0; i < max_node; i++){
+		per_node_received_byte[i]=0;
 	}
 
 }
@@ -84,6 +87,7 @@ BEGIN {
 		if ( strEvent == "r" && idPacket >= idLowestPacket) {
 			nReceivedPackets += 1 ;		nReceivedBytes += nBytes;
 #			printf("%15.0f\n", nBytes);
+			per_node_received_byte[node]+=nBytes;
 			rReceivedTime[ idPacket ] = rTime ;
 			rDelay[idPacket] = rReceivedTime[ idPacket] - rSentTime[ idPacket ];
 #			rTotalDelay += rReceivedTime[ idPacket] - rSentTime[ idPacket ];
@@ -141,24 +145,28 @@ END {
 
 	printf( "%15.2f\n%15.5f\n%15.2f\n%15.2f\n%15.2f\n%10.2f\n%10.2f\n%10.5f\n", rThroughput, rAverageDelay, nSentPackets, nReceivedPackets, nDropPackets, rPacketDeliveryRatio, rPacketDropRatio,rTime) ;
 	printf("%15.5f\n%15.5f\n%15.5f\n%15.5f\n%15.0f\n%15.9f\n", total_energy_consumption, avg_energy_per_bit, avg_energy_per_byte, avg_energy_per_packet, total_retransmit, rEnergyEfficeincy);
-	
-	# Printing individually
+	for(i = 0; i < max_node; i++){
+		per_node_throughput[i]=per_node_received_byte[i]*8/ rTime;
+		# printf( "%15.2f\n", per_node_throughput[i]);
+		printf("%.4f\n",per_node_throughput[i]);
+	}
 
-	printf( "Time: %15.5f\n",rTime);
-	printf( "Throughput: %15.5f\n",rThroughput);
-	printf( "AverageDelay: %15.5f\n",rAverageDelay);
-    printf( "SentPackets: %15.2f\n",nSentPackets);
-    printf( "ReceivedPackets: %15.2f\n",nReceivedPackets);
-    printf( "DropPackets: %15.2f\n",nDropPackets);
-    printf( "PacketDeliveryRatio: %10.2f\n",rPacketDeliveryRatio);
-    printf( "PacketDropRatio: %10.2f\n",rPacketDropRatio);
+	# Printing individually
+	# printf( "Time: %15.5f\n",rTime);
+	# printf( "Throughput: %15.5f\n",rThroughput);
+	# printf( "AverageDelay: %15.5f\n",rAverageDelay);
+    # printf( "SentPackets: %15.2f\n",nSentPackets);
+    # printf( "ReceivedPackets: %15.2f\n",nReceivedPackets);
+    # printf( "DropPackets: %15.2f\n",nDropPackets);
+    # printf( "PacketDeliveryRatio: %10.2f\n",rPacketDeliveryRatio);
+    # printf( "PacketDropRatio: %10.2f\n",rPacketDropRatio);
     
-    printf("**********************\nEnergy:\n");
-    printf( "Total Energy Consumption: %15.5f\n",total_energy_consumption);
-    printf( "avg_energy_per_bit: %15.5f\n",avg_energy_per_bit);
-    printf( "avg_energy_per_byte: %15.5f\n",avg_energy_per_byte);
-    printf( "avg_energy_per_packet: %15.5f\n",avg_energy_per_packet);
-    printf( "total_retransmit: %15.5f\n",total_retransmit);
-    printf( "Energy Efficeincy: %15.9f\n",rEnergyEfficeincy);
+    # printf("**********************\nEnergy:\n");
+    # printf( "Total Energy Consumption: %15.5f\n",total_energy_consumption);
+    # printf( "avg_energy_per_bit: %15.5f\n",avg_energy_per_bit);
+    # printf( "avg_energy_per_byte: %15.5f\n",avg_energy_per_byte);
+    # printf( "avg_energy_per_packet: %15.5f\n",avg_energy_per_packet);
+    # printf( "total_retransmit: %15.5f\n",total_retransmit);
+    # printf( "Energy Efficeincy: %15.9f\n",rEnergyEfficeincy);
     
 }

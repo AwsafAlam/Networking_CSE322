@@ -28,7 +28,9 @@ BEGIN {
 	for (i=0; i<max_pckt; i++) {
 		retransmit[i] = 0;		
 	}
-
+	for(i = 0; i < max_node; i++){
+		per_node_received_byte[i]=0;
+	}
 }
 
 {
@@ -76,6 +78,7 @@ BEGIN {
 		if ( strEvent == "r" && idPacket >= idLowestPacket) {
 			nReceivedPackets += 1 ;		nReceivedBytes += (nBytes-header);
 #			printf("%15.0f\n", $6); #nBytes);
+			per_node_received_byte[node]+=nBytes;
 			rReceivedTime[ idPacket ] = rTime ;
 			rDelay[idPacket] = rReceivedTime[ idPacket] - rSentTime[ idPacket ];
 #			rTotalDelay += rReceivedTime[ idPacket] - rSentTime[ idPacket ];
@@ -134,6 +137,11 @@ END {
 
 	printf( "%15.2f\n%15.5f\n%15.2f\n%15.2f\n%15.2f\n%10.2f\n%10.2f\n%10.5f\n", rThroughput, rAverageDelay, nSentPackets, nReceivedPackets, nDropPackets, rPacketDeliveryRatio, rPacketDropRatio,rTime) ;
 	printf("%15.5f\n%15.5f\n%15.5f\n%15.5f\n%15.0f\n%15.9f\n", total_energy_consumption, avg_energy_per_bit, avg_energy_per_byte, avg_energy_per_packet, total_retransmit, rEnergyEfficeincy);
+
+	for(i = 0; i < max_node; i++){
+		per_node_throughput[i]=per_node_received_byte[i]*8/ rTime;
+		printf( "%15.2f\n", per_node_throughput[i]);
+	}
 
 	# Printing individually
 	printf("************************\n");

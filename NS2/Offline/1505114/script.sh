@@ -92,6 +92,8 @@ cd $rootDir
 echo "set   autoscale" >> plot.plt
 echo "set terminal pdf" >> plot.plt
 echo "set output \"$tcl.$p.$mod.pdf\"" >> plot.plt
+echo "set title \"$tcl Comparing metrics with variation in $metric\"" >> plot.plt
+echo "set xlabel \"Node\"" >> plot.plt
 
 
 for((r=1;r<=$datapoints;r++));
@@ -102,13 +104,14 @@ echo "total iteration: $iteration"
 
 l=0;thr=0.0;del=0.0;s_packet=0.0;r_packet=0.0;d_packet=0.0;del_ratio=0.0;failcount=0;
 dr_ratio=0.0;time=0.0;t_energy=0.0;energy_bit=0.0;energy_byte=0.0;energy_packet=0.0;total_retransmit=0.0;energy_efficiency=0.0;
+awkval=0.0;
 
 i=0
 
 if [ $p -eq 1 ]; then
 echo "------------- VARIAION IN NODE NUMBER -----------------";
 metric="Number of Nodes"
-row=$(($r))
+row=$(($r*2))
 vari=$(($row*$row))
 elif [ $p -eq 2 ]; then
 echo "------------- VARIAION IN FLOW -----------------";
@@ -216,10 +219,13 @@ fi
 		elif [ "$l" == "14" ]; then
 			energy_efficiency=$(echo "scale=9; $energy_efficiency+$val/$iteration_float" | bc)
 	#		echo -ne "energy_efficiency: "
+		else
+			temp=$(($l - 14))
+			awkval=$(echo "scale=5; $awkval+$val/$iteration_float" | bc)
+			per_node[$temp]=$awkval
 		fi
 
-
-		echo "$val"
+		# echo "$val"
 
 	done < "$output_file_format$under$i$under$r.out"
 
@@ -253,7 +259,7 @@ fi
 
 	output_file2="$dir$output_file_format$under.out"
 	output_file="data_$p.out"
-
+	thruput_pernode="perNode_$r.out"
 	# echo "------------- VARIAION IN $metric -----------------";
 	echo -ne "$vari " >> $output_file
 	echo -ne "$vari " >> $output_file2
@@ -292,16 +298,22 @@ fi
 	echo -ne "$total_retransmit " >> $output_file
 	echo -ne "$enr_nj " >> $output_file
 	echo "" >> $output_file
-	# r=$(($r+1))
-	####################################### END A ROUND
 
+	
+	for((t=0;t<$vari;t++));
+	do
+		echo "$t ${per_node[$t]}" >> $thruput_pernode
+		
+	done
+	
+	####################################### END A ROUND
+	echo "plot \"$thruput_pernode\" using 1:2 title '$vari $metric' with linespoints lw 2" >> plot.plt
 done
 
 echo " Generating graphs ... for $p"
 
 echo "set title \"$tcl Comparing metrics with variation in $metric\"" >> plot.plt
 echo "set xlabel \"$metric\"" >> plot.plt
-
 
 echo "set ylabel \"Throughput\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:2 title 'Throughput' with linespoints lw 2" >> plot.plt
