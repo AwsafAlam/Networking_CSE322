@@ -170,7 +170,7 @@ done
 	echo "SIMULATION COMPLETE. BUILDING STAT......"
 	under="_"
 	awk -f $awk_file trace.tr > "$output_file_format$under$i$under$r.out"
-
+	flag=0
 	ok=1;
 	while read val
 	do
@@ -223,16 +223,17 @@ done
 	#		echo -ne "total_retrnsmit: "
 		elif [ "$l" == "14" ]; then
 			energy_efficiency=$(echo "scale=9; $energy_efficiency+$val/$iteration_float" | bc)
+			flag=1;
 	#		echo -ne "energy_efficiency: "
 		elif [ "$val" == "awsaf" ]; then
-			break;
-		else
+			flag=0
+		elif [ "$flag" == "1" ]; then
 			temp=$(($l - 14))
 			per_node[$temp]=$(echo "scale=5; ${per_node[$temp]}+$val/$iteration_float" | bc)
 			# per_node[$temp]=$val
 		fi
 
-		# echo "$val"
+		echo "$val"
 
 	done < "$output_file_format$under$i$under$r.out"
 
