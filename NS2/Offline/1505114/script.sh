@@ -2,7 +2,7 @@
 # ./cleanup.sh
 clear
 output_file_format="wireless_mobile"
-iteration_float=10.0
+iteration_float=4.0
 iteration=$(printf %.0f $iteration_float);
 
 rootDir=~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
@@ -104,7 +104,7 @@ echo "total iteration: $iteration"
 
 l=0;thr=0.0;del=0.0;s_packet=0.0;r_packet=0.0;d_packet=0.0;del_ratio=0.0;failcount=0;
 dr_ratio=0.0;time=0.0;t_energy=0.0;energy_bit=0.0;energy_byte=0.0;energy_packet=0.0;total_retransmit=0.0;energy_efficiency=0.0;
-awkval=0.0;
+awkval=0.0;normalised_routing=0.0;
 
 i=0;
 
@@ -140,6 +140,7 @@ dist=$((10 + $dist))
 vari=$dist
 fi
 
+declare -a per_node
 for((t=0;t<$vari;t++));
 do
 	per_node[$t]=0.0;
@@ -170,7 +171,7 @@ done
 	echo "SIMULATION COMPLETE. BUILDING STAT......"
 	under="_"
 	awk -f $awk_file trace.tr > "$output_file_format$under$i$under$r.out"
-	flag=0
+	
 	ok=1;
 	while read val
 	do
@@ -223,17 +224,15 @@ done
 	#		echo -ne "total_retrnsmit: "
 		elif [ "$l" == "14" ]; then
 			energy_efficiency=$(echo "scale=9; $energy_efficiency+$val/$iteration_float" | bc)
-			flag=1;
-	#		echo -ne "energy_efficiency: "
-		elif [ "$val" == "awsaf" ]; then
-			flag=0
-		elif [ "$flag" == "1" ]; then
-			temp=$(($l - 14))
+		elif [ "$l" == "15" ]; then
+			normalised_routing=$(echo "scale=5; $normalised_routing+$val/$iteration_float" | bc)
+			echo "Routin ; $normalised_routing"
+		else
+			temp=$(($l-14))
 			per_node[$temp]=$(echo "scale=5; ${per_node[$temp]}+$val/$iteration_float" | bc)
-			# per_node[$temp]=$val
 		fi
 
-		echo "$val"
+		# echo "$val"
 
 	done < "$output_file_format$under$i$under$r.out"
 
@@ -281,6 +280,7 @@ done
 	echo -ne "PacketDeliveryRatio:      $del_ratio " >> $output_file2
 	echo -ne "PacketDropRatio:      $dr_ratio " >> $output_file2
 	echo -ne "Total time:  $time " >> $output_file2
+	echo -ne "normalised_routing Load:  $normalised_routing " >> $output_file2
 	echo -ne "" >> $output_file2
 	echo -ne "" >> $output_file2
 	echo -ne "Total energy consumption:        $t_energy " >> $output_file2
@@ -305,6 +305,7 @@ done
 	echo -ne "$energy_packet " >> $output_file
 	echo -ne "$total_retransmit " >> $output_file
 	echo -ne "$enr_nj " >> $output_file
+	echo -ne "$normalised_routing " >> $output_file
 	echo "" >> $output_file
 
 	
@@ -327,12 +328,6 @@ echo "set ylabel \"Throughput\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:2 title 'Throughput' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Sent Packets\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:3 title 'Avg delay' with linespoints lw 2" >> plot.plt
-# echo "set ylabel \"Sent Packets\"" >> plot.plt
-# echo "plot \"data_$p.out\" using 1:4 title 'Sent Packets' with linespoints lw 2" >> plot.plt
-# echo "set ylabel \"Received Packets\"" >> plot.plt
-# echo "plot \"data_$p.out\" using 1:5 title 'Received Packets' with linespoints lw 2" >> plot.plt
-# echo "set ylabel \"Dropped packets\"" >> plot.plt
-# echo "plot \"data_$p.out\" using 1:6 title 'Dropped packets' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Packet delivery Ratio\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:4 title 'Packet delivery Ratio' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Packet Drop Ratio\"" >> plot.plt
@@ -341,16 +336,14 @@ echo "plot \"data_$p.out\" using 1:5 title 'Packet Drop Ratio' with linespoints 
 echo "set title \"$tcl Comparing Energy variation\"" >> plot.plt
 echo "set ylabel \"Total Energy\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:7 title 'Total Energy' with linespoints lw 2" >> plot.plt 
-# echo "set ylabel \"Energy Per bit\"" >> plot.plt
-# echo "plot \"data_$p.out\" using 1:11 title 'Energy Per bit' with linespoints lw 2" >> plot.plt
-# echo "set ylabel \"Energy Per Byte\"" >> plot.plt
-# echo "plot \"data_$p.out\" using 1:12 title 'Energy Per Byte' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Energy Per Packet\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:8 title 'Energy Per Packet' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Total retransmit\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:9 title 'Total retransmit' with linespoints lw 2" >> plot.plt
 echo "set ylabel \"Efficiency\"" >> plot.plt
 echo "plot \"data_$p.out\" using 1:10 title 'Efficiency' with linespoints lw 2" >> plot.plt
+echo "set ylabel \"Normalised routing Load\"" >> plot.plt
+echo "plot \"data_$p.out\" using 1:11 title 'Normalised routing Load' with linespoints lw 2" >> plot.plt
 
 echo "set title \"$tcl Comparing variation in congestion window size with time\"" >> plot.plt
 echo "set xlabel \"Time\"" >> plot.plt
