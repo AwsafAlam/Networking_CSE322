@@ -2,7 +2,7 @@
 # ./cleanup.sh
 clear
 output_file_format="wireless_mobile"
-iteration_float=4.0
+iteration_float=1.0
 iteration=$(printf %.0f $iteration_float);
 
 rootDir=~/Documents/ns_mod/ns-allinone-2.35/ns-2.35/
@@ -309,7 +309,7 @@ done
 	echo "" >> $output_file
 
 	
-	for((t=0;t<$vari;t++));
+	for((t=0;t<$(($row*$row));t++));
 	do
 		echo "$t ${per_node[$t]}" >> $thruput_pernode
 		
