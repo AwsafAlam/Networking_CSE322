@@ -45,7 +45,7 @@ void stoptimer(int AorB);
 void tolayer3(int AorB, struct pkt packet);
 void tolayer5(int AorB, char datasent[20]);
 
-/********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
+/********* TODO: WRITE THE NEXT SEVEN ROUTINES *********/
 
 /* called from layer 5, passed the data to be sent to other side */
 void A_output(struct msg message)
@@ -75,7 +75,7 @@ void A_timerinterrupt(void)
 /* entity A routines are called. You can use it to do any initialization */
 void A_init(void)
 {
-
+    printf("Init A....\n");
 }
 
 /* Note that with simplex transfer from a-to-B, there is no B_output() */
@@ -96,6 +96,7 @@ void B_timerinterrupt(void)
 /* entity B routines are called. You can use it to do any initialization */
 void B_init(void)
 {
+    printf("Init B...\n");
 
 }
 
