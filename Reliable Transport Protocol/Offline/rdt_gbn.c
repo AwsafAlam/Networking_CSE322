@@ -185,7 +185,7 @@ void init();
 void generate_next_arrival(void);
 void insertevent(struct event *p);
 
-int main(int argc, char const *argv[])
+int main()
 {
     struct event *eventptr;
     struct msg msg2give;
