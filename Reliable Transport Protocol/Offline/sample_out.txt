@@ -1,0 +1,345 @@
+-----  Stop and Wait Network Simulator Version 1.1 -------- 
+
+Enter the number of messages to simulate: 5
+Enter  packet loss probability [enter 0.0 for no loss]:0.3
+Enter packet corruption probability [0.0 for no corruption]:0.2
+Enter average time between messages from sender's layer5 [ > 0.0]:500
+Enter TRACE:4
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 0.000000
+            INSERTEVENT: future time will be 935.286987
+
+EVENT time: 935.286987,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 935.286987
+            INSERTEVENT: future time will be 1756.241943
+          MAINLOOP: data given to student: aaaaaaaaaaaaaaaaaaa
+  A_output: send packet: aaaaaaaaaaaaaaaaaaa
+          TOLAYER3: seq: 0, ack 0, check: 1843 aaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 935.286987
+            INSERTEVENT: future time will be 940.752075
+          START TIMER: starting timer at 935.286987
+            INSERTEVENT: time is 935.286987
+            INSERTEVENT: future time will be 950.286987
+
+EVENT time: 940.752075,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: recv message: aaaaaaaaaaaaaaaaaaa
+  B_input: send ACK.
+          TOLAYER3: seq: 2077957280, ack 0, check: 2077957676 `��o�`3
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 940.752075
+            INSERTEVENT: future time will be 945.983704
+          TOLAYER5: data received: aaaaaaaaaaaaaaaaaaa
+
+EVENT time: 945.983704,  type: 2, fromlayer3  entity: 0
+From layer 3
+  A_input: packet corrupted. drop.
+
+EVENT time: 950.286987,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: aaaaaaaaaaaaaaaaaaa.
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 950.286987
+            INSERTEVENT: time is 950.286987
+            INSERTEVENT: future time will be 965.286987
+
+EVENT time: 965.286987,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: aaaaaaaaaaaaaaaaaaa.
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 965.286987
+            INSERTEVENT: time is 965.286987
+            INSERTEVENT: future time will be 980.286987
+
+EVENT time: 980.286987,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: aaaaaaaaaaaaaaaaaaa.
+          TOLAYER3: seq: 0, ack 0, check: 1843 aaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 980.286987
+            INSERTEVENT: future time will be 989.531555
+          START TIMER: starting timer at 980.286987
+            INSERTEVENT: time is 980.286987
+            INSERTEVENT: future time will be 995.286987
+
+EVENT time: 989.531555,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: not the expected seq. send NAK.
+          TOLAYER3: packet being lost
+
+EVENT time: 995.286987,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: aaaaaaaaaaaaaaaaaaa.
+          TOLAYER3: seq: 0, ack 0, check: 1843 aaaaaaaaaaaaaaaaaaa
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 995.286987
+            INSERTEVENT: future time will be 996.765381
+          START TIMER: starting timer at 995.286987
+            INSERTEVENT: time is 995.286987
+            INSERTEVENT: future time will be 1010.286987
+
+EVENT time: 996.765381,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: not the expected seq. send NAK.
+          TOLAYER3: seq: 2077957208, ack 0, check: 2077957604 `��o�`3
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 996.765381
+            INSERTEVENT: future time will be 1002.037598
+
+EVENT time: 1002.037598,  type: 2, fromlayer3  entity: 0
+From layer 3
+  A_input: acked.
+          STOP TIMER: stopping timer at 1002.037598
+
+EVENT time: 1756.241943,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 1756.241943
+            INSERTEVENT: future time will be 2474.343750
+          MAINLOOP: data given to student: bbbbbbbbbbbbbbbbbbb
+  A_output: send packet: bbbbbbbbbbbbbbbbbbb
+          TOLAYER3: seq: 1, ack 0, check: 1863 bbbbbbbbbbbbbbbbbbb
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1756.241943
+            INSERTEVENT: future time will be 1762.271606
+          START TIMER: starting timer at 1756.241943
+            INSERTEVENT: time is 1756.241943
+            INSERTEVENT: future time will be 1771.241943
+
+EVENT time: 1762.271606,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: recv message: bbbbbbbbbbbbbbbbbbb
+  B_input: send ACK.
+          TOLAYER3: packet being lost
+          TOLAYER5: data received: bbbbbbbbbbbbbbbbbbb
+
+EVENT time: 1771.241943,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: bbbbbbbbbbbbbbbbbbb.
+          TOLAYER3: seq: 1, ack 0, check: 1863 bbbbbbbbbbbbbbbbbbb
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1771.241943
+            INSERTEVENT: future time will be 1775.305542
+          START TIMER: starting timer at 1771.241943
+            INSERTEVENT: time is 1771.241943
+            INSERTEVENT: future time will be 1786.241943
+
+EVENT time: 1775.305542,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: packet corrupted. send NAK.
+          TOLAYER3: seq: 2077957168, ack 1, check: 2077957585 `��o�`G
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1775.305542
+            INSERTEVENT: future time will be 1777.089478
+
+EVENT time: 1777.089478,  type: 2, fromlayer3  entity: 0
+From layer 3
+  A_input: packet corrupted. drop.
+
+EVENT time: 1786.241943,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: bbbbbbbbbbbbbbbbbbb.
+          TOLAYER3: seq: 1, ack 0, check: 1863 bbbbbbbbbbbbbbbbbbb
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1786.241943
+            INSERTEVENT: future time will be 1790.400513
+          START TIMER: starting timer at 1786.241943
+            INSERTEVENT: time is 1786.241943
+            INSERTEVENT: future time will be 1801.241943
+
+EVENT time: 1790.400513,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: not the expected seq. send NAK.
+          TOLAYER3: packet being lost
+
+EVENT time: 1801.241943,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: bbbbbbbbbbbbbbbbbbb.
+          TOLAYER3: seq: 1, ack 0, check: 1863 bbbbbbbbbbbbbbbbbbb
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1801.241943
+            INSERTEVENT: future time will be 1807.079956
+          START TIMER: starting timer at 1801.241943
+            INSERTEVENT: time is 1801.241943
+            INSERTEVENT: future time will be 1816.241943
+
+EVENT time: 1807.079956,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: packet corrupted. send NAK.
+          TOLAYER3: seq: 2077957168, ack 1, check: 2077957585 `��o�`G
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 1807.079956
+            INSERTEVENT: future time will be 1808.955200
+
+EVENT time: 1808.955200,  type: 2, fromlayer3  entity: 0
+From layer 3
+  A_input: acked.
+          STOP TIMER: stopping timer at 1808.955200
+
+EVENT time: 2474.343750,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 2474.343750
+            INSERTEVENT: future time will be 2480.839844
+          MAINLOOP: data given to student: ccccccccccccccccccc
+  A_output: send packet: ccccccccccccccccccc
+          TOLAYER3: seq: 0, ack 0, check: 1881 ccccccccccccccccccc
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 2474.343750
+            INSERTEVENT: future time will be 2475.650146
+          START TIMER: starting timer at 2474.343750
+            INSERTEVENT: time is 2474.343750
+            INSERTEVENT: future time will be 2489.343750
+
+EVENT time: 2475.650146,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: recv message: ccccccccccccccccccc
+  B_input: send ACK.
+          TOLAYER3: seq: 2077957280, ack 0, check: 2077957714 `��o�`Y
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 2475.650146
+            INSERTEVENT: future time will be 2481.228760
+          TOLAYER5: data received: ccccccccccccccccccc
+
+EVENT time: 2480.839844,  type: 1, fromlayer5  entity: 0
+          GENERATE NEXT ARRIVAL: creating new arrival
+            INSERTEVENT: time is 2480.839844
+            INSERTEVENT: future time will be 3345.424316
+          MAINLOOP: data given to student: ddddddddddddddddddd
+  A_output: not yet acked. drop the message: ddddddddddddddddddd
+
+EVENT time: 2481.228760,  type: 2, fromlayer3  entity: 0
+From layer 3
+  A_input: packet corrupted. drop.
+
+EVENT time: 2489.343750,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: ccccccccccccccccccc.
+          TOLAYER3: seq: 0, ack 0, check: 1881 ccccccccccccccccccc
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 2489.343750
+            INSERTEVENT: future time will be 2491.099365
+          START TIMER: starting timer at 2489.343750
+            INSERTEVENT: time is 2489.343750
+            INSERTEVENT: future time will be 2504.343750
+
+EVENT time: 2491.099365,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: packet corrupted. send NAK.
+          TOLAYER3: seq: 2077957168, ack 0, check: 2077957602 `��o�`Y
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 2491.099365
+            INSERTEVENT: future time will be 2493.977295
+
+EVENT time: 2493.977295,  type: 2, fromlayer3  entity: 0
+From layer 3
+  A_input: acked.
+          STOP TIMER: stopping timer at 2493.977295
+
+EVENT time: 3345.424316,  type: 1, fromlayer5  entity: 0
+          MAINLOOP: data given to student: eeeeeeeeeeeeeeeeeee
+  A_output: send packet: eeeeeeeeeeeeeeeeeee
+          TOLAYER3: seq: 1, ack 0, check: 1920 eeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 3345.424316
+            INSERTEVENT: future time will be 3349.086182
+          START TIMER: starting timer at 3345.424316
+            INSERTEVENT: time is 3345.424316
+            INSERTEVENT: future time will be 3360.424316
+
+EVENT time: 3349.086182,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: recv message: eeeeeeeeeeeeeeeeeee
+  B_input: send ACK.
+          TOLAYER3: seq: 2077957280, ack 1, check: 2077957498 `��o�`�
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 3349.086182
+            INSERTEVENT: future time will be 3357.997070
+          TOLAYER5: data received: eeeeeeeeeeeeeeeeeee
+
+EVENT time: 3357.997070,  type: 2, fromlayer3  entity: 0
+From layer 3
+  A_input: packet corrupted. drop.
+
+EVENT time: 3360.424316,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: eeeeeeeeeeeeeeeeeee.
+          TOLAYER3: seq: 1, ack 0, check: 1920 eeeeeeeeeeeeeeeeeee
+          TOLAYER3: packet being corrupted
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 3360.424316
+            INSERTEVENT: future time will be 3366.041992
+          START TIMER: starting timer at 3360.424316
+            INSERTEVENT: time is 3360.424316
+            INSERTEVENT: future time will be 3375.424316
+
+EVENT time: 3366.041992,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: packet corrupted. send NAK.
+          TOLAYER3: packet being lost
+
+EVENT time: 3375.424316,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: eeeeeeeeeeeeeeeeeee.
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 3375.424316
+            INSERTEVENT: time is 3375.424316
+            INSERTEVENT: future time will be 3390.424316
+
+EVENT time: 3390.424316,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: eeeeeeeeeeeeeeeeeee.
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 3390.424316
+            INSERTEVENT: time is 3390.424316
+            INSERTEVENT: future time will be 3405.424316
+
+EVENT time: 3405.424316,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: eeeeeeeeeeeeeeeeeee.
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 3405.424316
+            INSERTEVENT: time is 3405.424316
+            INSERTEVENT: future time will be 3420.424316
+
+EVENT time: 3420.424316,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: eeeeeeeeeeeeeeeeeee.
+          TOLAYER3: packet being lost
+          START TIMER: starting timer at 3420.424316
+            INSERTEVENT: time is 3420.424316
+            INSERTEVENT: future time will be 3435.424316
+
+EVENT time: 3435.424316,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: eeeeeeeeeeeeeeeeeee.
+          TOLAYER3: seq: 1, ack 0, check: 1920 eeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 3435.424316
+            INSERTEVENT: future time will be 3437.537109
+          START TIMER: starting timer at 3435.424316
+            INSERTEVENT: time is 3435.424316
+            INSERTEVENT: future time will be 3450.424316
+
+EVENT time: 3437.537109,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: not the expected seq. send NAK.
+          TOLAYER3: packet being lost
+
+EVENT time: 3450.424316,  type: 0, timerinterrupt   entity: 0
+  A_timerinterrupt: resend last packet: eeeeeeeeeeeeeeeeeee.
+          TOLAYER3: seq: 1, ack 0, check: 1920 eeeeeeeeeeeeeeeeeee
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 3450.424316
+            INSERTEVENT: future time will be 3456.656738
+          START TIMER: starting timer at 3450.424316
+            INSERTEVENT: time is 3450.424316
+            INSERTEVENT: future time will be 3465.424316
+
+EVENT time: 3456.656738,  type: 2, fromlayer3  entity: 1
+From layer 3
+  B_input: not the expected seq. send NAK.
+          TOLAYER3: seq: 2077957208, ack 1, check: 2077957426 `��o�`�
+          TOLAYER3: scheduling arrival on other side
+            INSERTEVENT: time is 3456.656738
+            INSERTEVENT: future time will be 3459.139160
+
+EVENT time: 3459.139160,  type: 2, fromlayer3  entity: 0
+From layer 3
+  A_input: acked.
+          STOP TIMER: stopping timer at 3459.139160
+ Simulator terminated at time 3459.139160
+ after sending 5 msgs from layer5
