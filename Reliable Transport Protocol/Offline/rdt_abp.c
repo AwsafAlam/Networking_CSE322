@@ -49,19 +49,29 @@ void tolayer5(int AorB, char datasent[20]);
 /**************** Defined Variables *************************************/
 #define A 0
 #define B 1
-#define INCREMENT 2.0
-int ACK = 1;
+#define TIMEOUT 10.0
+int ACK = 0;
 int SEQ_NUM = 0;
-/********* TODO: WRITE THE NEXT SEVEN ROUTINES *********/
-/* used to check the checksum */
-int check_checksum(struct pkt package){
-    int i;
-    int sum = (package.seqnum + package.acknum);
-    for(i = 0; i < DATA_SIZE; i++){
-        sum += (int)package.payload[i];
-    }
-    return (sum == package.checksum);
-}
+
+
+// int A_STATE = 0;
+int B_STATE = 0;
+
+int count = 0;
+
+int prev_sequence_number;
+struct msg prev_message;
+struct pkt prev_packet;
+struct pkt B_prev_packet;
+
+enum state
+{
+    WAIT_ACK,
+    SEND_PCKT
+};
+
+enum state A_STATE;
+
 /* used to generate checksum */
 int getchecksum(struct pkt package){
     int i;
@@ -79,25 +89,31 @@ int getchecksum(struct pkt package){
 void A_output(struct msg message)
 {
     // printf("Output A...\n");
-    printf("A>>Sending data to layer3 \n");
-    for (int i = 0; i < 20; i++)
-        printf("%c", message.data[i]);
-    printf("\n");
-    if(ACK == 0)
-        ACK = 1;
-    else
-        ACK = 0;
+    printf("A>>Sending data to layer3 : %s\n",message.data);
+    
+    if(A_STATE == WAIT_ACK){
+        printf("\n----------------\nwaiting for an ACK# %d\n---------------------\n",ACK);
+        return -1;
+    }else{
+        struct pkt mypkt;
+        mypkt.acknum = ACK;
+        mypkt.seqnum = SEQ_NUM;
+   
+        strcpy(mypkt.payload,message.data);
+        mypkt.checksum = getchecksum(mypkt); 
 
-    struct pkt mypkt;
-    mypkt.acknum = ACK;
-    mypkt.seqnum = SEQ_NUM;
-    SEQ_NUM++;
+        tolayer3(A,mypkt);
+        starttimer(A,TIMEOUT);
+        printf("================ Data sent from A ================ \n");
 
-    strcpy(mypkt.payload,message.data);
-    mypkt.checksum = getchecksum(mypkt); 
-
-    tolayer3(A,mypkt);
-    printf("================ Data sent from A ================ \n");
+        prev_packet = mypkt;
+        
+        A_STATE = SEND_PCKT;
+        if(ACK == 0){ACK = 1;}else{ACK = 0;}
+        if(SEQ_NUM == 0){SEQ_NUM = 1;}else{SEQ_NUM = 0;}
+    
+        return 1;
+    }
 
 }
 
@@ -124,11 +140,31 @@ void A_input(struct pkt packet)
         // ackpkt.checksum = getchecksum(ackpkt); 
         // tolayer3(B,ackpkt);
         // tolayer5(B,packet.payload);
+        stoptimer(0);
+        
         printf("================ ACK received succesful ================ \n");
     }
     else{
         printf("================ ACK corrupted ================ \n");
     }
+
+    if (A_STATE != WAIT_ACK) {
+        printf("  A_input: A->B only. drop.\n");
+        return;
+    }
+    if (packet.checksum != get_checksum(&packet)) {
+        printf("  A_input: packet corrupted. drop.\n");
+        return;
+    }
+
+    if (packet.acknum != SEQ_NUM) {
+        printf("  A_input: not the expected ACK. drop.\n");
+        return;
+    }
+    // printf("  A_input: acked.\n");
+    // stoptimer(0);
+    // SEQ_NUM = 1 - SEQ_NUM;
+    // A.state = WAIT_LAYER5;
 }
 
 /* called when A's timer goes off */
@@ -143,8 +179,11 @@ void A_timerinterrupt(void)
 void A_init(void)
 {
     printf("Init A....\n");
+    ACK = 0;
+    SEQ_NUM = 0;
+    A_STATE = SEND_PCKT;
     //printevlist();    
-    starttimer(A,INCREMENT);
+    // starttimer(A,TIMEOUT);
 }
 
 /* Note that with simplex transfer from a-to-B, there is no B_output() */
@@ -185,7 +224,7 @@ void B_init(void)
 {
     printf("Init B...\n");
     //printevlist();
-    starttimer(B,INCREMENT);
+    //starttimer(B,INCREMENT);
 
 }
 
