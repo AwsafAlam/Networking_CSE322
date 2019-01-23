@@ -23,9 +23,10 @@
 /* a "msg" is the data unit passed from layer 5 (teachers code) to layer  */
 /* 4 (students' code).  It contains the data (characters) to be delivered */
 /* to layer 5 via the students transport level protocol entities.         */
+#define DATA_SIZE 20
 struct msg
 {
-    char data[20];
+    char data[DATA_SIZE];
 };
 
 /* a packet is the data unit passed from layer 4 (students code) to layer */
@@ -36,7 +37,7 @@ struct pkt
     int seqnum;
     int acknum;
     int checksum;
-    char payload[20];
+    char payload[DATA_SIZE];
 };
 
 /********* FUNCTION PROTOTYPES. DEFINED IN THE LATER PART******************/
@@ -49,30 +50,55 @@ void tolayer5(int AorB, char datasent[20]);
 #define A 0
 #define B 1
 #define INCREMENT 2.0
-
+int ACK = 1;
+int SEQ_NUM = 0;
 /********* TODO: WRITE THE NEXT SEVEN ROUTINES *********/
+/* used to check the checksum */
+int check_checksum(struct pkt package){
+    int i;
+    int sum = (package.seqnum + package.acknum);
+    for(i = 0; i < DATA_SIZE; i++){
+        sum += (int)package.payload[i];
+    }
+    return (sum == package.checksum);
+}
+/* used to generate checksum */
+int getchecksum(struct pkt package){
+    int i;
+    int sum = 0;
+    
+    for(i = 0; i < DATA_SIZE; i++){
+        sum += (int)package.payload[i];
+    }
+    sum += (package.seqnum + package.acknum);
+
+    return sum;            
+}
 
 /* called from layer 5, passed the data to be sent to other side */
 void A_output(struct msg message)
 {
     // printf("Output A...\n");
-    printf("     USER OUTPUT: data to layer3 \n");
+    printf("A>>Sending data to layer3 \n");
     for (int i = 0; i < 20; i++)
         printf("%c", message.data[i]);
     printf("\n");
+    if(ACK == 0)
+        ACK = 1;
+    else
+        ACK = 0;
+
     struct pkt mypkt;
-    // mypkt = (struct pkt *)malloc(sizeof(struct pkt));
-    mypkt.acknum = 0;
-    mypkt.seqnum = 10;
-    mypkt.checksum = 2; 
+    mypkt.acknum = ACK;
+    mypkt.seqnum = SEQ_NUM;
+    SEQ_NUM++;
+
     strcpy(mypkt.payload,message.data);
+    mypkt.checksum = getchecksum(mypkt); 
 
     tolayer3(A,mypkt);
-    // struct pkt packet;
-    // packet.acknum = 1;
-    // packet.seqnum = 20;
-    // packet.checksum = 5;
-    // A_input(packet);
+    printf("================ Data sent from A ================ \n");
+
 }
 
 /* need be completed only for extra credit */
@@ -85,10 +111,24 @@ void B_output(struct msg message)
 /* called from layer 3, when a packet arrives for layer 4 */
 void A_input(struct pkt packet)
 {
-    printf("A Input...\n");
+    printf("A >> ACK Packet received. \n");
     printf("SeqNO: %d\nAck: %d\nCecksum: %d\n",packet.seqnum,packet.acknum,packet.checksum);
-    // A_output(packet.payload);
-    tolayer5(A,packet.payload);
+    if(getchecksum(packet) == packet.checksum){
+        // Sending ack packet
+        // struct pkt ackpkt;
+        // ackpkt.acknum = packet.acknum;
+        // ackpkt.seqnum = packet.seqnum;
+        // // SEQ_NUM++;
+
+        // //strcpy(ackpkt.payload,packet.payload);
+        // ackpkt.checksum = getchecksum(ackpkt); 
+        // tolayer3(B,ackpkt);
+        // tolayer5(B,packet.payload);
+        printf("================ ACK received succesful ================ \n");
+    }
+    else{
+        printf("================ ACK corrupted ================ \n");
+    }
 }
 
 /* called when A's timer goes off */
@@ -112,9 +152,25 @@ void A_init(void)
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 void B_input(struct pkt packet)
 {
-    printf("Input B...\n");
+    printf("B >> data Packet received. Sending Ack\n");
     printf("SeqNO: %d\nAck: %d\nCecksum: %d\n",packet.seqnum,packet.acknum,packet.checksum);
-    tolayer5(A,packet.payload);
+    if(getchecksum(packet) == packet.checksum){
+        // Sending ack packet
+        struct pkt ackpkt;
+        ackpkt.acknum = packet.acknum;
+        ackpkt.seqnum = packet.seqnum;
+        // SEQ_NUM++;
+
+        //strcpy(ackpkt.payload,packet.payload);
+        ackpkt.checksum = getchecksum(ackpkt); 
+        tolayer3(B,ackpkt);
+        tolayer5(B,packet.payload);
+        printf("================ Sending ACK ================ \n");
+    }
+    else{
+        printf("================ Packet corrupted ================ \n");
+    }
+
 }
 
 /* called when B's timer goes off */
