@@ -1,0 +1,276 @@
+-----  Stop and Wait Network Simulator Version 1.1 -------- 
+
+Enter the number of messages to simulate: 5
+Enter  packet loss probability [enter 0.0 for no loss]:0.1
+Enter packet corruption probability [0.0 for no corruption]:0.3
+Enter average time between messages from sender's layer5 [ > 0.0]:1000
+Enter TRACE:2
+
+EVENT time: 1870.573975,  type: 1, fromlayer5  entity: 0
+================================ Inside A_output===================================
+[A] Receive an message from layer5. Window[0,0) Message[data=a..]
+          TOLAYER3: packet being corrupted
+[A] Send packet to layer3. Window[0,1) Packet[seq=0,ack=111,check=2051,data=a..]
+
+EVENT time: 1876.039062,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[0] Packet[seq=0,ack=111,check=2051,data=Z..]
+[B] Packet is corrupted. Expected[0] Packet[seq=0,ack=111,check=2051,data=Z..]
+
+EVENT time: 1890.573975,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[0,1)
+[A] Timeout! Send out the package again. Window[0,1) Packet[seq=0,ack=111,check=2051,data=a..]
+
+EVENT time: 1892.755615,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[0] Packet[seq=0,ack=111,check=2051,data=a..]
+[B] Send packet to layer5. Expected[1] Packet[seq=0,ack=111,check=2051,data=a..]
+[B] Send ACK packet to layer3. Expected[1] Packet[seq=0,ack=0,check=1940,data=a..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 1894.776123,  type: 2, fromlayer3  entity: 0
+================================ Inside A_input===================================
+[A] Receive ACK packet from layer3. Window[0,1) Packet[seq=0,ack=0,check=1940,data=a..]
+[A] ACK packet process successfully accomplished!!. Window[1,1) Packet[seq=0,ack=0,check=1940,data=a..]
+================================ Outside A_input===================================
+
+EVENT time: 3512.483887,  type: 1, fromlayer5  entity: 0
+================================ Inside A_output===================================
+[A] Receive an message from layer5. Window[1,1) Message[data=b..]
+[A] Send packet to layer3. Window[1,2) Packet[seq=1,ack=111,check=2072,data=b..]
+
+EVENT time: 3513.783203,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[1] Packet[seq=1,ack=111,check=2072,data=b..]
+[B] Send packet to layer5. Expected[2] Packet[seq=1,ack=111,check=2072,data=b..]
+          TOLAYER3: packet being lost
+[B] Send ACK packet to layer3. Expected[2] Packet[seq=1,ack=1,check=1962,data=b..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 3532.483887,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[1,2)
+[A] Timeout! Send out the package again. Window[1,2) Packet[seq=1,ack=111,check=2072,data=b..]
+
+EVENT time: 3541.912354,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[2] Packet[seq=1,ack=111,check=2072,data=b..]
+[B] Duplicated packet detected. Expected[2] Packet[seq=1,ack=111,check=2072,data=b..]
+[B] Send ACK packet to layer3. Expected[2] Packet[seq=1,ack=1,check=1962,data=b..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 3549.375244,  type: 2, fromlayer3  entity: 0
+================================ Inside A_input===================================
+[A] Receive ACK packet from layer3. Window[1,2) Packet[seq=1,ack=1,check=1962,data=b..]
+[A] ACK packet process successfully accomplished!!. Window[2,2) Packet[seq=1,ack=1,check=1962,data=b..]
+================================ Outside A_input===================================
+
+EVENT time: 5344.603516,  type: 1, fromlayer5  entity: 0
+================================ Inside A_output===================================
+[A] Receive an message from layer5. Window[2,2) Message[data=c..]
+[A] Send packet to layer3. Window[2,3) Packet[seq=2,ack=111,check=2093,data=c..]
+
+EVENT time: 5347.333984,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[2] Packet[seq=2,ack=111,check=2093,data=c..]
+[B] Send packet to layer5. Expected[3] Packet[seq=2,ack=111,check=2093,data=c..]
+          TOLAYER3: packet being corrupted
+[B] Send ACK packet to layer3. Expected[3] Packet[seq=2,ack=2,check=1984,data=c..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 5349.700195,  type: 2, fromlayer3  entity: 0
+================================ Inside A_input===================================
+[A] Receive ACK packet from layer3. Window[2,3) Packet[seq=2,ack=2,check=1984,data=Z..]
+[A] ACK packet is corrupted. Window[2,3) Packet[seq=2,ack=2,check=1984,data=Z..]
+
+EVENT time: 5364.603516,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[2,3)
+          TOLAYER3: packet being lost
+[A] Timeout! Send out the package again. Window[2,3) Packet[seq=2,ack=111,check=2093,data=c..]
+
+EVENT time: 5384.603516,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[2,3)
+          TOLAYER3: packet being lost
+[A] Timeout! Send out the package again. Window[2,3) Packet[seq=2,ack=111,check=2093,data=c..]
+
+EVENT time: 5404.603516,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[2,3)
+[A] Timeout! Send out the package again. Window[2,3) Packet[seq=2,ack=111,check=2093,data=c..]
+
+EVENT time: 5410.852539,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[3] Packet[seq=2,ack=111,check=2093,data=c..]
+[B] Duplicated packet detected. Expected[3] Packet[seq=2,ack=111,check=2093,data=c..]
+[B] Send ACK packet to layer3. Expected[3] Packet[seq=2,ack=2,check=1984,data=c..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 5412.333008,  type: 2, fromlayer3  entity: 0
+================================ Inside A_input===================================
+[A] Receive ACK packet from layer3. Window[2,3) Packet[seq=2,ack=2,check=1984,data=c..]
+[A] ACK packet process successfully accomplished!!. Window[3,3) Packet[seq=2,ack=2,check=1984,data=c..]
+================================ Outside A_input===================================
+
+EVENT time: 6462.303711,  type: 1, fromlayer5  entity: 0
+================================ Inside A_output===================================
+[A] Receive an message from layer5. Window[3,3) Message[data=d..]
+[A] Send packet to layer3. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6468.664551,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[3] Packet[seq=3,ack=111,check=2114,data=d..]
+[B] Send packet to layer5. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+          TOLAYER3: packet being lost
+[B] Send ACK packet to layer3. Expected[4] Packet[seq=3,ack=3,check=2006,data=d..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 6482.303711,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[3,4)
+[A] Timeout! Send out the package again. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6483.362305,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+[B] Duplicated packet detected. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+          TOLAYER3: packet being lost
+[B] Send ACK packet to layer3. Expected[4] Packet[seq=3,ack=3,check=2006,data=d..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 6502.303711,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[3,4)
+[A] Timeout! Send out the package again. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6507.577637,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+[B] Duplicated packet detected. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+          TOLAYER3: packet being lost
+[B] Send ACK packet to layer3. Expected[4] Packet[seq=3,ack=3,check=2006,data=d..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 6522.303711,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[3,4)
+[A] Timeout! Send out the package again. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6531.084961,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+[B] Duplicated packet detected. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+          TOLAYER3: packet being lost
+[B] Send ACK packet to layer3. Expected[4] Packet[seq=3,ack=3,check=2006,data=d..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 6542.303711,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[3,4)
+          TOLAYER3: packet being lost
+[A] Timeout! Send out the package again. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6562.303711,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[3,4)
+          TOLAYER3: packet being corrupted
+[A] Timeout! Send out the package again. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6567.123047,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[4] Packet[seq=3,ack=111,check=2114,data=Z..]
+[B] Packet is corrupted. Expected[4] Packet[seq=3,ack=111,check=2114,data=Z..]
+
+EVENT time: 6582.303711,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[3,4)
+[A] Timeout! Send out the package again. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6585.965332,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+[B] Duplicated packet detected. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+          TOLAYER3: packet being corrupted
+[B] Send ACK packet to layer3. Expected[4] Packet[seq=3,ack=3,check=2006,data=d..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 6594.875977,  type: 2, fromlayer3  entity: 0
+================================ Inside A_input===================================
+[A] Receive ACK packet from layer3. Window[3,4) Packet[seq=3,ack=3,check=2006,data=Z..]
+[A] ACK packet is corrupted. Window[3,4) Packet[seq=3,ack=3,check=2006,data=Z..]
+
+EVENT time: 6602.303711,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[3,4)
+          TOLAYER3: packet being corrupted
+[A] Timeout! Send out the package again. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6607.921387,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[4] Packet[seq=3,ack=111,check=2114,data=Z..]
+[B] Packet is corrupted. Expected[4] Packet[seq=3,ack=111,check=2114,data=Z..]
+
+EVENT time: 6622.303711,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[3,4)
+          TOLAYER3: packet being corrupted
+[A] Timeout! Send out the package again. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6624.335449,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[4] Packet[seq=3,ack=111,check=2114,data=Z..]
+[B] Packet is corrupted. Expected[4] Packet[seq=3,ack=111,check=2114,data=Z..]
+
+EVENT time: 6642.303711,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[3,4)
+          TOLAYER3: packet being corrupted
+[A] Timeout! Send out the package again. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6650.046875,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[4] Packet[seq=3,ack=111,check=2114,data=Z..]
+[B] Packet is corrupted. Expected[4] Packet[seq=3,ack=111,check=2114,data=Z..]
+
+EVENT time: 6662.303711,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[3,4)
+[A] Timeout! Send out the package again. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6668.995117,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+[B] Duplicated packet detected. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+          TOLAYER3: packet being corrupted
+[B] Send ACK packet to layer3. Expected[4] Packet[seq=3,ack=3,check=2006,data=d..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 6674.467773,  type: 2, fromlayer3  entity: 0
+================================ Inside A_input===================================
+[A] Receive ACK packet from layer3. Window[3,4) Packet[seq=3,ack=3,check=2006,data=Z..]
+[A] ACK packet is corrupted. Window[3,4) Packet[seq=3,ack=3,check=2006,data=Z..]
+
+EVENT time: 6682.303711,  type: 0, timerinterrupt   entity: 0
+[A] Time interrupt occur.Window[3,4)
+[A] Timeout! Send out the package again. Window[3,4) Packet[seq=3,ack=111,check=2114,data=d..]
+
+EVENT time: 6687.690430,  type: 2, fromlayer3  entity: 1
+================================ Inside B_input===================================
+[B] Receive a packet from layer3. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+[B] Duplicated packet detected. Expected[4] Packet[seq=3,ack=111,check=2114,data=d..]
+[B] Send ACK packet to layer3. Expected[4] Packet[seq=3,ack=3,check=2006,data=d..]
+================================ Outside B_input(packet) =========================
+
+EVENT time: 6689.394531,  type: 2, fromlayer3  entity: 0
+================================ Inside A_input===================================
+[A] Receive ACK packet from layer3. Window[3,4) Packet[seq=3,ack=3,check=2006,data=d..]
+[A] ACK packet process successfully accomplished!!. Window[4,4) Packet[seq=3,ack=3,check=2006,data=d..]
+================================ Outside A_input===================================
+
+EVENT time: 7537.408203,  type: 1, fromlayer5  entity: 0
+================================ Inside A_output===================================
+[A] Receive an message from layer5. Window[4,4) Message[data=e..]
+[A] Send packet to layer3. Window[4,5) Packet[seq=4,ack=111,check=2135,data=e..]
+
+EVENT time: 7545.366211,  type: 2, fromlayer3  entity: 1
+===========================================================================
+Simulator terminated at time 7545.366211,
+After sending 5 msgs from layer5
+
+[0] of messages still left in extra buffer of Sender A.
+==========================================================================
+Result: Protocol: [gbn]
+***********************
+[5] of packets sent from the Application Layer of Sender A
+[21] of packets sent from the Transport Layer of Sender A
+[17] packets received at the Transport layer of Receiver B
+[4] of packets received at the Application layer of Receiver B
+Total time: [7545.366211] time units
+Throughput = [0.000530] packets/time units
