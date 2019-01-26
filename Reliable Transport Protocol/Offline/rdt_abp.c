@@ -55,14 +55,14 @@ int SEQ_NUM = 0;
 
 
 // int A_STATE = 0;
-int B_STATE = 0;
+//int B_STATE = 0;
 
 int count = 0;
 
 int prev_sequence_number;
 struct msg prev_message;
-struct pkt prev_packet;
-struct pkt B_prev_packet;
+struct pkt A_prev_packet;
+struct pkt B_prev_ack;
 
 enum state
 {
@@ -71,6 +71,7 @@ enum state
 };
 
 enum state A_STATE;
+enum state B_STATE;
 
 /* used to generate checksum */
 int getchecksum(struct pkt package){
@@ -92,9 +93,10 @@ void A_output(struct msg message)
     printf("A>>Sending data to layer3 : %s\n",message.data);
     
     if(A_STATE == WAIT_ACK){
-        printf("\n----------------\nwaiting for an ACK# %d\n---------------------\n",ACK);
-        return -1;
-    }else{
+        printf("================= Waiting for an ACK# %d ================ \n",ACK);
+        return;
+    }
+    else{
         struct pkt mypkt;
         mypkt.acknum = ACK;
         mypkt.seqnum = SEQ_NUM;
@@ -106,13 +108,11 @@ void A_output(struct msg message)
         starttimer(A,TIMEOUT);
         printf("================ Data sent from A ================ \n");
 
-        prev_packet = mypkt;
+        A_prev_packet = mypkt;
         
-        A_STATE = SEND_PCKT;
-        if(ACK == 0){ACK = 1;}else{ACK = 0;}
-        if(SEQ_NUM == 0){SEQ_NUM = 1;}else{SEQ_NUM = 0;}
-    
-        return 1;
+        A_STATE = WAIT_ACK;
+        
+        return;
     }
 
 }
@@ -129,38 +129,34 @@ void A_input(struct pkt packet)
 {
     printf("A >> ACK Packet received. \n");
     printf("SeqNO: %d\nAck: %d\nCecksum: %d\n",packet.seqnum,packet.acknum,packet.checksum);
-    if(getchecksum(packet) == packet.checksum){
-        // Sending ack packet
-        // struct pkt ackpkt;
-        // ackpkt.acknum = packet.acknum;
-        // ackpkt.seqnum = packet.seqnum;
-        // // SEQ_NUM++;
-
-        // //strcpy(ackpkt.payload,packet.payload);
-        // ackpkt.checksum = getchecksum(ackpkt); 
-        // tolayer3(B,ackpkt);
-        // tolayer5(B,packet.payload);
-        stoptimer(0);
-        
-        printf("================ ACK received succesful ================ \n");
+    if(getchecksum(packet) == packet.checksum ){
+     
+        if(ACK == 0){ACK = 1;}else{ACK = 0;}
+        stoptimer(A);
+        A_STATE = SEND_PCKT;
+        printf("================ ACK received succesful at A ================ \n");
     }
     else{
-        printf("================ ACK corrupted ================ \n");
+        printf("================ ACK corrupted at A ================ \n");
+        tolayer3(A,A_prev_packet);
+        stoptimer(A);
+        starttimer(A,TIMEOUT);
+        printf("================ Data resend from A ================ \n");
     }
 
-    if (A_STATE != WAIT_ACK) {
-        printf("  A_input: A->B only. drop.\n");
-        return;
-    }
-    if (packet.checksum != get_checksum(&packet)) {
-        printf("  A_input: packet corrupted. drop.\n");
-        return;
-    }
+    // if (A_STATE != WAIT_ACK) {
+    //     printf("  A_input: A->B only. drop.\n");
+    //     return;
+    // }
+    // if (packet.checksum != getchecksum(packet)) {
+    //     printf("  A_input: packet corrupted. drop.\n");
+    //     return;
+    // }
 
-    if (packet.acknum != SEQ_NUM) {
-        printf("  A_input: not the expected ACK. drop.\n");
-        return;
-    }
+    // if (packet.acknum != SEQ_NUM) {
+    //     printf("  A_input: not the expected ACK. drop.\n");
+    //     return;
+    // }
     // printf("  A_input: acked.\n");
     // stoptimer(0);
     // SEQ_NUM = 1 - SEQ_NUM;
@@ -170,8 +166,14 @@ void A_input(struct pkt packet)
 /* called when A's timer goes off */
 void A_timerinterrupt(void)
 {
-    printf("  A_timerinterrupt\n");
-    // starttimer(0,3);
+    printf("A>> Timeout occurred\n======================= Resending prev packet ===================\n");
+    // Packet corrupted
+    //stoptimer(A);
+    starttimer(A,TIMEOUT);
+    if(A_STATE == WAIT_ACK){
+        tolayer3(A,A_prev_packet);
+    }
+    A_STATE = WAIT_ACK;
 }
 
 /* the following routine will be called once (only) before any other */
@@ -191,23 +193,32 @@ void A_init(void)
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 void B_input(struct pkt packet)
 {
-    printf("B >> data Packet received. Sending Ack\n");
+    printf("B >> data Packet received : %s\n",packet.payload);
     printf("SeqNO: %d\nAck: %d\nCecksum: %d\n",packet.seqnum,packet.acknum,packet.checksum);
-    if(getchecksum(packet) == packet.checksum){
+    if (packet.seqnum == B_prev_ack.seqnum) {
+        /* code */
+        printf("============= Detected Duplicate packet ===============\n");
+        tolayer3(B,B_prev_ack);
+
+    }
+    else if(getchecksum(packet) == packet.checksum){
         // Sending ack packet
         struct pkt ackpkt;
         ackpkt.acknum = packet.acknum;
         ackpkt.seqnum = packet.seqnum;
-        // SEQ_NUM++;
-
-        //strcpy(ackpkt.payload,packet.payload);
+        
         ackpkt.checksum = getchecksum(ackpkt); 
         tolayer3(B,ackpkt);
         tolayer5(B,packet.payload);
-        printf("================ Sending ACK ================ \n");
+        B_prev_ack = ackpkt;
+        if(SEQ_NUM == 0){SEQ_NUM = 1;}else{SEQ_NUM = 0;} //Expecting next SEQ No.
+
+        // starttimer(B, TIMEOUT);
+        //stoptimer(A);
+        printf("================ Sending ACK from B ================ \n");
     }
     else{
-        printf("================ Packet corrupted ================ \n");
+        printf("================ Packet corrupted found at B================ \n");
     }
 
 }
@@ -216,6 +227,11 @@ void B_input(struct pkt packet)
 void B_timerinterrupt(void)
 {
     printf("  B_timerinterrupt: B doesn't have a timer. ignore.\n");
+
+    //starttimer(B,TIMEOUT);
+    //if(A_STATE == WAIT_ACK){
+    //    tolayer3(B,B_prev_packet);
+    //}
 }
 
 /* the following rouytine will be called once (only) before any other */
@@ -225,6 +241,7 @@ void B_init(void)
     printf("Init B...\n");
     //printevlist();
     //starttimer(B,INCREMENT);
+    B_prev_ack.seqnum = 1;
 
 }
 
