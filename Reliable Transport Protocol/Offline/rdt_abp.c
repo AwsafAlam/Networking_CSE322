@@ -49,7 +49,7 @@ void tolayer5(int AorB, char datasent[20]);
 /**************** Defined Variables *************************************/
 #define A 0
 #define B 1
-#define TIMEOUT 10.0
+#define TIMEOUT 20.0
 int ACK = 0;
 int SEQ_NUM = 0;
 
@@ -305,6 +305,12 @@ int main(int argc, char const *argv[])
 
     int i, j;
     char c;
+    
+    nsimmax = 5;
+    lossprob = 0.0;
+    corruptprob = 0.0;
+    lambda = 1000;
+    TRACE = 2;
 
     init();
     A_init();
@@ -397,16 +403,16 @@ void init() /* initialize the simulator */
     float jimsrand();
 
     printf("-----  Stop and Wait Network Simulator Version 1.1 -------- \n\n");
-    printf("Enter the number of messages to simulate: ");
-    scanf("%d",&nsimmax);
-    printf("Enter  packet loss probability [enter 0.0 for no loss]:");
-    scanf("%f",&lossprob);
-    printf("Enter packet corruption probability [0.0 for no corruption]:");
-    scanf("%f",&corruptprob);
-    printf("Enter average time between messages from sender's layer5 [ > 0.0]:");
-    scanf("%f",&lambda);
-    printf("Enter TRACE:");
-    scanf("%d",&TRACE);
+    printf("Enter the number of messages to simulate: %d\n",nsimmax);
+    //scanf("%d",&nsimmax);
+    printf("Enter  packet loss probability [enter 0.0 for no loss]: %0.2f\n",lossprob);
+    //scanf("%f",&lossprob);
+    printf("Enter packet corruption probability [0.0 for no corruption]: %0.2f\n",corruptprob);
+    //scanf("%f",&corruptprob);
+    printf("Enter average time between messages from sender's layer5 [ > 0.0]: %0.2f\n",lambda);
+    //scanf("%f",&lambda);
+    printf("Enter TRACE: %d\n",TRACE);
+    //scanf("%d",&TRACE);
 
     srand(9999); /* init random number generator */
     sum = 0.0;   /* test random number generator for students */
