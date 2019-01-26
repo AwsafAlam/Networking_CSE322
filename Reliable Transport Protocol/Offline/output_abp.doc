@@ -1,111 +1,451 @@
 -----  Stop and Wait Network Simulator Version 1.1 -------- 
 
 Enter the number of messages to simulate: 5
-Enter  packet loss probability [enter 0.0 for no loss]: 0.00
-Enter packet corruption probability [0.0 for no corruption]: 0.00
+Enter  packet loss probability [enter 0.0 for no loss]: 0.10
+Enter packet corruption probability [0.0 for no corruption]: 0.30
 Enter average time between messages from sender's layer5 [ > 0.0]: 1000.00
 Enter TRACE: 2
 Init A....
 Init B...
 
 EVENT time: 1870.573975,  type: 1, fromlayer5  entity: 0
-A>>Sending data to layer3 : aaaaaaaaaaaaaaaaaaa
+	[A] >>Sending data to layer3 : aaaaaaaaaaaaaaaaaaa
 ================ Data sent from A ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1843 | aaaaaaaaaaaaaaaaaaa ]
+-----------------------------------------------------------
+          TOLAYER3: packet being corrupted
 
 EVENT time: 1876.039062,  type: 2, fromlayer3  entity: 1
 From layer 3
-B >> data Packet received : aaaaaaaaaaaaaaaaaaa
-SeqNO: 0
-Ack: 0
-Cecksum: 1843
+	[B] >> data Packet received : Zaaaaaaaaaaaaaaaaaa
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1843 | Zaaaaaaaaaaaaaaaaaa ]
+-----------------------------------------------------------
+================ Packet corrupted found at B [Discard] ================ 
+
+EVENT time: 1890.573975,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1843 | aaaaaaaaaaaaaaaaaaa ]
+-----------------------------------------------------------
+
+EVENT time: 1892.755615,  type: 2, fromlayer3  entity: 1
+From layer 3
+	[B] >> data Packet received : aaaaaaaaaaaaaaaaaaa
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1843 | aaaaaaaaaaaaaaaaaaa ]
+-----------------------------------------------------------
 ================ Sending ACK from B ================ 
 
-EVENT time: 1881.270630,  type: 2, fromlayer3  entity: 0
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -189 |  ]
+-----------------------------------------------------------
+
+EVENT time: 1894.776123,  type: 2, fromlayer3  entity: 0
 From layer 3
-A >> ACK Packet received. 
-SeqNO: 0
-Ack: 0
-Cecksum: 162
+	[A] >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -189 |  ]
+-----------------------------------------------------------
 ================ ACK received succesful at A ================ 
 
 EVENT time: 3512.483887,  type: 1, fromlayer5  entity: 0
-A>>Sending data to layer3 : bbbbbbbbbbbbbbbbbbb
+	[A] >>Sending data to layer3 : bbbbbbbbbbbbbbbbbbb
 ================ Data sent from A ================ 
 
-EVENT time: 3514.504395,  type: 2, fromlayer3  entity: 1
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1864 | bbbbbbbbbbbbbbbbbbb ]
+-----------------------------------------------------------
+
+EVENT time: 3513.783203,  type: 2, fromlayer3  entity: 1
 From layer 3
-B >> data Packet received : bbbbbbbbbbbbbbbbbbb
-SeqNO: 1
-Ack: 1
-Cecksum: 1864
+	[B] >> data Packet received : bbbbbbbbbbbbbbbbbbb
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1864 | bbbbbbbbbbbbbbbbbbb ]
+-----------------------------------------------------------
 ================ Sending ACK from B ================ 
 
-EVENT time: 3518.971680,  type: 2, fromlayer3  entity: 0
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -187 |  ]
+-----------------------------------------------------------
+          TOLAYER3: packet being lost
+
+EVENT time: 3532.483887,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1864 | bbbbbbbbbbbbbbbbbbb ]
+-----------------------------------------------------------
+
+EVENT time: 3541.912354,  type: 2, fromlayer3  entity: 1
 From layer 3
-A >> ACK Packet received. 
-SeqNO: 1
-Ack: 1
-Cecksum: 164
+	[B] >> data Packet received : bbbbbbbbbbbbbbbbbbb
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1864 | bbbbbbbbbbbbbbbbbbb ]
+-----------------------------------------------------------
+============= Detected Duplicate packet ===============
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -187 |  ]
+-----------------------------------------------------------
+
+EVENT time: 3549.375244,  type: 2, fromlayer3  entity: 0
+From layer 3
+	[A] >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -187 |  ]
+-----------------------------------------------------------
 ================ ACK received succesful at A ================ 
 
-EVENT time: 5209.402832,  type: 1, fromlayer5  entity: 0
-A>>Sending data to layer3 : ccccccccccccccccccc
+EVENT time: 5344.603516,  type: 1, fromlayer5  entity: 0
+	[A] >>Sending data to layer3 : ccccccccccccccccccc
 ================ Data sent from A ================ 
 
-EVENT time: 5214.266113,  type: 2, fromlayer3  entity: 1
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1881 | ccccccccccccccccccc ]
+-----------------------------------------------------------
+
+EVENT time: 5347.333984,  type: 2, fromlayer3  entity: 1
 From layer 3
-B >> data Packet received : ccccccccccccccccccc
-SeqNO: 0
-Ack: 0
-Cecksum: 1881
+	[B] >> data Packet received : ccccccccccccccccccc
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1881 | ccccccccccccccccccc ]
+-----------------------------------------------------------
 ================ Sending ACK from B ================ 
 
-EVENT time: 5220.564453,  type: 2, fromlayer3  entity: 0
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -189 |  ]
+-----------------------------------------------------------
+          TOLAYER3: packet being corrupted
+
+EVENT time: 5349.700195,  type: 2, fromlayer3  entity: 0
 From layer 3
-A >> ACK Packet received. 
-SeqNO: 0
-Ack: 0
-Cecksum: 162
+	[A] >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -189 | Z ]
+-----------------------------------------------------------
+================ ACK corrupted at A [Discard] ================ 
+
+EVENT time: 5364.603516,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1881 | ccccccccccccccccccc ]
+-----------------------------------------------------------
+          TOLAYER3: packet being lost
+
+EVENT time: 5384.603516,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1881 | ccccccccccccccccccc ]
+-----------------------------------------------------------
+          TOLAYER3: packet being lost
+
+EVENT time: 5404.603516,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1881 | ccccccccccccccccccc ]
+-----------------------------------------------------------
+
+EVENT time: 5410.852539,  type: 2, fromlayer3  entity: 1
+From layer 3
+	[B] >> data Packet received : ccccccccccccccccccc
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1881 | ccccccccccccccccccc ]
+-----------------------------------------------------------
+============= Detected Duplicate packet ===============
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -189 |  ]
+-----------------------------------------------------------
+
+EVENT time: 5412.333008,  type: 2, fromlayer3  entity: 0
+From layer 3
+	[A] >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -189 |  ]
+-----------------------------------------------------------
 ================ ACK received succesful at A ================ 
 
-EVENT time: 6091.731934,  type: 1, fromlayer5  entity: 0
-A>>Sending data to layer3 : ddddddddddddddddddd
+EVENT time: 6462.303711,  type: 1, fromlayer5  entity: 0
+	[A] >>Sending data to layer3 : ddddddddddddddddddd
 ================ Data sent from A ================ 
 
-EVENT time: 6100.750488,  type: 2, fromlayer3  entity: 1
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
+
+EVENT time: 6468.664551,  type: 2, fromlayer3  entity: 1
 From layer 3
-B >> data Packet received : ddddddddddddddddddd
-SeqNO: 1
-Ack: 1
-Cecksum: 1902
+	[B] >> data Packet received : ddddddddddddddddddd
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
 ================ Sending ACK from B ================ 
 
-EVENT time: 6104.813965,  type: 2, fromlayer3  entity: 0
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -187 |  ]
+-----------------------------------------------------------
+          TOLAYER3: packet being lost
+
+EVENT time: 6482.303711,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
+
+EVENT time: 6483.362305,  type: 2, fromlayer3  entity: 1
 From layer 3
-A >> ACK Packet received. 
-SeqNO: 1
-Ack: 1
-Cecksum: 164
+	[B] >> data Packet received : ddddddddddddddddddd
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
+============= Detected Duplicate packet ===============
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -187 |  ]
+-----------------------------------------------------------
+          TOLAYER3: packet being lost
+
+EVENT time: 6502.303711,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
+
+EVENT time: 6507.577637,  type: 2, fromlayer3  entity: 1
+From layer 3
+	[B] >> data Packet received : ddddddddddddddddddd
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
+============= Detected Duplicate packet ===============
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -187 |  ]
+-----------------------------------------------------------
+          TOLAYER3: packet being lost
+
+EVENT time: 6522.303711,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
+
+EVENT time: 6531.084961,  type: 2, fromlayer3  entity: 1
+From layer 3
+	[B] >> data Packet received : ddddddddddddddddddd
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
+============= Detected Duplicate packet ===============
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -187 |  ]
+-----------------------------------------------------------
+          TOLAYER3: packet being lost
+
+EVENT time: 6542.303711,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
+          TOLAYER3: packet being lost
+
+EVENT time: 6562.303711,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
+          TOLAYER3: packet being corrupted
+
+EVENT time: 6567.123047,  type: 2, fromlayer3  entity: 1
+From layer 3
+	[B] >> data Packet received : Zdddddddddddddddddd
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | Zdddddddddddddddddd ]
+-----------------------------------------------------------
+============= Detected Duplicate packet ===============
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -187 |  ]
+-----------------------------------------------------------
+
+EVENT time: 6570.784668,  type: 2, fromlayer3  entity: 0
+From layer 3
+	[A] >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -187 |  ]
+-----------------------------------------------------------
 ================ ACK received succesful at A ================ 
 
-EVENT time: 6803.430176,  type: 1, fromlayer5  entity: 0
-A>>Sending data to layer3 : eeeeeeeeeeeeeeeeeee
+EVENT time: 7537.408203,  type: 1, fromlayer5  entity: 0
+	[A] >>Sending data to layer3 : eeeeeeeeeeeeeeeeeee
 ================ Data sent from A ================ 
 
-EVENT time: 6809.006836,  type: 2, fromlayer3  entity: 1
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | eeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+          TOLAYER3: packet being corrupted
+
+EVENT time: 7546.318848,  type: 2, fromlayer3  entity: 1
 From layer 3
-B >> data Packet received : eeeeeeeeeeeeeeeeeee
-SeqNO: 0
-Ack: 0
-Cecksum: 1919
+	[B] >> data Packet received : Zeeeeeeeeeeeeeeeeee
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | Zeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+================ Packet corrupted found at B [Discard] ================ 
+
+EVENT time: 7557.408203,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | eeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+          TOLAYER3: packet being corrupted
+
+EVENT time: 7563.025879,  type: 2, fromlayer3  entity: 1
+From layer 3
+	[B] >> data Packet received : Zeeeeeeeeeeeeeeeeee
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | Zeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+================ Packet corrupted found at B [Discard] ================ 
+
+EVENT time: 7577.408203,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | eeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+          TOLAYER3: packet being corrupted
+
+EVENT time: 7579.439941,  type: 2, fromlayer3  entity: 1
+From layer 3
+	[B] >> data Packet received : Zeeeeeeeeeeeeeeeeee
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | Zeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+================ Packet corrupted found at B [Discard] ================ 
+
+EVENT time: 7597.408203,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | eeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+          TOLAYER3: packet being corrupted
+
+EVENT time: 7605.151367,  type: 2, fromlayer3  entity: 1
+From layer 3
+	[B] >> data Packet received : Zeeeeeeeeeeeeeeeeee
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | Zeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+================ Packet corrupted found at B [Discard] ================ 
+
+EVENT time: 7617.408203,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | eeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+
+EVENT time: 7624.099609,  type: 2, fromlayer3  entity: 1
+From layer 3
+	[B] >> data Packet received : eeeeeeeeeeeeeeeeeee
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | eeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
 ================ Sending ACK from B ================ 
 
-EVENT time: 6818.843750,  type: 2, fromlayer3  entity: 0
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -189 |  ]
+-----------------------------------------------------------
+          TOLAYER3: packet being corrupted
+
+EVENT time: 7629.572266,  type: 2, fromlayer3  entity: 0
 From layer 3
-A >> ACK Packet received. 
-SeqNO: 0
-Ack: 0
-Cecksum: 162
+	[A] >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -189 | Z ]
+-----------------------------------------------------------
+================ ACK corrupted at A [Discard] ================ 
+
+EVENT time: 7637.408203,  type: 0, timerinterrupt   entity: 0
+	[A] >> Timeout occurred
+======================= Resending prev packet ===================
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | eeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+
+EVENT time: 7642.794922,  type: 2, fromlayer3  entity: 1
+From layer 3
+	[B] >> data Packet received : eeeeeeeeeeeeeeeeeee
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | eeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+============= Detected Duplicate packet ===============
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -189 |  ]
+-----------------------------------------------------------
+
+EVENT time: 7644.499023,  type: 2, fromlayer3  entity: 0
+From layer 3
+	[A] >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -189 |  ]
+-----------------------------------------------------------
 ================ ACK received succesful at A ================ 
- Simulator terminated at time 6818.843750
+ Simulator terminated at time 7644.499023
  after sending 5 msgs from layer5

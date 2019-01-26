@@ -1,0 +1,311 @@
+-----  Stop and Wait Network Simulator Version 1.1 -------- 
+
+Enter the number of messages to simulate: 10
+Enter  packet loss probability [enter 0.0 for no loss]: 0.00
+Enter packet corruption probability [0.0 for no corruption]: 0.00
+Enter average time between messages from sender's layer5 [ > 0.0]: 1000.00
+Enter TRACE: 2
+Init A....
+Init B...
+
+EVENT time: 1870.573975,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : aaaaaaaaaaaaaaaaaaa
+================ Data sent from A ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1843 | aaaaaaaaaaaaaaaaaaa ]
+-----------------------------------------------------------
+
+EVENT time: 1876.039062,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : aaaaaaaaaaaaaaaaaaa
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1843 | aaaaaaaaaaaaaaaaaaa ]
+-----------------------------------------------------------
+================ Sending ACK from B ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -154 |  ]
+-----------------------------------------------------------
+
+EVENT time: 1881.270630,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -154 |  ]
+-----------------------------------------------------------
+================ ACK received succesful at A ================ 
+
+EVENT time: 3512.483887,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : bbbbbbbbbbbbbbbbbbb
+================ Data sent from A ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1864 | bbbbbbbbbbbbbbbbbbb ]
+-----------------------------------------------------------
+
+EVENT time: 3514.504395,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : bbbbbbbbbbbbbbbbbbb
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1864 | bbbbbbbbbbbbbbbbbbb ]
+-----------------------------------------------------------
+================ Sending ACK from B ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -152 |  ]
+-----------------------------------------------------------
+
+EVENT time: 3518.971680,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -152 |  ]
+-----------------------------------------------------------
+================ ACK received succesful at A ================ 
+
+EVENT time: 5209.402832,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : ccccccccccccccccccc
+================ Data sent from A ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1881 | ccccccccccccccccccc ]
+-----------------------------------------------------------
+
+EVENT time: 5214.266113,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : ccccccccccccccccccc
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1881 | ccccccccccccccccccc ]
+-----------------------------------------------------------
+================ Sending ACK from B ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -154 |  ]
+-----------------------------------------------------------
+
+EVENT time: 5220.564453,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -154 |  ]
+-----------------------------------------------------------
+================ ACK received succesful at A ================ 
+
+EVENT time: 6091.731934,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : ddddddddddddddddddd
+================ Data sent from A ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
+
+EVENT time: 6100.750488,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : ddddddddddddddddddd
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1902 | ddddddddddddddddddd ]
+-----------------------------------------------------------
+================ Sending ACK from B ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -152 |  ]
+-----------------------------------------------------------
+
+EVENT time: 6104.813965,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -152 |  ]
+-----------------------------------------------------------
+================ ACK received succesful at A ================ 
+
+EVENT time: 6803.430176,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : eeeeeeeeeeeeeeeeeee
+================ Data sent from A ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | eeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+
+EVENT time: 6805.213867,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : eeeeeeeeeeeeeeeeeee
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1919 | eeeeeeeeeeeeeeeeeee ]
+-----------------------------------------------------------
+================ Sending ACK from B ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -154 |  ]
+-----------------------------------------------------------
+
+EVENT time: 6811.462891,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -154 |  ]
+-----------------------------------------------------------
+================ ACK received succesful at A ================ 
+
+EVENT time: 7339.630859,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : fffffffffffffffffff
+================ Data sent from A ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1940 | fffffffffffffffffff ]
+-----------------------------------------------------------
+
+EVENT time: 7344.971191,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : fffffffffffffffffff
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1940 | fffffffffffffffffff ]
+-----------------------------------------------------------
+================ Sending ACK from B ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -152 |  ]
+-----------------------------------------------------------
+
+EVENT time: 7351.332031,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -152 |  ]
+-----------------------------------------------------------
+================ ACK received succesful at A ================ 
+
+EVENT time: 8717.816406,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : ggggggggggggggggggg
+================ Data sent from A ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1957 | ggggggggggggggggggg ]
+-----------------------------------------------------------
+
+EVENT time: 8718.875000,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : ggggggggggggggggggg
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1957 | ggggggggggggggggggg ]
+-----------------------------------------------------------
+================ Sending ACK from B ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -154 |  ]
+-----------------------------------------------------------
+
+EVENT time: 8723.796875,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -154 |  ]
+-----------------------------------------------------------
+================ ACK received succesful at A ================ 
+
+EVENT time: 8912.303711,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : hhhhhhhhhhhhhhhhhhh
+================ Data sent from A ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1978 | hhhhhhhhhhhhhhhhhhh ]
+-----------------------------------------------------------
+
+EVENT time: 8915.041016,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : hhhhhhhhhhhhhhhhhhh
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 1978 | hhhhhhhhhhhhhhhhhhh ]
+-----------------------------------------------------------
+================ Sending ACK from B ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -152 |  ]
+-----------------------------------------------------------
+
+EVENT time: 8916.796875,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -152 |  ]
+-----------------------------------------------------------
+================ ACK received succesful at A ================ 
+
+EVENT time: 9929.774414,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : iiiiiiiiiiiiiiiiiii
+================ Data sent from A ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1995 | iiiiiiiiiiiiiiiiiii ]
+-----------------------------------------------------------
+
+EVENT time: 9932.652344,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : iiiiiiiiiiiiiiiiiii
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | 1995 | iiiiiiiiiiiiiiiiiii ]
+-----------------------------------------------------------
+================ Sending ACK from B ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -154 |  ]
+-----------------------------------------------------------
+
+EVENT time: 9936.314453,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 0 | 0 | -154 |  ]
+-----------------------------------------------------------
+================ ACK received succesful at A ================ 
+
+EVENT time: 10575.213867,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : jjjjjjjjjjjjjjjjjjj
+================ Data sent from A ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 2016 | jjjjjjjjjjjjjjjjjjj ]
+-----------------------------------------------------------
+
+EVENT time: 10584.125000,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : jjjjjjjjjjjjjjjjjjj
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | 2016 | jjjjjjjjjjjjjjjjjjj ]
+-----------------------------------------------------------
+================ Sending ACK from B ================ 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -152 |  ]
+-----------------------------------------------------------
+
+EVENT time: 10593.516602,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+
+-----------------------------------------------------------
+[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ 1 | 1 | -152 |  ]
+-----------------------------------------------------------
+================ ACK received succesful at A ================ 
+ Simulator terminated at time 10593.516602
+ after sending 10 msgs from layer5

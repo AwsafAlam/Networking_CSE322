@@ -53,14 +53,6 @@ void tolayer5(int AorB, char datasent[20]);
 int ACK = 0;
 int SEQ_NUM = 0;
 
-
-// int A_STATE = 0;
-//int B_STATE = 0;
-
-int count = 0;
-
-int prev_sequence_number;
-struct msg prev_message;
 struct pkt A_prev_packet;
 struct pkt B_prev_ack;
 
@@ -71,9 +63,13 @@ enum state
 };
 
 enum state A_STATE;
-enum state B_STATE;
 
-/* used to generate checksum */
+void printPacket(struct pkt packet){
+    printf("\n-----------------------------------------------------------\n");
+    printf("[ ACK | SEQ | CHECK_SUM | PAYLOAD ] : [ %d | %d | %d | %s ]",packet.acknum,packet.seqnum,packet.checksum,packet.payload);
+    printf("\n-----------------------------------------------------------\n");
+}
+
 int getchecksum(struct pkt package){
     int i;
     int sum = 0;
@@ -90,27 +86,28 @@ int getchecksum(struct pkt package){
 void A_output(struct msg message)
 {
     // printf("Output A...\n");
-    printf("A>>Sending data to layer3 : %s\n",message.data);
+    printf("\t[A] >>Sending data to layer3 : %s\n",message.data);
     
     if(A_STATE == WAIT_ACK){
         printf("================= Waiting for an ACK# %d ================ \n",ACK);
         return;
     }
     else{
+
         struct pkt mypkt;
         mypkt.acknum = ACK;
         mypkt.seqnum = SEQ_NUM;
    
         strcpy(mypkt.payload,message.data);
         mypkt.checksum = getchecksum(mypkt); 
+        A_prev_packet = mypkt;
+        A_STATE = WAIT_ACK;
+
+        printf("================ Data sent from A ================ \n");
+        printPacket(mypkt);
 
         tolayer3(A,mypkt);
         starttimer(A,TIMEOUT);
-        printf("================ Data sent from A ================ \n");
-
-        A_prev_packet = mypkt;
-        
-        A_STATE = WAIT_ACK;
         
         return;
     }
@@ -127,8 +124,10 @@ void B_output(struct msg message)
 /* called from layer 3, when a packet arrives for layer 4 */
 void A_input(struct pkt packet)
 {
-    printf("A >> ACK Packet received. \n");
-    printf("SeqNO: %d\nAck: %d\nCecksum: %d\n",packet.seqnum,packet.acknum,packet.checksum);
+    printf("\t[A] >> ACK Packet received. \n");
+    // printf("SeqNO: %d\nAck: %d\nCecksum: %d\n",packet.seqnum,packet.acknum,packet.checksum);
+    printPacket(packet);
+
     if(getchecksum(packet) == packet.checksum ){
      
         if(ACK == 0){ACK = 1;}else{ACK = 0;}
@@ -137,43 +136,29 @@ void A_input(struct pkt packet)
         printf("================ ACK received succesful at A ================ \n");
     }
     else{
-        printf("================ ACK corrupted at A ================ \n");
+        printf("================ ACK corrupted at A [Discard] ================ \n");
         // tolayer3(A,A_prev_packet);
         // stoptimer(A);
         // starttimer(A,TIMEOUT);
         // printf("================ Data resend from A ================ \n");
     }
 
-    // if (A_STATE != WAIT_ACK) {
-    //     printf("  A_input: A->B only. drop.\n");
-    //     return;
-    // }
-    // if (packet.checksum != getchecksum(packet)) {
-    //     printf("  A_input: packet corrupted. drop.\n");
-    //     return;
-    // }
-
-    // if (packet.acknum != SEQ_NUM) {
-    //     printf("  A_input: not the expected ACK. drop.\n");
-    //     return;
-    // }
-    // printf("  A_input: acked.\n");
-    // stoptimer(0);
-    // SEQ_NUM = 1 - SEQ_NUM;
-    // A.state = WAIT_LAYER5;
 }
 
 /* called when A's timer goes off */
 void A_timerinterrupt(void)
 {
-    printf("A>> Timeout occurred\n======================= Resending prev packet ===================\n");
+    printf("\t[A] >> Timeout occurred\n======================= Resending prev packet ===================\n");
     // Packet corrupted
-    //stoptimer(A);
     starttimer(A,TIMEOUT);
     if(A_STATE == WAIT_ACK){
+        printPacket(A_prev_packet);
         tolayer3(A,A_prev_packet);
+        A_STATE = WAIT_ACK;
     }
-    A_STATE = WAIT_ACK;
+    else{
+        printf("Warning: Interrupt before sending packet");
+    }
 }
 
 /* the following routine will be called once (only) before any other */
@@ -184,8 +169,7 @@ void A_init(void)
     ACK = 0;
     SEQ_NUM = 0;
     A_STATE = SEND_PCKT;
-    //printevlist();    
-    // starttimer(A,TIMEOUT);
+    
 }
 
 /* Note that with simplex transfer from a-to-B, there is no B_output() */
@@ -193,32 +177,32 @@ void A_init(void)
 /* called from layer 3, when a packet arrives for layer 4 at B*/
 void B_input(struct pkt packet)
 {
-    printf("B >> data Packet received : %s\n",packet.payload);
-    printf("SeqNO: %d\nAck: %d\nCecksum: %d\n",packet.seqnum,packet.acknum,packet.checksum);
+    printf("\t[B] >> data Packet received : %s\n",packet.payload);
+    printPacket(packet);
+    
     if (packet.seqnum == B_prev_ack.seqnum) {
         /* code */
         printf("============= Detected Duplicate packet ===============\n");
+        printPacket(B_prev_ack);
         tolayer3(B,B_prev_ack);
-
     }
     else if(getchecksum(packet) == packet.checksum){
         // Sending ack packet
         struct pkt ackpkt;
         ackpkt.acknum = packet.acknum;
         ackpkt.seqnum = packet.seqnum;
-        
+        memset(ackpkt.payload , 0 , strlen(ackpkt.payload));
         ackpkt.checksum = getchecksum(ackpkt); 
+        printf("================ Sending ACK from B ================ \n");
+        printPacket(ackpkt);
+    
         tolayer3(B,ackpkt);
         tolayer5(B,packet.payload);
         B_prev_ack = ackpkt;
         if(SEQ_NUM == 0){SEQ_NUM = 1;}else{SEQ_NUM = 0;} //Expecting next SEQ No.
-
-        // starttimer(B, TIMEOUT);
-        //stoptimer(A);
-        printf("================ Sending ACK from B ================ \n");
     }
     else{
-        printf("================ Packet corrupted found at B================ \n");
+        printf("================ Packet corrupted found at B [Discard] ================ \n");
     }
 
 }
@@ -239,8 +223,6 @@ void B_timerinterrupt(void)
 void B_init(void)
 {
     printf("Init B...\n");
-    //printevlist();
-    //starttimer(B,INCREMENT);
     B_prev_ack.seqnum = 1;
 
 }
@@ -307,8 +289,8 @@ int main(int argc, char const *argv[])
     char c;
     
     nsimmax = 5;
-    lossprob = 0.0;
-    corruptprob = 0.0;
+    lossprob = 0.1;
+    corruptprob = 0.3;
     lambda = 1000;
     TRACE = 2;
 
