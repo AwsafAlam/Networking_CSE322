@@ -1,4 +1,4 @@
------  Stop and Wait Network Simulator Version 1.1 -------- 
+﻿-----  Stop and Wait Network Simulator Version 1.1 -------- 
 
 Enter the number of messages to simulate: 10
 Enter  packet loss probability [enter 0.0 for no loss]: 0.10
