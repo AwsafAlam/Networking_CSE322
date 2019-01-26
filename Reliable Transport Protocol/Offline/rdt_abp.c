@@ -138,10 +138,10 @@ void A_input(struct pkt packet)
     }
     else{
         printf("================ ACK corrupted at A ================ \n");
-        tolayer3(A,A_prev_packet);
-        stoptimer(A);
-        starttimer(A,TIMEOUT);
-        printf("================ Data resend from A ================ \n");
+        // tolayer3(A,A_prev_packet);
+        // stoptimer(A);
+        // starttimer(A,TIMEOUT);
+        // printf("================ Data resend from A ================ \n");
     }
 
     // if (A_STATE != WAIT_ACK) {

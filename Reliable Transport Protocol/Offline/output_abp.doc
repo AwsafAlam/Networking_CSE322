@@ -1,0 +1,152 @@
+-----  Stop and Wait Network Simulator Version 1.1 -------- 
+
+Enter the number of messages to simulate: 5
+Enter  packet loss probability [enter 0.0 for no loss]:0.4
+Enter packet corruption probability [0.0 for no corruption]:0.0
+Enter average time between messages from sender's layer5 [ > 0.0]:600
+Enter TRACE:2
+Init A....
+Init B...
+
+EVENT time: 1122.344360,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : aaaaaaaaaaaaaaaaaaa
+================ Data sent from A ================ 
+
+EVENT time: 1127.809448,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : aaaaaaaaaaaaaaaaaaa
+SeqNO: 0
+Ack: 0
+Cecksum: 1843
+================ Sending ACK from B ================ 
+
+EVENT time: 1132.344360,  type: 0, timerinterrupt   entity: 0
+A>> Timeout occurred
+======================= Resending prev packet ===================
+
+EVENT time: 1133.041016,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+SeqNO: 0
+Ack: 0
+Cecksum: 493
+================ ACK received succesful at A ================ 
+
+EVENT time: 1134.494385,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : aaaaaaaaaaaaaaaaaaa
+SeqNO: 0
+Ack: 0
+Cecksum: 1843
+============= Detected Duplicate packet ===============
+
+EVENT time: 1143.738892,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+SeqNO: 0
+Ack: 0
+Cecksum: 493
+Warning: unable to cancel your timer. It wasn't running.
+================ ACK received succesful at A ================ 
+
+EVENT time: 2107.490479,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : bbbbbbbbbbbbbbbbbbb
+================ Data sent from A ================ 
+
+EVENT time: 2108.968994,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : bbbbbbbbbbbbbbbbbbb
+SeqNO: 1
+Ack: 0
+Cecksum: 1863
+================ Sending ACK from B ================ 
+
+EVENT time: 2114.241211,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+SeqNO: 1
+Ack: 0
+Cecksum: 494
+================ ACK received succesful at A ================ 
+
+EVENT time: 2147.385986,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : ccccccccccccccccccc
+          TOLAYER3: packet being lost
+================ Data sent from A ================ 
+
+EVENT time: 2157.385986,  type: 0, timerinterrupt   entity: 0
+A>> Timeout occurred
+======================= Resending prev packet ===================
+
+EVENT time: 2166.404541,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : ccccccccccccccccccc
+SeqNO: 0
+Ack: 1
+Cecksum: 1882
+================ Sending ACK from B ================ 
+
+EVENT time: 2167.385986,  type: 0, timerinterrupt   entity: 0
+A>> Timeout occurred
+======================= Resending prev packet ===================
+          TOLAYER3: packet being lost
+
+EVENT time: 2170.468262,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+SeqNO: 0
+Ack: 1
+Cecksum: 494
+================ ACK received succesful at A ================ 
+
+EVENT time: 3009.107910,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : ddddddddddddddddddd
+          TOLAYER3: packet being lost
+================ Data sent from A ================ 
+
+EVENT time: 3019.107910,  type: 0, timerinterrupt   entity: 0
+A>> Timeout occurred
+======================= Resending prev packet ===================
+          TOLAYER3: packet being lost
+
+EVENT time: 3029.107910,  type: 0, timerinterrupt   entity: 0
+A>> Timeout occurred
+======================= Resending prev packet ===================
+
+EVENT time: 3035.356934,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : ddddddddddddddddddd
+SeqNO: 1
+Ack: 0
+Cecksum: 1901
+================ Sending ACK from B ================ 
+
+EVENT time: 3036.837646,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+SeqNO: 1
+Ack: 0
+Cecksum: 494
+================ ACK received succesful at A ================ 
+
+EVENT time: 3619.348145,  type: 1, fromlayer5  entity: 0
+A>>Sending data to layer3 : eeeeeeeeeeeeeeeeeee
+================ Data sent from A ================ 
+
+EVENT time: 3621.978760,  type: 2, fromlayer3  entity: 1
+From layer 3
+B >> data Packet received : eeeeeeeeeeeeeeeeeee
+SeqNO: 0
+Ack: 1
+Cecksum: 1920
+================ Sending ACK from B ================ 
+
+EVENT time: 3623.854004,  type: 2, fromlayer3  entity: 0
+From layer 3
+A >> ACK Packet received. 
+SeqNO: 0
+Ack: 1
+Cecksum: 494
+================ ACK received succesful at A ================ 
+ Simulator terminated at time 3623.854004
+ after sending 5 msgs from layer5
