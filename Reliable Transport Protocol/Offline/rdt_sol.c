@@ -35,31 +35,33 @@ struct pkt {
     };
 
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
-/********* FUNCTION PROTOTYPES. DEFINED IN THE LATER PART******************/
-int starttimer(int AorB, float increment);
-int stoptimer(int AorB);
-int tolayer3(int AorB, struct pkt packet);
-int tolayer5(int AorB, char datasent[20]);
 
-/* common defines */
+
+/* comm defines */
 #define   A    0
 #define   B    1
 /* timeout for the timer */
+#define INTERVAL 1.0
 #define TIMEOUT 20.0
 /* when A send a data package to B,
    we do not need to set acknum,
    so we set it to this default number */
 #define DEFAULT_ACK 111
-/* define of stages for sender */
-enum sender_flag {
-  WAIT_FOR_PKG,
-  WAIT_FOR_ACK
+/* define window size */
+#define N 10
+struct ring_buf {
+  /* For receiver	0: acceptable, 1:data received.
+     For sender		0: acceptable, 1:data sended, 2:ACK received */
+  int flag;
+  struct pkt packet;
+  float timeout;	/* packet send time */
 };
+float g_cur_time = 0.0;
 
-/* current expected seq for A */
-int A_seqnum = 0;
-/* current expected seq for B */
-int B_seqnum = 0;
+/* defines for recver */
+int B_base = 0;
+int B_ring_start = 0;
+struct ring_buf B_buf[N];
 
 /* defines for statistic */
 int A_from_layer5 = 0;
@@ -67,10 +69,66 @@ int A_to_layer3 = 0;
 int B_from_layer3 = 0;
 int B_to_layer5 = 0;
 
-/* store current flag for retransmit. */
-struct pkt cur_packet;
-/* current stage of A */
-enum sender_flag A_flag = WAIT_FOR_PKG;
+/* defines for sender */
+int A_base = 0;
+int A_ring_start = 0;
+int A_nextseq = 0;
+/* ring buffer for all packets in window */
+struct ring_buf A_buf[N];
+
+/* extra buffer used when window is full */
+struct node {
+	struct msg message;
+	struct node *next;
+};
+struct node *list_head = NULL;
+struct node *list_end = NULL;
+int Extra_BufSize = 0;
+void append_msg(struct msg *m)
+{
+	int i;
+	/*allocate memory*/
+	struct node *n = malloc(sizeof(struct node));
+	if(n == NULL) {
+		printf("No enough memory");
+		return;
+	}
+	n->next = NULL;
+	/*copy packet*/
+	for(i = 0; i < 20; ++i) {
+		n->message.data[i] = m->data[i];
+	}
+
+	/* if list empty, just add into the list*/
+	if(list_end == NULL) {
+		list_head = n;
+		list_end = n;
+		++Extra_BufSize;
+		return;
+	}
+	/* otherwise, add at the end*/
+	list_end->next = n;
+	list_end = n;
+	++Extra_BufSize;
+}
+struct node *pop_msg()
+{
+	struct node *p;
+	/* if the list is empty, return NULL*/
+	if(list_head == NULL) {
+		return NULL;
+	}
+
+	/* retrive the first node*/
+	p = list_head;
+	list_head = p->next;
+	if(list_head == NULL) {
+		list_end = NULL;
+	}
+	--Extra_BufSize;
+
+	return p;
+}
 
 
 /* common tools */
@@ -86,7 +144,7 @@ Because checksum is used to make sure the packet is correct, not corrupted.
 Seqnum and acknum may also be corrupted, so we need to add seqnum and acknum.
  
  * About the check sum:
- * There is no perfect method for checksum, only suitable method.  
+ * There is no perfect method for check sum, only suitable method.  
  * In this assignment, we only need to add all of them as it is simple and it works well.
 */
 
@@ -107,67 +165,193 @@ int calc_checksum(struct pkt *p)
   checksum += p->seqnum;
   /*add the acknum*/
   checksum += p->acknum;
-/*Then we get the final checksum.*/
+ /*Then we get the final checksum.*/
   return checksum;
 }
 void Debug_Log(int AorB, char *msg, struct pkt *p, struct msg *m)
 {
   char ch = (AorB == A)?'A':'B';
-  if(p != NULL) {
-    printf("[%c] %s. Packet[seq=%d,ack=%d,check=%d,data=%c..]\n", ch,
-        msg, p->seqnum, p->acknum, p->checksum, p->payload[0]);
-  } else if(m != NULL) {
-    printf("[%c] %s. Message[data=%c..]\n", ch, msg, m->data[0]);
-  } else {
-    printf("[%c] %s.\n", ch, msg);
+  if(AorB == A)
+  {
+    if(p != NULL) {
+      printf("[%c] %s. Window[(%d,%d) Packet[seq=%d,ack=%d,check=%d,data=%c..]\n", ch, msg,
+      A_base, A_nextseq, p->seqnum, p->acknum, p->checksum, p->payload[0]);
+    } else if(m != NULL) {
+      printf("[%c] %s. Window[(%d,%d) Message[data=%c..]\n", ch, msg, A_base, A_nextseq, m->data[0]);
+    } else {
+      printf("[%c] %s.Window[(%d,%d)\n", ch, msg, A_base, A_nextseq);
+    }
+  }
+  else
+  {
+    if(p != NULL) {
+      printf("[%c] %s. Base[%d] Packet[seq=%d,ack=%d,check=%d,data=%c..]\n", ch, msg,
+      B_base, p->seqnum, p->acknum, p->checksum, p->payload[0]);
+    } else if(m != NULL) {
+      printf("[%c] %s. Base[%d] Message[data=%c..]\n", ch, msg, B_base, m->data[0]);
+    } else {
+      printf("[%c] %s. Base[%d]\n", ch, msg, B_base);
+    }
+  }
+}
+/* helper functions for the window */
+int window_isfull()
+{
+  if(A_nextseq >= A_base + N)
+    return 1;
+  else
+    return 0;
+}
+/* copy packet */
+void copy_packet(struct pkt *dst, struct pkt *src)
+{
+  int i;
+  if(dst == NULL || src == NULL)
+    return;
+  dst->seqnum = src->seqnum;
+  dst->acknum = src->acknum;
+  dst->checksum = src->checksum;
+  for(i = 0; i < 20; ++i)
+  {
+    dst->payload[i] = src->payload[i];
+  }
+}
+/* functions for B */
+struct ring_buf *get_ring_buf(int AorB, int seqnum)
+{
+  int cur_index = 0;
+  if(AorB == A)
+  {
+    if(seqnum < A_base || seqnum >= A_base + N)
+    {
+      //Debug_Log(A, "Seqnum is not within the window", NULL, NULL);
+      return NULL;
+    }
+
+    cur_index = (A_ring_start + seqnum - A_base) % N;
+    return &(A_buf[cur_index]);
+  }
+  else
+  {
+    if(seqnum < B_base || seqnum >= B_base + N)
+    {
+      //Debug_Log(B, "Seqnum is not within the window", NULL, NULL);
+      return NULL;
+    }
+
+    cur_index = (B_ring_start + seqnum - B_base) % N;
+    return &(B_buf[cur_index]);
+  }
+}
+
+/* check if we need to free send buffer */
+void free_send_buf()
+{
+  int i;
+  int count = 0;
+  /* check the receive window */
+  for(i = A_base; i < A_base + N; ++i)
+  {
+    struct ring_buf *p = get_ring_buf(A, i);
+    /* if not sequence, break the search */
+    if(p == NULL || p->flag != 2)
+      break;
+    /* send packet to layer 5 */
+    p->flag = 0;
+    ++count;
+  }
+
+  /* adjust expected number and ring base */
+  A_base += count;
+  A_ring_start += count;
+
+  /*when the window size decreases,check the extra buffer, if we need any message need to send */
+  while(count>0) {
+    struct node *n = pop_msg();
+    if(n == NULL) {
+      break;
+    }
+    A_output(n->message);
+    free(n);
+    count--;
   }
 }
 
 /* called from layer 5, passed the data to be sent to other side */
+/* Every time there is a new packet come, 
+ * a) we append this packet at the end of the extra buffer.
+ * b) Then we check the window is full or not; If the window is full, we just leave the packet in the extra buffer;
+ * c) If the window is not full, we retrieve one packet at the beginning of the extra buffer, and process it. 
+ */
 A_output(message)
   struct msg message;
 {
 printf("================================ Inside A_output===================================\n");
   int i;
   int checksum = 0;
+  struct ring_buf *p = NULL;
+  struct node *n;
 
-  ++A_from_layer5;
-  Debug_Log(A, "Receive an message from layer5", NULL, &message);
+   /* append message to buffer */
+  /*Step (a)*/
+  append_msg(&message);
 
   /* If the last packet have not been ACKed, just drop this message */
-  if(A_flag != WAIT_FOR_PKG)
+  /*Step (b)*/
+  if(window_isfull())
   {
-    Debug_Log(A, "Drop this message, last message have not finished", NULL, &message);
+    Debug_Log(A, "Drop this message, the window is full already", NULL, &message);
     return;
   }
-  /* set current package to not finished */
-  A_flag = WAIT_FOR_ACK;
 
-  /* copy data from meg to pkt */
+  /* pop a message from the extra buffer */
+  /* Step(c)*/
+  n = pop_msg();
+  if(n == NULL)
+  {
+	printf("No message need to process\n");
+    return 0;
+  }
+
+  /* get a free packet from the buffer */
+  p = get_ring_buf(A, A_nextseq);
+  if(p == NULL || p->flag == 1)
+  {
+    Debug_Log(A, "BUG! The window is full already", NULL, &message);
+    return;
+  }
+  ++A_from_layer5;
+  Debug_Log(A, "Receive a message from layer5", NULL, &message);
+  /* copy data from msg to pkt */
   for (i=0; i<20; i++)
   {
-    cur_packet.payload[i] = message.data[i];
+    p->packet.payload[i] = n->message.data[i];
   }
+  /* after used, free the node */
+  free(n);
+
   /* set current seqnum */
-  cur_packet.seqnum = A_seqnum;
+  p->packet.seqnum = A_nextseq;
   /* we are send package, do not need to set acknum */
-  cur_packet.acknum = DEFAULT_ACK;
+  p->packet.acknum = DEFAULT_ACK;
 
   /* calculate check sum including seqnum and acknum */
-  checksum = calc_checksum(&cur_packet);
+  checksum = calc_checksum(&(p->packet));
   /* set check sum */
-  cur_packet.checksum = checksum;
+  p->packet.checksum = checksum;
+
+  p->flag = 1;
+  p->timeout = g_cur_time + TIMEOUT;
 
   /* send pkg to layer 3 */
-  tolayer3(A, cur_packet);
+  tolayer3(A, p->packet);
   ++A_to_layer3;
-  Debug_Log(A, "Send packet to layer3", &cur_packet, &message);
+  ++A_nextseq;
 
-  /* start timer */
-  starttimer(A, TIMEOUT);
+  Debug_Log(A, "Send packet to layer3", &(p->packet), &message);
 
   return 0;
-  printf("================================ Outside A_output===================================\n");
+ printf("================================ Outside A_output===================================\n");
 }
 
 B_output(message)  /* need be completed only for extra credit */
@@ -179,7 +363,9 @@ B_output(message)  /* need be completed only for extra credit */
 A_input(packet)
   struct pkt packet;
 {
-printf("================================ Inside A_input===================================\n");	
+printf("================================ Inside A_input===================================\n");
+  struct ring_buf *p;
+
   Debug_Log(A, "Receive ACK packet from layer3", &packet, NULL);
 
   /* check checksum, if corrupted, do nothing */
@@ -189,50 +375,93 @@ printf("================================ Inside A_input=========================
     return;
   }
 
-  /* Delay ack? if ack is not expected, do nothing */
-  if(packet.acknum != A_seqnum)
+  /* Duplicate ACKs, do nothing */
+  if(packet.acknum < A_base)
   {
-    Debug_Log(A, "ACK is not expected", &packet, NULL);
+    Debug_Log(A, "Receive duplicate ACK", &packet, NULL);
     return;
   }
 
+  p = get_ring_buf(A, packet.acknum);
+  if(p == NULL)
+  {
+    Debug_Log(A, "BUG: receive ACK of future packets", &packet, NULL);
+    return;
+  }
+
+  p->flag = 2;
+
   /* go to the next seq, and stop the timer */
-  A_seqnum = (A_seqnum + 1) % 2;
-  stoptimer(A);
-  /* set the last package have received correctly */
-  A_flag = WAIT_FOR_PKG;
+  free_send_buf();
 
   Debug_Log(A, "ACK packet process successfully accomplished!!", &packet, NULL);
-  
-  printf("================================ Outside A_input===================================\n");
+ printf("================================ Outside A_input===================================\n");
 }
 
 /* called when A's timer goes off */
 A_timerinterrupt()
 {
-  Debug_Log(A, "Time interrupt occur", &cur_packet, NULL);
-  /* if current package not finished, we resend it */
-  if(A_flag == WAIT_FOR_ACK)
+  int i;
+
+  g_cur_time += INTERVAL;
+
+  /* if current package timeout, we resend it */
+  for(i = A_base; i < A_nextseq; ++i)
   {
-    Debug_Log(A, "Timeout! Send out the package again", &cur_packet, NULL);
-    tolayer3(A, cur_packet);
-    ++A_to_layer3;
-    /* start the timer again */
-    starttimer(A, TIMEOUT);
+    struct ring_buf *p = get_ring_buf(A, i);
+    if(p != NULL && p->flag == 1 && g_cur_time > p->timeout)
+    {
+      tolayer3(A, p->packet);
+      ++A_to_layer3;
+      /* reset the timeout of current packet */
+      p->timeout = (g_cur_time + TIMEOUT);
+      Debug_Log(A, "Timeout! Send out the package again", &(p->packet), NULL);
+    }
   }
-  else
-  {
-    Debug_Log(A, "BUG??? Maybe forgot to stop the timer", &cur_packet, NULL);
-  }
+
+  /* start the timer again */
+  starttimer(A, INTERVAL);
 }  
 
 /* the following routine will be called once (only) before any other */
 /* entity A routines are called. You can use it to do any initialization */
 A_init()
 {
+  int i;
+  for(i = 0; i < N; ++i)
+  {
+    A_buf[i].flag = 0;
+  }
+
+  /* start the timer, timeout is INTERVAL, not TIMEOUT */
+  starttimer(A, INTERVAL);
 }
 
 
+/* check if we need to send data to layer5 */
+void free_recv_buf()
+{
+  int i;
+  int count = 0;
+  /* check the receive window */
+  for(i = B_base; i < B_base + N; ++i)
+  {
+    struct ring_buf *p = get_ring_buf(B, i);
+    /* if not sequent, break the search */
+    if(p == NULL || p->flag != 1)
+      break;
+    /* send packet to layer 5 */
+    tolayer5(B, p->packet.payload);
+    ++B_to_layer5;
+    Debug_Log(B, "Send packet to layer5", &(p->packet), NULL);
+    p->flag = 0;
+    ++count;
+  }
+
+  /* adjust expected number and ring base */
+  B_base += count;
+  B_ring_start += count;
+}
 /* Note that with simplex transfer from a-to-B, there is no B_output() */
 
 /* called from layer 3, when a packet arrives for layer 4 at B*/
@@ -250,27 +479,39 @@ printf("================================ Inside B_input=========================
     return;
   }
 
-  /* duplicate package, do not deliver data again.
-     just resend the ACK again */
-  if(packet.seqnum != B_seqnum)
+  /* if packet outside of the window, MUST be a error packet */
+  if(packet.seqnum >= B_base + N)
   {
-    Debug_Log(B, "Duplicated packet detected", &packet, NULL);
-  }
-  /* normal package, deliver data to layer5 */
-  else
-  {
-    B_seqnum = (B_seqnum + 1)%2;
-    tolayer5(B, packet.payload);
-    ++B_to_layer5;
-    Debug_Log(B, "Send packet to layer5", &packet, NULL);
+    Debug_Log(B, "BUG! receive packet with large seqnum", &packet, NULL);
+    return;
   }
 
-  /* send back ack */
+  struct ring_buf *p = get_ring_buf(B, packet.seqnum);
+  /* duplicate package, send back a ACK.
+     case 1: seqnum < B_base;
+     case 2: the packet already buffered  */
+  if(p == NULL || p->flag == 1)
+  {
+    Debug_Log(B, "Duplicate packet detected", &packet, NULL);
+    packet.acknum = packet.seqnum;
+    packet.checksum = calc_checksum(&packet);
+    tolayer3(B, packet);
+    Debug_Log(B, "Send ACK packet to layer3", &packet, NULL);
+    return;
+  }
+
+  /* buffer current packet */
+  p->flag = 1;
+  copy_packet(&p->packet, &packet);
+
+  /* send ack to sender */
   packet.acknum = packet.seqnum;
   packet.checksum = calc_checksum(&packet);
-
   tolayer3(B, packet);
   Debug_Log(B, "Send ACK packet to layer3", &packet, NULL);
+
+  /* check if we need to send data to layer5 */
+  free_recv_buf();
   printf("================================ Outside B_input(packet) =========================\n");
 }
 
@@ -283,6 +524,11 @@ B_timerinterrupt()
 /* entity B routines are called. You can use it to do any initialization */
 B_init()
 {
+  int i;
+  for(i = 0; i < N; ++i)
+  {
+    B_buf[i].flag = 0;
+  }
 }
 
 
@@ -411,17 +657,17 @@ main()
         }
 
 terminate:
-printf("===========================================================================\n");
+   printf("===========================================================================\n");
    printf("Simulator terminated at time %f,\nAfter sending %d msgs from layer5\n",time,nsim);
-    printf("===========================================================================\n");
    /* print statistical messages */
+   printf("\n[%d] of messages still left in extra buffer of Sender A.\n==========================================================================\n", Extra_BufSize);
    printf("Result: Protocol: [gbn]\n");
    printf("***********************\n");
    printf("[%u] of packets sent from the Application Layer of Sender A\n", A_from_layer5);
    printf("[%u] of packets sent from the Transport Layer of Sender A\n", A_to_layer3);
    printf("[%u] packets received at the Transport layer of Receiver B\n", B_from_layer3);
    printf("[%u] of packets received at the Application layer of Receiver B\n", B_to_layer5);
-   printf("Total time: [%f] time units\n", time);
+   printf("Total time: [%f] time units\n", time/lambda);
    printf("Throughput = [%f] packets/time units\n", B_to_layer5/time);
 }
 

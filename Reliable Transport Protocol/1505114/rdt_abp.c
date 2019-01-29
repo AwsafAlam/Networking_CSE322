@@ -131,6 +131,7 @@ void A_input(struct pkt packet)
     if(getchecksum(packet) == packet.checksum ){
      
         if(ACK == 0){ACK = 1;}else{ACK = 0;}
+        tolayer5(A,packet.payload);
         stoptimer(A);
         A_STATE = SEND_PCKT;
         printf("================ ACK received succesful at A ================ \n");

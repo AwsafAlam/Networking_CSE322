@@ -201,7 +201,7 @@ void A_timerinterrupt(void)
     {
         if( i >= buffer.size())
             break;
-        starttimer(A,TIMEOUT+ buffer[i].seqnum);
+        starttimer(A,TIMEOUT);
         printPacket(buffer[i]);
         tolayer3(A,buffer[i]);
     }
@@ -249,7 +249,7 @@ void B_input(struct pkt packet)
         else{
             // Sending ack packet
             // if(SEQ_NUM == 0){SEQ_NUM = 1;}else{SEQ_NUM = 0;} //Expecting next SEQ No.
-            printf("============= Detected Duplicate packet ===============\n");
+            printf("============= Resend previous ACK from B ===============\n");
             printPacket(B_prev_ack);
             tolayer3(B,B_prev_ack);
         
