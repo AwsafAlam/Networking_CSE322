@@ -1,11 +1,54 @@
+/********************************
+Offline 5 : Error Correction and detection
+Pg : 141, Tanenbaum; Ch: 3.2
+
+/******************************/
+#include <bits/stdc++.h>
 #include <iostream>
 #include <stdio.h>
-// #include <windows.h>
+#include <stdlib.h>
 
 using namespace std;
 
+int datablock[10000][10000];
 
-bool ErrorDetection(string data, int m , float p , int gen){
+void ConvertToBinary(int n, int *data)
+{
+    if (n / 2 != 0) {
+        ConvertToBinary(n / 2,data);
+    }
+    printf("%d", n % 2);
+    
+}
+
+// function to convert decimal to binary 
+void decToBinary(int n, int k,int l) 
+{ 
+    // array to store binary number 
+    int binaryNum[1000]; 
+  
+    // counter for binary array 
+    int i = 0; 
+    while (n > 0) { 
+  
+        // storing remainder in binary array 
+        binaryNum[i] = n % 2; 
+        n = n / 2; 
+        i++; 
+    } 
+
+    // printing binary array in reverse order 
+    for (int j = i - 1; j >= 0; j--){
+        cout << binaryNum[j]; 
+        datablock[k][l] = binaryNum[j];
+        l++;
+    } 
+
+
+} 
+
+bool ErrorDetection(string data, int m , float p , string polynomial_gen){
+
 
     return false;
 }
@@ -27,16 +70,51 @@ enum Color {
 
 int main(int argc, char const *argv[])
 {
-    /* code */
 
-    for(int i = 0; i < 10; i++)
+    string data,polynom;
+    int m;
+    float p;
+
+    cout<<"enter data string: ";
+    cin>>data;
+    cout<<"enter number of data bytes in a row <m>: ";
+    cin>>m;
+    cout<<"enter probability <p>: ";
+    cin>>p;
+    cout<<"enter generator polynomial: ";
+    cin>>polynom;
+    
+    while(data.length() %m != 0 ){
+        data += "~";
+    }
+    cout<<"\ndata string after padding: "<<data<<endl;
+    int row_siz = 8*m;
+    int col_siz = data.length()/m;
+    int total_bits = data.length()*8;
+    
+    cout<<"\ndata block <ascii code of m characters per row>:\n";
+    int k = 0;
+    for(int i = 0; i < data.length(); i++)
     {
-        /* code */
+        for(int j = 0; j < m; j++)
+        {
+            decToBinary(data[i],k,k*8);
+            i++;k++;
+            if(i == data.length())
+                break;
+        }
+        cout<<endl;
+    }
+    cout<<"\ndata block after adding check bits:\n"<<datablock<<endl;
+    
+    for(int i = 0; i < 4; i++)
+    {
         if(i%2 ==0)
-            cout << "\033[1;"<<FG_BLUE<<"m"<<i<<"\033[m";
+            cout << "\033[1;"<<FG_GREEN<<"m"<<i<<"\033[0m";
         else
             cout <<i;
     }
     cout<<endl;
+    
     return 0;
 }
