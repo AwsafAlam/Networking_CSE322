@@ -7,15 +7,16 @@ Pg : 141, Tanenbaum; Ch: 3.2
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 using namespace std;
 
 int datablock[10000][10000];
 
-void ConvertToBinary(int n, int *data)
+void ConvertToBinary(int n)
 {
     if (n / 2 != 0) {
-        ConvertToBinary(n / 2,data);
+        ConvertToBinary(n / 2);
     }
     printf("%d", n % 2);
     
@@ -38,6 +39,14 @@ void decToBinary(int n, int k,int l)
     } 
 
     // printing binary array in reverse order 
+    while(i < 8){
+        /* code */
+        ///cout<<"0";
+        //datablock[k][l] = 0;
+        //l++;
+        i++;
+    }
+    
     for (int j = i - 1; j >= 0; j--){
         cout << binaryNum[j]; 
         datablock[k][l] = binaryNum[j];
@@ -76,7 +85,8 @@ int main(int argc, char const *argv[])
     float p;
 
     cout<<"enter data string: ";
-    cin>>data;
+    // cin>>data;
+    getline(cin,data);
     cout<<"enter number of data bytes in a row <m>: ";
     cin>>m;
     cout<<"enter probability <p>: ";
@@ -93,20 +103,31 @@ int main(int argc, char const *argv[])
     int total_bits = data.length()*8;
     
     cout<<"\ndata block <ascii code of m characters per row>:\n";
+
     int k = 0;
     for(int i = 0; i < data.length(); i++)
     {
         for(int j = 0; j < m; j++)
         {
-            decToBinary(data[i],k,k*8);
-            i++;k++;
+            decToBinary(data[i],k,j*8);
+            if(j != m-1)
+                i++;
             if(i == data.length())
                 break;
         }
+        k++;
         cout<<endl;
     }
-    cout<<"\ndata block after adding check bits:\n"<<datablock<<endl;
+    cout<<"\ndata block after adding check bits:\n";
     
+    for(int j = 0; j < k; j++){
+        for(int i = 0; i < m*8 ; i++){
+        
+            cout<<datablock[j][i];
+        }
+        cout<<endl;
+    }
+
     for(int i = 0; i < 4; i++)
     {
         if(i%2 ==0)
