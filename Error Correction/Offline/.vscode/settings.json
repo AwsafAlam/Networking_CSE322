@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.tcl": "tcl",
+        "iostream": "cpp"
+    }
+}

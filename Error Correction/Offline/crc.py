@@ -43,7 +43,7 @@ def mod2div(divident, divisor):
   
         # increment pick to move further 
         pick += 1
-  
+        print(tmp,"\n");
     # For the last n bits, we have to carry it out 
     # normally as increased value of pick will cause 
     # Index Out of Bounds. 

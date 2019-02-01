@@ -13,9 +13,9 @@ Pg : 141, Tanenbaum; Ch: 3.2
 
 using namespace std;
 
-vi data_frame[1000];
-vi serialized;
-vi key;
+vi data_frame[1000], rec_frame[1000] ;
+vi serialized, received;
+vi key , error_idx;
 
 enum Color {
     FG_BLACK    = 30,
@@ -77,37 +77,96 @@ bool getParity(int row , int idx)
 } 
 
 vi XOR(vi a, vi b){
-
+    vi tmp;
+    int i =0;
+    // cout<<"\n---------\nb: ";
+    // for(int i = 0; i < b.size(); i++)
+    //     cout<<b[i];
+    // cout<<"\n***********\na: ";
+    // for(int i = 0; i < a.size(); i++)
+    //     cout<<a[i];
+    // cout<<"\n---------\n";
+    
+    
+    for(int i = 0; i < b.size(); i++)
+    {
+        if(a[i] == b[i])
+            tmp.push_back(0);
+        else
+            tmp.push_back(1);
+        // tmp.push_back(a[i]^b[i]);
+    }
+    return tmp;
 }
 
-vi Division(){
+vi Division(vi frame){
     int divisor_len = key.size();
-    vi temp(serialized.begin(), serialized.begin()+divisor_len);
-
-    while(divisor_len < serialized.size()){
+    int zer_len = divisor_len;
+    vi temp(frame.begin(), frame.begin()+divisor_len);
+    // for(int i = 0; i < temp.size(); i++)
+    //     cout<<temp[i];
+    // cout<<"\n---------\n";
+    
+    while(divisor_len < frame.size()){
         if(temp[0] == 1){//First element 1
-            temp = XOR(key , temp);
-            temp.push_back(serialized[divisor_len]);
+            vi tmp = XOR(key , temp);
+            temp.clear();
+            temp = tmp;
+            temp.push_back(frame[divisor_len]);
         }
         else{
-            vi zero(divisor_len,0);
-            temp = XOR( zero, temp);
-            temp.push_back(serialized[divisor_len]);
+            vi zero(zer_len,0);
+            vi tmp = XOR( zero, temp);
+            temp.clear();
+            temp = tmp;
+            temp.push_back(frame[divisor_len]);
         }
         divisor_len++;
+        if(temp[0] == 0){
+            temp.erase(temp.begin(), temp.begin()+1);
+        }
+        // for(int i = 0; i < temp.size(); i++)
+        //     cout<<temp[i];
+        // cout<<"\n=========\n";
+        
     }
     if(temp[0] == 1){
-        temp = XOR(key,temp);
+        vi tmp = XOR(key,temp);
+        temp.clear();
+        temp = tmp;
     }
     else
     {
-        vi zero(divisor_len,0);
-        temp = XOR(zero,temp);
+        vi zero(zer_len,0);
+        vi tmp = XOR(zero,temp);
+        temp.clear();
+        temp = tmp;
     }
-    
+    if(temp[0] == 0){
+            temp.erase(temp.begin(), temp.begin()+1);
+    }
     return temp; 
 }
 
+bool Error_Detection(vi received){
+    vi remainder  =  Division(received);
+    for(int i = 0; i < remainder.size(); i++)
+    {
+        if(remainder[i] != 0)
+        {
+            return true;
+        }    
+    }
+    return false;
+}
+
+float jimsrand(void)
+{
+    double mmm = RAND_MAX;
+    float x;                 /* individual students may need to change mmm */
+    x = rand() / mmm;        /* x should be uniform in [0,1] */
+    return (x);
+}
 
 int main(int argc, char const *argv[])
 {
@@ -116,15 +175,26 @@ int main(int argc, char const *argv[])
     int m;
     float p;
 
-    cout<<"enter data string: ";
-    getline(cin,data);
-    cout<<"enter number of data bytes in a row <m>: ";
-    cin>>m;
-    cout<<"enter probability <p>: ";
-    cin>>p;
-    cout<<"enter generator polynomial: ";
-    cin>>polynom;
-    
+    // cout<<"enter data string: ";
+    // getline(cin,data);
+    // cout<<"enter number of data bytes in a row <m>: ";
+    // cin>>m;
+    // cout<<"enter probability <p>: ";
+    // cin>>p;
+    // cout<<"enter generator polynomial: ";
+    // cin>>polynom;
+
+    data = "Hamming Code";
+    m = 2;
+    p = 0.05;
+    polynom = "10101";
+
+    if( p > 1.0 || m <= 0 ){
+        cout<<"Invalid argument..";
+        return 0;
+    }
+
+    /// Padding data string ----------
     while(data.length() %m != 0 ){
         data += "~";
     }
@@ -141,6 +211,7 @@ int main(int argc, char const *argv[])
     int col_siz = data.length()/m;
     int total_bits = data.length()*8;
     
+    /// Printing data block -----------
     cout<<"\ndata block <ascii code of m characters per row>:\n";
 
     int k = 0;
@@ -157,6 +228,7 @@ int main(int argc, char const *argv[])
         k++;
         cout<<endl;
     }
+    /// Adding Check bits ------------
     cout<<"\ndata block after adding check bits:\n";
     
     for(int j = 0; j < col_siz; j++){
@@ -167,10 +239,8 @@ int main(int argc, char const *argv[])
                 k++;i++;
                 continue;
             }
-            //cout<<data_frame[j][i];
             i++;k++;
         }
-        //cout<<endl;
     }
 
     for(int i =0 ; i< col_siz ; i++){
@@ -189,6 +259,8 @@ int main(int argc, char const *argv[])
         cout<<endl;
     }
     row_siz = data_frame[0].size();
+
+    /// Serialising data ------------
     cout<<"\ndata bits after column-wise serialization:\n";
     for(int i = 0; i < row_siz; i++)
     {
@@ -198,22 +270,88 @@ int main(int argc, char const *argv[])
             serialized.push_back(data_frame[j][i]);
         }
     }
+    vi temp = serialized;
     for(int i =0 ; i< polynom.length()-1 ; i++)
-        serialized.push_back(0);
+        temp.push_back(0);
 
+    /// Calculate CRC checksum -----------
     cout<<"\n\ndata bits after appending CRC checksum <sent frame>:\n";
-    vi remainder = Division();
+    vi remainder = Division(temp);
     for(int i = 0; i < serialized.size(); i++)
     {
         cout<<serialized[i];
     }
     for(int i = 0; i < remainder.size(); i++)
     {
-        cout << "\033[1;"<<FG_GREEN<<"m"<<remainder[i]<<"\033[0m";
+        cout << "\033[1;"<<FG_CYAN<<"m"<<remainder[i]<<"\033[0m";
         serialized.push_back(remainder[i]);
     }
+
+    /// Prnting Received frame ---------
+    cout<<"\n\nreceived frame:\n";
+    for(int i = 0; i < serialized.size(); i++)
+    {
+        if (jimsrand() < p){
+            error_idx.push_back(i);    
+            serialized[i] == 1 ? serialized[i]=0:serialized[i]=1;
+            cout << "\033[1;"<<FG_RED<<"m"<<serialized[i]<<"\033[0m";
+        }
+        else
+            cout<<serialized[i];
+        received.push_back(serialized[i]);
+    }
+    /// Error Detection -------
+    cout<<"\n\nresult of CRC checksum matching: ";
+    Error_Detection(received) ? cout<<"error detected": cout<<"no error detected";
+
+    /// Removing Checksum ----------
+    for(int i =0 ; i< polynom.length()-1 ; i++)
+        received.pop_back();
+
+    /// Deserialization -------- Bits are only toggled, but block size remains same
+    cout<<"\n\ndata block after removing CRC checksum bits:\n";
+    int r = 0;
+    int c = 0;
+    vector<pair<int,int>> err_ij;
+    for(int i = 0; i < received.size(); i++)
+    {
+        rec_frame[r].push_back(received[i]);
+        r = (r+1)%col_siz;
+        if( i == error_idx.front()){
+            err_ij.push_back({r,rec_frame[r].size()-1});
+            //cout<<"Error at : "<<rec_frame[r].size()-1<<" "<<r<<endl;
+            error_idx.erase(error_idx.begin() , error_idx.begin()+1);
+        }
+    }
     
-    
-    
+    for(int i =0 ; i< col_siz ; i++){
+        for(int j = 0; j < rec_frame[i].size(); j++)
+        {
+            if(rec_frame[i][j] != data_frame[i][j]){
+                cout << "\033[1;"<<FG_RED<<"m"<<rec_frame[i][j]<<"\033[0m";
+            }
+            else{
+                cout<<rec_frame[i][j];
+            }
+            
+        }
+        cout<<endl;
+    }
+
+
+    cout<<"\n\ndata block after removing check bits:\n";
+    for(int j =0 ; j< col_siz ; j++){
+        int i =0, k=1;
+        while(i< m*8){
+            if(!(k == 0) && !(k & (k - 1))){
+                rec_frame[j].insert(rec_frame[j].begin()+i ,-1);
+                k++;i++;
+                continue;
+            }
+            i++;k++;
+        }
+    }
+
+
     return 0;
 }
