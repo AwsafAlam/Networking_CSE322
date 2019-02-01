@@ -1,4 +1,4 @@
 clear
-g++ err_correc.cpp
+g++ -std=c++11 err_correc.cpp
 ./a.out
 rm a.out

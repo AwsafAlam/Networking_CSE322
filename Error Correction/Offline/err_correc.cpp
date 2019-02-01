@@ -35,7 +35,8 @@ enum Color {
 
 void binary_Convert(int n, int k,int l) 
 { 
-    // array to store binary number 
+    // ascii of binary number 
+    //cout<<endl<<n<<endl;
     int binaryNum[1000]; 
     memset(binaryNum,0,sizeof(binaryNum));
     // counter for binary array 
@@ -59,13 +60,13 @@ void binary_Convert(int n, int k,int l)
 
 } 
 
-bool getParity(int row , int idx) 
+bool getParity(vi data_row , int idx) 
 { 
     bool parity = 0;
     int count = 0; 
-    for(int i = 0; i < data_frame[row].size(); i++)
+    for(int i = 0; i < data_row.size(); i++)
     {
-        if( (i+1) & idx && data_frame[row][i]== 1){
+        if( (i+1) & idx && data_row[i]== 1){
             count++;
         }
     }
@@ -148,24 +149,34 @@ vi Division(vi frame){
     return temp; 
 }
 
-bool Error_Detection(vi received){
+int Error_Detection(vi received){
+    int count  = 0;
     vi remainder  =  Division(received);
     for(int i = 0; i < remainder.size(); i++)
     {
         if(remainder[i] != 0)
         {
-            return true;
+            count++;
         }    
     }
-    return false;
+    return count;
 }
 
 float jimsrand(void)
 {
-    double mmm = RAND_MAX;
-    float x;                 /* individual students may need to change mmm */
-    x = rand() / mmm;        /* x should be uniform in [0,1] */
-    return (x);
+    // double mmm = RAND_MAX;
+    // float x;                 /* individual students may need to change mmm */
+    // x = rand() / mmm;        /* x should be uniform in [0,1] */
+    // return (x);
+    
+    const int range_from  = 0;
+    const int range_to    = 1;
+    random_device rand_dev;
+    mt19937 generator(rand_dev());
+    //uniform_int_distribution<int>  distr(range_from, range_to);
+    uniform_real_distribution<float> distr(range_from,range_to);
+    return distr(generator);
+
 }
 
 int main(int argc, char const *argv[])
@@ -185,6 +196,7 @@ int main(int argc, char const *argv[])
     // cin>>polynom;
 
     data = "Hamming Code";
+    // data = "a";
     m = 2;
     p = 0.05;
     polynom = "10101";
@@ -247,7 +259,7 @@ int main(int argc, char const *argv[])
         for(int j = 0; j < data_frame[i].size(); j++)
         {
             if(data_frame[i][j] == -1){
-                data_frame[i][j] =  getParity(i,j+1);
+                data_frame[i][j] =  getParity(data_frame[i],j+1);
                 cout << "\033[1;"<<FG_GREEN<<"m"<<data_frame[i][j]<<"\033[0m";
             }
             else
@@ -291,7 +303,7 @@ int main(int argc, char const *argv[])
     cout<<"\n\nreceived frame:\n";
     for(int i = 0; i < serialized.size(); i++)
     {
-        if (jimsrand() < p){
+        if (jimsrand() < p ){
             error_idx.push_back(i);    
             serialized[i] == 1 ? serialized[i]=0:serialized[i]=1;
             cout << "\033[1;"<<FG_RED<<"m"<<serialized[i]<<"\033[0m";
@@ -302,7 +314,7 @@ int main(int argc, char const *argv[])
     }
     /// Error Detection -------
     cout<<"\n\nresult of CRC checksum matching: ";
-    Error_Detection(received) ? cout<<"error detected": cout<<"no error detected";
+    Error_Detection(received)!= 0 ? cout<<"error detected": cout<<"no error detected";
 
     /// Removing Checksum ----------
     for(int i =0 ; i< polynom.length()-1 ; i++)
@@ -317,7 +329,7 @@ int main(int argc, char const *argv[])
     {
         rec_frame[r].push_back(received[i]);
         r = (r+1)%col_siz;
-        if( i == error_idx.front()){
+        if(error_idx.size()  > 0 && i == error_idx.front()){
             err_ij.push_back({r,rec_frame[r].size()-1});
             //cout<<"Error at : "<<rec_frame[r].size()-1<<" "<<r<<endl;
             error_idx.erase(error_idx.begin() , error_idx.begin()+1);
@@ -340,18 +352,66 @@ int main(int argc, char const *argv[])
 
 
     cout<<"\n\ndata block after removing check bits:\n";
-    for(int j =0 ; j< col_siz ; j++){
-        int i =0, k=1;
-        while(i< m*8){
+    for(int i =0 ; i< col_siz ; i++){
+        int k=1;
+        vi parity,indexes;
+        for(int j = 0; j < rec_frame[i].size(); j++)
+        {
             if(!(k == 0) && !(k & (k - 1))){
-                rec_frame[j].insert(rec_frame[j].begin()+i ,-1);
-                k++;i++;
-                continue;
+               parity.push_back(getParity(rec_frame[i],j+1));
+               indexes.push_back(j);
+               //cout << "\033[1;"<<FG_GREEN<<"m"<<rec_frame[i][j]<<"\033[0m";
             }
-            i++;k++;
+            // else{
+            //     cout<<rec_frame[i][j];
+            // }
+            k++;
         }
+        //cout<<endl;
+        int bin = 0;
+        for(int l=0; l< parity.size(); l++){
+            bin += (pow(2,l) * parity[l]);
+        }
+        //cout<<"Index :"<<bin<<endl;
+        if(bin <= rec_frame[i].size() && bin != 0)
+            rec_frame[i][bin-1] == 0?rec_frame[i][bin-1] = 1:rec_frame[i][bin-1] = 0;
+        
+        // cout<<"------------------------\n";
+        // for(int j = 0; j < rec_frame[i].size(); j++)
+        //     cout<<rec_frame[i][j];
+        // cout<<endl;
+        for(int l = 0; l < indexes.size(); l++)
+        {
+            rec_frame[i].erase(rec_frame[i].begin() + (indexes[l]-l));
+        }
+        
+    }
+    //cout<<"\n\n------------------\n\n";
+    for(int i =0 ; i< col_siz ; i++){
+        for(int j = 0; j < rec_frame[i].size(); j++)
+        {
+              cout<<rec_frame[i][j];
+            
+        }
+        cout<<endl;
     }
 
+    cout<<"\nOutput frame: ";
+    string rec_data;
+    for(int i =0 ; i< col_siz ; i++){
+        for(int j = 0; j < m; j++)
+        {
+            int bin = 0,idx =0;
+            for(int l= (j*8)+7; l >= j*8 ; l--){
+                bin += (pow(2,idx) * rec_frame[i][l]);
+                idx++;
+            }
+            rec_data.push_back(bin);
+            //cout<<bin<<endl;
+            
+        }
+    }
+    cout<<rec_data<<endl;
 
     return 0;
 }
