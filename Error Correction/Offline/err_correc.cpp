@@ -186,20 +186,20 @@ int main(int argc, char const *argv[])
     int m;
     float p;
 
-    // cout<<"enter data string: ";
-    // getline(cin,data);
-    // cout<<"enter number of data bytes in a row <m>: ";
-    // cin>>m;
-    // cout<<"enter probability <p>: ";
-    // cin>>p;
-    // cout<<"enter generator polynomial: ";
-    // cin>>polynom;
+    cout<<"enter data string: ";
+    getline(cin,data);
+    cout<<"enter number of data bytes in a row <m>: ";
+    cin>>m;
+    cout<<"enter probability <p>: ";
+    cin>>p;
+    cout<<"enter generator polynomial: ";
+    cin>>polynom;
 
-    data = "Hamming Code";
+    // data = "Hamming Code";
     // data = "a";
-    m = 2;
-    p = 0.05;
-    polynom = "10101";
+    // m = 2;
+    // p = 0.05;
+    // polynom = "10101";
 
     if( p > 1.0 || m <= 0 ){
         cout<<"Invalid argument..";
